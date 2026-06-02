@@ -1,11 +1,12 @@
 # COVER PAGE
 
 **Project Title:** FraudLens Bharat: AI-Based Hinglish Cyber-Fraud Detection and Complaint Triage System  
-**Student Name(s) & Roll Number(s):** To be filled  
+**Student Name:** Gautam Manchandani  
+**Student ID:** 2023EBCS209  
 **Program:** BSc Computer Science (Online Mode)  
-**Institution Name:** To be filled  
+**Institution Name:** BITS Pilani  
 **Academic Year:** 2025-2026  
-**Internal Supervisor Name:** To be filled  
+**Internal Supervisor Name:** Dr. Ashok Yemineni  
 
 ## Declaration
 
