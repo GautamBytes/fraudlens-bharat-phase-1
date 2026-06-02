@@ -149,14 +149,19 @@ Input: suspicious message text
 
 ## 2.6 Screenshots / Code Snippets
 
-Screenshots to be added after local execution:
+The following Phase 1 screenshots are stored in `outputs/screenshots/`:
 
-- Dashboard home screen
-- Scam analysis result
-- Extracted entities table
-- API docs page
-- Confusion matrix
-- Test result terminal
+- `dashboard_home.png`: dashboard home screen
+- `dashboard_analysis_result.png`: KYC scam analysis result with extracted evidence
+- `dashboard_otp_demo.png`: OTP phishing demo result
+- `api_docs.png`: FastAPI documentation page
+- `api_health.png`: API health endpoint response
+- `metrics_summary.png`: baseline model metrics summary
+- `test_results.png`: automated pytest result evidence
+- `git_commit_history.png`: Git commit history evidence
+- `project_structure.png`: Phase 1 implementation structure evidence
+
+The confusion matrix is stored in `outputs/metrics/confusion_matrix.png`.
 
 # CHAPTER 3: TESTING, VALIDATION & RESULTS
 
@@ -199,7 +204,7 @@ pytest
 
 ## Demo Screenshots
 
-To be added in `outputs/screenshots/`.
+Demo screenshots are stored in `outputs/screenshots/`, especially `dashboard_home.png`, `dashboard_analysis_result.png`, `dashboard_otp_demo.png`, `api_docs.png`, and `api_health.png`.
 
 ## Demo Video Link
 
@@ -210,7 +215,7 @@ To be added after recording final Phase 1 demo.
 ## 5.1 Version Control Evidence
 
 - GitHub repository link: https://github.com/GautamBytes/fraudlens-bharat-phase-1
-- Commit history screenshot: To be added
+- Commit history screenshot: `outputs/screenshots/git_commit_history.png`
 
 ## 5.2 Weekly Progress Summary
 
