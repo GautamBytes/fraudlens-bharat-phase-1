@@ -2,7 +2,7 @@
 
 FraudLens Bharat is a pure-software cyber-fraud triage prototype for Indian users. Phase 1 focuses on a reliable baseline system that analyzes pasted scam messages, classifies the fraud type, extracts useful evidence, scores risk, and generates a complaint-ready summary.
 
-The project is designed for a BSc Computer Science capstone submission. It includes implementation code, dataset scaffolding, testing evidence, documentation, references, and demo cases aligned with the provided capstone format and rubric.
+The project is designed for my capstone project submission. It includes implementation code, dataset scaffolding, testing evidence, documentation, references, and demo cases aligned with the provided capstone format and rubric.
 
 ## Phase 1 Scope
 
