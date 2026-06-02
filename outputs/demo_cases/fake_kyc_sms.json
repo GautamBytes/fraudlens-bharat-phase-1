@@ -1,12 +1,12 @@
 {
-  "case_id": "e252aeeb-5935-4b66-8c7c-596694587684",
-  "created_at": "2026-06-02T11:05:20.357056",
+  "case_id": "d2db6a69-fa47-4940-922f-0db831ba2938",
+  "created_at": "2026-06-02T11:21:18.077698",
   "original_text": "Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.",
   "cleaned_text": "dear customer your bank kyc is expired. update pan at http://bank-kyc-verify.example/login or account will block today.",
   "predicted_label": "kyc_scam",
-  "confidence": 0.2837,
+  "confidence": 0.69,
   "risk_level": "high",
-  "risk_score": 88.93,
+  "risk_score": 100.0,
   "entities": [
     {
       "type": "url",
@@ -66,8 +66,8 @@
     },
     {
       "name": "classifier_confidence",
-      "score": 9.93,
-      "reason": "Classifier predicts kyc_scam with confidence 0.28",
+      "score": 24.15,
+      "reason": "Classifier predicts kyc_scam with confidence 0.69",
       "evidence": null
     },
     {
@@ -90,16 +90,16 @@
     }
   ],
   "explanation": [
+    "Classifier predicts kyc_scam with confidence 0.69",
     "URL does not use HTTPS",
     "URL contains suspicious keyword 'kyc'",
     "URL contains suspicious keyword 'login'",
     "URL contains suspicious keyword 'verify'",
-    "Message contains at least one URL",
-    "Urgency language detected"
+    "Message contains at least one URL"
   ],
   "complaint_draft": "Suspected fraud type: kyc_scam\nRisk level: high\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected threat_phrase: block\nDetected urgency_phrase: expire, today\nDetected url: http://bank-kyc-verify.example/login\nOriginal message: Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
-    "prediction_source": "baseline_model",
+    "prediction_source": "baseline_model_with_rule_agreement",
     "user_notes": null
   }
 }

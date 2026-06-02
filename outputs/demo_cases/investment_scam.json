@@ -1,12 +1,12 @@
 {
-  "case_id": "61c102c9-dbb9-4b35-b3cc-e7e189bf2a2e",
-  "created_at": "2026-06-02T11:05:20.362829",
+  "case_id": "f454f641-418a-4247-b747-c5a1b8e3b3c3",
+  "created_at": "2026-06-02T11:21:18.082359",
   "original_text": "Join crypto VIP group. Guaranteed 15 percent profit daily. Invest 5000 now and double in 7 days.",
   "cleaned_text": "join crypto vip group. guaranteed 15 percent profit daily. invest 5000 now and double in 7 days.",
   "predicted_label": "investment_scam",
-  "confidence": 0.2752,
-  "risk_level": "low",
-  "risk_score": 14.63,
+  "confidence": 0.9,
+  "risk_level": "medium",
+  "risk_score": 36.5,
   "entities": [
     {
       "type": "urgency_phrase",
@@ -18,8 +18,8 @@
   "risk_signals": [
     {
       "name": "classifier_confidence",
-      "score": 9.63,
-      "reason": "Classifier predicts investment_scam with confidence 0.28",
+      "score": 31.5,
+      "reason": "Classifier predicts investment_scam with confidence 0.90",
       "evidence": null
     },
     {
@@ -30,12 +30,12 @@
     }
   ],
   "explanation": [
-    "Classifier predicts investment_scam with confidence 0.28",
+    "Classifier predicts investment_scam with confidence 0.90",
     "Urgency language detected"
   ],
-  "complaint_draft": "Suspected fraud type: investment_scam\nRisk level: low\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected urgency_phrase: now\nOriginal message: Join crypto VIP group. Guaranteed 15 percent profit daily. Invest 5000 now and double in 7 days.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "complaint_draft": "Suspected fraud type: investment_scam\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected urgency_phrase: now\nOriginal message: Join crypto VIP group. Guaranteed 15 percent profit daily. Invest 5000 now and double in 7 days.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
-    "prediction_source": "baseline_model",
+    "prediction_source": "baseline_model_with_rule_agreement",
     "user_notes": null
   }
 }

@@ -62,7 +62,17 @@ class ModelPredictor:
                     confidence = float(max(self._classifier.predict_proba(vector)[0]))
                 else:
                     confidence = 0.7
-                return Prediction(label=label, confidence=round(confidence, 4), source="baseline_model")
+                rule_label, rule_confidence = rule_based_predict(cleaned)
+                if rule_label == label:
+                    confidence = max(confidence, rule_confidence)
+                    source = "baseline_model_with_rule_agreement"
+                elif confidence < 0.45 and rule_confidence > confidence:
+                    label = rule_label
+                    confidence = rule_confidence
+                    source = "rule_fallback_low_model_confidence"
+                else:
+                    source = "baseline_model"
+                return Prediction(label=label, confidence=round(confidence, 4), source=source)
             except Exception:
                 pass
         label, confidence = rule_based_predict(cleaned)
