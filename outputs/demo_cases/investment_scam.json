@@ -1,0 +1,41 @@
+{
+  "case_id": "61c102c9-dbb9-4b35-b3cc-e7e189bf2a2e",
+  "created_at": "2026-06-02T11:05:20.362829",
+  "original_text": "Join crypto VIP group. Guaranteed 15 percent profit daily. Invest 5000 now and double in 7 days.",
+  "cleaned_text": "join crypto vip group. guaranteed 15 percent profit daily. invest 5000 now and double in 7 days.",
+  "predicted_label": "investment_scam",
+  "confidence": 0.2752,
+  "risk_level": "low",
+  "risk_score": 14.63,
+  "entities": [
+    {
+      "type": "urgency_phrase",
+      "value": "now",
+      "confidence": 0.8,
+      "source": "keyword"
+    }
+  ],
+  "risk_signals": [
+    {
+      "name": "classifier_confidence",
+      "score": 9.63,
+      "reason": "Classifier predicts investment_scam with confidence 0.28",
+      "evidence": null
+    },
+    {
+      "name": "urgency_language",
+      "score": 5.0,
+      "reason": "Urgency language detected",
+      "evidence": null
+    }
+  ],
+  "explanation": [
+    "Classifier predicts investment_scam with confidence 0.28",
+    "Urgency language detected"
+  ],
+  "complaint_draft": "Suspected fraud type: investment_scam\nRisk level: low\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected urgency_phrase: now\nOriginal message: Join crypto VIP group. Guaranteed 15 percent profit daily. Invest 5000 now and double in 7 days.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "metadata": {
+    "prediction_source": "baseline_model",
+    "user_notes": null
+  }
+}

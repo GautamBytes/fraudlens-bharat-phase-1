@@ -1,0 +1,105 @@
+{
+  "case_id": "e252aeeb-5935-4b66-8c7c-596694587684",
+  "created_at": "2026-06-02T11:05:20.357056",
+  "original_text": "Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.",
+  "cleaned_text": "dear customer your bank kyc is expired. update pan at http://bank-kyc-verify.example/login or account will block today.",
+  "predicted_label": "kyc_scam",
+  "confidence": 0.2837,
+  "risk_level": "high",
+  "risk_score": 88.93,
+  "entities": [
+    {
+      "type": "url",
+      "value": "http://bank-kyc-verify.example/login",
+      "confidence": 1.0,
+      "source": "regex"
+    },
+    {
+      "type": "urgency_phrase",
+      "value": "expire",
+      "confidence": 0.8,
+      "source": "keyword"
+    },
+    {
+      "type": "urgency_phrase",
+      "value": "today",
+      "confidence": 0.8,
+      "source": "keyword"
+    },
+    {
+      "type": "threat_phrase",
+      "value": "block",
+      "confidence": 0.8,
+      "source": "keyword"
+    }
+  ],
+  "risk_signals": [
+    {
+      "name": "non_https_url",
+      "score": 15.0,
+      "reason": "URL does not use HTTPS",
+      "evidence": "http://bank-kyc-verify.example/login"
+    },
+    {
+      "name": "suspicious_url_keyword",
+      "score": 10.0,
+      "reason": "URL contains suspicious keyword 'kyc'",
+      "evidence": "http://bank-kyc-verify.example/login"
+    },
+    {
+      "name": "suspicious_url_keyword",
+      "score": 10.0,
+      "reason": "URL contains suspicious keyword 'login'",
+      "evidence": "http://bank-kyc-verify.example/login"
+    },
+    {
+      "name": "suspicious_url_keyword",
+      "score": 10.0,
+      "reason": "URL contains suspicious keyword 'verify'",
+      "evidence": "http://bank-kyc-verify.example/login"
+    },
+    {
+      "name": "hyphenated_domain",
+      "score": 8.0,
+      "reason": "Domain contains multiple hyphens, a common phishing pattern",
+      "evidence": "http://bank-kyc-verify.example/login"
+    },
+    {
+      "name": "classifier_confidence",
+      "score": 9.93,
+      "reason": "Classifier predicts kyc_scam with confidence 0.28",
+      "evidence": null
+    },
+    {
+      "name": "url_present",
+      "score": 10.0,
+      "reason": "Message contains at least one URL",
+      "evidence": null
+    },
+    {
+      "name": "urgency_language",
+      "score": 10.0,
+      "reason": "Urgency language detected",
+      "evidence": null
+    },
+    {
+      "name": "threat_language",
+      "score": 6.0,
+      "reason": "Threat or coercion language detected",
+      "evidence": null
+    }
+  ],
+  "explanation": [
+    "URL does not use HTTPS",
+    "URL contains suspicious keyword 'kyc'",
+    "URL contains suspicious keyword 'login'",
+    "URL contains suspicious keyword 'verify'",
+    "Message contains at least one URL",
+    "Urgency language detected"
+  ],
+  "complaint_draft": "Suspected fraud type: kyc_scam\nRisk level: high\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected threat_phrase: block\nDetected urgency_phrase: expire, today\nDetected url: http://bank-kyc-verify.example/login\nOriginal message: Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "metadata": {
+    "prediction_source": "baseline_model",
+    "user_notes": null
+  }
+}

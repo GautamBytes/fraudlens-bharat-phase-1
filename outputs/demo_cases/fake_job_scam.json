@@ -1,0 +1,60 @@
+{
+  "case_id": "b2752bb8-b28e-45d8-a4aa-4ac1d0a28fb9",
+  "created_at": "2026-06-02T11:05:20.361712",
+  "original_text": "Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.",
+  "cleaned_text": "work from home job hai, salary 45000 monthly. joining kit fee rs 999 send karo to hr@jobpay.example.",
+  "predicted_label": "fake_job",
+  "confidence": 0.2776,
+  "risk_level": "low",
+  "risk_score": 31.72,
+  "entities": [
+    {
+      "type": "upi_id",
+      "value": "hr@jobpay",
+      "confidence": 1.0,
+      "source": "regex"
+    },
+    {
+      "type": "email",
+      "value": "hr@jobpay.example",
+      "confidence": 1.0,
+      "source": "regex"
+    },
+    {
+      "type": "money",
+      "value": "rs 999",
+      "confidence": 1.0,
+      "source": "regex"
+    }
+  ],
+  "risk_signals": [
+    {
+      "name": "classifier_confidence",
+      "score": 9.72,
+      "reason": "Classifier predicts fake_job with confidence 0.28",
+      "evidence": null
+    },
+    {
+      "name": "upi_present",
+      "score": 12.0,
+      "reason": "Message contains a UPI ID",
+      "evidence": null
+    },
+    {
+      "name": "money_present",
+      "score": 10.0,
+      "reason": "Message asks for or references money",
+      "evidence": null
+    }
+  ],
+  "explanation": [
+    "Message contains a UPI ID",
+    "Message asks for or references money",
+    "Classifier predicts fake_job with confidence 0.28"
+  ],
+  "complaint_draft": "Suspected fraud type: fake_job\nRisk level: low\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected email: hr@jobpay.example\nDetected money: rs 999\nDetected upi_id: hr@jobpay\nOriginal message: Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "metadata": {
+    "prediction_source": "baseline_model",
+    "user_notes": null
+  }
+}
