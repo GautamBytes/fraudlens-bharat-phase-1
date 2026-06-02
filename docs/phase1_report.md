@@ -208,7 +208,7 @@ To be added after recording final Phase 1 demo.
 
 ## 5.1 Version Control Evidence
 
-- GitHub repository link: To be added
+- GitHub repository link: https://github.com/GautamBytes/fraudlens-bharat-phase-1
 - Commit history screenshot: To be added
 
 ## 5.2 Weekly Progress Summary
@@ -256,5 +256,5 @@ Refer to `docs/references.md`.
 
 A. User Manual: `docs/user_manual.md`  
 B. Installation Guide: `docs/installation_guide.md`  
-C. Source Code Link: To be added after GitHub push  
+C. Source Code Link: https://github.com/GautamBytes/fraudlens-bharat-phase-1  
 D. Demo Video Link: To be added after recording  
