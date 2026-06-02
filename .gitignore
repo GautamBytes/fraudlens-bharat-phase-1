@@ -9,6 +9,7 @@ __pycache__/
 *.sqlite
 *.sqlite3
 .streamlit/secrets.toml
+*.egg-info/
 .cache/
 outputs/screenshots/*.png
 outputs/screenshots/*.jpg
