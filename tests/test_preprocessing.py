@@ -1,4 +1,4 @@
-from fraudlens.preprocessing import normalize_text, tokenize_for_display
+from fraudlens.preprocessing import normalize_text, prepare_model_text, tokenize_for_display
 
 
 def test_normalize_text_cleans_whitespace_and_lowercases():
@@ -16,3 +16,8 @@ def test_normalize_text_preserves_evidence_tokens():
 def test_tokenize_for_display():
     assert tokenize_for_display("A  B") == ["a", "b"]
 
+
+def test_prepare_model_text_does_not_treat_hinglish_fir_as_police_fir():
+    model_text = prepare_model_text("Loan approved, CIBIL low hai fir bhi approval.")
+    assert "__signal_loan_scam" in model_text
+    assert "__signal_digital_arrest" not in model_text

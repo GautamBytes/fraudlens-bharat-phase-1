@@ -14,7 +14,7 @@ I hereby declare that this capstone project titled "FraudLens Bharat: AI-Based H
 
 ## Abstract
 
-Cyber-fraud reporting in India often begins with unstructured evidence such as SMS messages, WhatsApp chats, payment screenshots, suspicious links, phone numbers, and UPI IDs. Many victims describe incidents in Hinglish or mixed Hindi-English language, which makes direct use of standard English-only fraud detection tools less reliable. FraudLens Bharat is a Phase 1 prototype that demonstrates how natural language processing, rule-based entity extraction, URL risk analysis, and explainable scoring can support early cyber-fraud triage. The system accepts pasted scam text, classifies it into one of eight fraud categories, extracts important evidence, identifies risky URLs or payment indicators, assigns a low/medium/high risk level, and generates a complaint-ready incident summary for manual use. The implementation uses a TF-IDF and Logistic Regression baseline classifier, regex-based evidence extraction, SQLite storage, FastAPI endpoints, and a Streamlit dashboard. Phase 1 focuses on a stable baseline system that can be evaluated with test cases, precision/recall/F1 metrics, latency, and reproducible demo scenarios. Future phases will extend the system with OCR-based screenshot analysis, transformer-based classification, and graph analytics for repeated fraud identifiers.
+Cyber-fraud reporting in India often begins with unstructured evidence such as SMS messages, WhatsApp chats, suspicious links, phone numbers, UPI IDs, payment amounts, and threat language. Victims may describe incidents in English, Hindi, or Hinglish, which makes direct use of English-only tools less reliable. FraudLens Bharat is a Phase 1 software prototype for early cyber-fraud triage. It accepts pasted scam text, classifies the likely fraud type, extracts evidence entities, checks risky URL patterns, assigns an explainable low/medium/high risk level, stores the case locally, and generates a complaint-ready summary for manual reporting. The implemented baseline uses TF-IDF, Logistic Regression, transparent domain markers, regex-based entity extraction, heuristic URL risk analysis, FastAPI, Streamlit, SQLite, and pytest. On the current 64-row synthetic seed dataset, the rule-only fallback scores 0.8125 accuracy and 0.7833 macro-F1, while the hybrid Phase 1 classifier scores 1.0000 accuracy and 1.0000 macro-F1 on the 16-row stratified synthetic test split. This result is an internal Phase 1 benchmark, not a production accuracy claim. The main contribution is an explainable end-to-end triage workflow for Indian Hinglish cyber-fraud messages. Future phases should add larger real-world validation, OCR, transformer comparison, URL-model benchmarking, and graph analytics for repeated fraud identifiers.
 
 # Table of Contents
 
@@ -46,6 +46,8 @@ Appendix
 | Table 3 | Test Cases |
 | Table 4 | Phase 1 Result Metrics |
 | Table 5 | Weekly Progress Summary |
+| Table 6 | Initial State vs Phase 1 |
+| Table 7 | Rule-Only vs Hybrid Baseline |
 
 # CHAPTER 1: INTRODUCTION
 
@@ -71,7 +73,50 @@ Cyber-fraud victims often have scattered and incomplete evidence. A user may rec
 
 Phase 1 includes pasted text analysis only. It does not include screenshot OCR, transformer fine-tuning, graph analytics, real-time government integration, or automatic complaint submission. These are reserved for Phase 2.
 
-## 1.5 Organization of the Report
+## 1.5 Research Questions
+
+The Phase 1 research question is:
+
+Can a lightweight, explainable software pipeline classify common Indian cyber-fraud messages and extract complaint-ready evidence from mixed-language text?
+
+The supporting questions are:
+
+- Can a transparent hybrid baseline outperform a rule-only fallback on the same seed split?
+- Can entity extraction preserve the identifiers needed for manual complaint preparation?
+- Can the system expose enough reasons to support user trust without becoming unsafe or overclaimed?
+
+## 1.6 Fraud Class Taxonomy
+
+| Fraud Class | Description | Typical Signals |
+|---|---|---|
+| `kyc_scam` | Fake KYC, PAN, Aadhaar, wallet, or bank update | KYC expired, account block, PAN/Aadhaar update |
+| `digital_arrest` | Police, CBI, court, or cyber-cell impersonation | arrest, warrant, FIR, video call, secrecy |
+| `fake_job` | Employment or work-from-home fraud | salary promise, registration fee, HR contact |
+| `investment_scam` | Trading, crypto, doubling-money fraud | guaranteed profit, VIP group, 2x return |
+| `loan_scam` | Fake instant loan or fee-based loan fraud | processing fee, CIBIL, approval, recovery |
+| `courier_scam` | Parcel, customs, courier, or shipment fraud | parcel number, drugs detected, customs notice |
+| `upi_refund_scam` | Refund/cashback tricks that misuse UPI flow | collect request, UPI PIN, cashback, mandate |
+| `otp_phishing` | OTP, password, PIN, CVV, or login theft | OTP, PIN, CVV, password, login attempt |
+
+## 1.7 Literature Review Summary
+
+The Indian reporting context is shaped by I4C, NCRP, CFCFRMS, 1930, state law enforcement, banks, payment aggregators, telecom providers, and related cyber-response systems [1], [2].
+
+PIB reported 29,44,248 CERT-In tracked cyber incidents for 2025. It also reported that CFCFRMS saved more than Rs. 8,690 crore across more than 24.65 lakh complaints up to 31 January 2026 [1].
+
+Recent Hinglish cybercrime classification research used Hinglish-adapted transformers such as HingBERT and HingRoBERTa on I4C CyberGuard AI Hackathon data [3].
+
+That work reports HingRoBERTa at 74.41 percent accuracy and 71.49 percent F1. This is a useful Phase 2 benchmark but should not be compared directly with the small synthetic Phase 1 split [3].
+
+Phishing URL detection research shows that URL-only neural models can be evaluated through accuracy, precision, recall, F1, uncertainty, and latency [4].
+
+Graph fraud research shows why repeated entities such as UPI IDs, phone numbers, URLs, devices, and accounts should become graph nodes in later phases [5].
+
+Explainability research motivates visible reasons for predictions. FraudLens Bharat implements this through extracted entities, risk signals, confidence, and a complaint draft [6].
+
+The detailed review is available in `docs/literature_review.md`.
+
+## 1.8 Organization of the Report
 
 Chapter 2 explains architecture and implementation. Chapter 3 covers testing and results. Chapter 4 covers execution steps and deployment details. Chapter 5 records project evidence. Chapter 6 concludes the work and lists future enhancements.
 
@@ -167,7 +212,15 @@ The confusion matrix is stored in `outputs/metrics/confusion_matrix.png`.
 
 ## 3.1 Test Plan
 
-Testing includes unit tests, API tests, model evaluation, and manual dashboard validation.
+Testing includes unit tests, API tests, model evaluation, extraction regression tests, and manual dashboard validation.
+
+The evaluation plan separates five concerns:
+
+- Classification quality
+- Entity extraction quality
+- URL and risk signal behavior
+- Complaint draft usefulness
+- System reproducibility
 
 ## 3.2 Test Cases
 
@@ -180,6 +233,64 @@ Phase 1 metrics are generated by `python -m fraudlens.model_training` and stored
 - `models/metrics.json`
 - `outputs/metrics/classification_report.txt`
 - `outputs/metrics/confusion_matrix.png`
+
+The current dataset contains 64 synthetic, manually reviewed seed examples across 8 classes. The stratified split uses 48 training rows and 16 test rows.
+
+| Metric | Value |
+|---|---:|
+| Dataset rows | 64 |
+| Training rows | 48 |
+| Test rows | 16 |
+| Accuracy | 1.0000 |
+| Macro precision | 1.0000 |
+| Macro recall | 1.0000 |
+| Macro F1 | 1.0000 |
+
+This is an internal synthetic benchmark. It proves the Phase 1 pipeline is measurable and reproducible, but it does not prove production accuracy.
+
+## 3.4 Rule-Only vs Hybrid Baseline
+
+The rule-only fallback and the hybrid classifier were evaluated on the same 16-row synthetic test split.
+
+| Model | Accuracy | Macro Precision | Macro Recall | Macro F1 |
+|---|---:|---:|---:|---:|
+| Rule-only fallback | 0.8125 | 0.7917 | 0.8125 | 0.7833 |
+| Hybrid TF-IDF baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+
+The measured improvement comes from combining text features with transparent domain markers. The markers also fix an earlier ambiguity where the Hinglish word "fir" was treated as a police FIR.
+
+## 3.5 Initial State vs After Phase 1
+
+| Capability | Initial State | After Phase 1 |
+|---|---|---|
+| Fraud taxonomy | Not formalized | 8 documented fraud classes |
+| Evidence extraction | Manual reading | Phone, URL, UPI, email, money, OTP, urgency, threat |
+| Model result | No metric | Accuracy and macro-F1 generated by training pipeline |
+| Risk explanation | No structured reason | Visible risk signals and explanation list |
+| Complaint draft | Manual writing | Generated draft for manual reporting |
+| Interfaces | None | FastAPI and Streamlit |
+| Storage | None | SQLite case history |
+| Reproducibility | Ad hoc | Tests, metrics, demo JSON, screenshots |
+
+## 3.6 Comparison With Existing Model Families
+
+Transformer-based Hinglish complaint classifiers are better candidates for large real-world classification once a larger dataset is available.
+
+URL-only phishing models are stronger for URL classification but do not solve full-message triage by themselves.
+
+Graph fraud models are stronger for relationship discovery across repeated identifiers, but Phase 1 only extracts graph-ready entities.
+
+FraudLens Bharat Phase 1 is strongest as an explainable workflow prototype: it joins classification, evidence extraction, URL risk, scoring, storage, API, dashboard, tests, and documentation.
+
+The detailed comparison is available in `docs/comparative_analysis.md`.
+
+## 3.7 Limitations Of Current Evaluation
+
+- The seed dataset is synthetic and small.
+- The test split has only two examples per class.
+- The current score should not be interpreted as real-world generalization.
+- More noisy Hinglish, transliteration, misspellings, and adversarial examples are needed.
+- Real victim data must not be used without privacy controls and approval.
 
 # CHAPTER 4: EXECUTION / DEPLOYMENT DETAILS
 
@@ -229,22 +340,26 @@ Refer to `docs/supervisor_interaction.md`.
 
 ## Summary of Implementation
 
-Phase 1 implements a complete text-based baseline cyber-fraud triage prototype. It can classify scam text, extract evidence, detect URL risk, generate explanations, and store case history.
+Phase 1 implements a complete text-based baseline cyber-fraud triage prototype. It classifies scam text, extracts evidence, detects URL risk, generates explanations, creates a complaint draft, and stores case history.
 
 ## Achievements
 
-- Built a working baseline classifier.
+- Built a working hybrid TF-IDF baseline classifier.
 - Implemented practical entity extraction.
 - Added explainable risk scoring.
 - Created API and dashboard interfaces.
 - Added test cases and metrics generation.
+- Compared rule-only fallback against the hybrid baseline on the same split.
+- Improved the courier-scam vs digital-arrest distinction with clearer domain markers.
 
 ## Limitations
 
 - Dataset is synthetic and limited.
+- The current 1.0000 macro-F1 is an internal synthetic result.
 - OCR is not included in Phase 1.
 - Transformer models are not included in Phase 1.
 - No automatic government portal integration is performed.
+- No external real-world validation dataset is included.
 
 ## Future Enhancements
 
@@ -253,6 +368,8 @@ Phase 1 implements a complete text-based baseline cyber-fraud triage prototype. 
 - Fraud entity graph using NetworkX.
 - Stronger phishing URL dataset and model.
 - Multilingual extension beyond Hindi/Hinglish/English.
+- Larger dataset with noisy mixed-language examples.
+- Separate extraction benchmark with entity-level precision and recall.
 
 # REFERENCES
 
@@ -260,7 +377,11 @@ Refer to `docs/references.md`.
 
 # APPENDIX
 
-A. User Manual: `docs/user_manual.md`  
-B. Installation Guide: `docs/installation_guide.md`  
-C. Source Code Link: https://github.com/GautamBytes/fraudlens-bharat-phase-1  
-D. Demo Video Link: To be added after recording  
+A. User Manual: `docs/user_manual.md`
+B. Installation Guide: `docs/installation_guide.md`
+C. Literature Review: `docs/literature_review.md`
+D. Comparative Analysis: `docs/comparative_analysis.md`
+E. Evaluation Plan: `docs/evaluation_plan.md`
+F. Model and Data Card: `docs/model_card.md`
+G. Source Code Link: https://github.com/GautamBytes/fraudlens-bharat-phase-1
+H. Demo Video Link: To be added after recording

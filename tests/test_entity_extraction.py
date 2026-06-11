@@ -26,3 +26,15 @@ def test_extracts_urgency_and_threat_phrases():
     assert "urgency_phrase" in entity_types
     assert "threat_phrase" in entity_types
 
+
+def test_email_is_not_partially_extracted_as_upi_id():
+    text = "Send resume to hr@jobpay.example and pay Rs 999 as joining fee."
+    assert "hr@jobpay.example" in _values_by_type(text, "email")
+    assert "hr@jobpay" not in _values_by_type(text, "upi_id")
+
+
+def test_extracts_contextual_bare_money_amounts():
+    text = "Join VIP group. Invest 5000 now and receive 2500 cashback."
+    money_values = _values_by_type(text, "money")
+    assert "5000" in money_values
+    assert "2500" in money_values

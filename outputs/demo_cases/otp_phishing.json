@@ -1,13 +1,19 @@
 {
-  "case_id": "920e36aa-f579-4193-b2bf-85a891060129",
-  "created_at": "2026-06-02T11:21:18.080346",
+  "case_id": "45357841-fda4-47cd-b392-9adafd148870",
+  "created_at": "2026-06-11T12:01:54.510699",
   "original_text": "Login attempt detected. Send OTP code 482913 to verify ur identity or account delete ho jayega.",
   "cleaned_text": "login attempt detected. send otp code 482913 to verify ur identity or account delete ho jayega.",
   "predicted_label": "otp_phishing",
   "confidence": 0.69,
   "risk_level": "medium",
-  "risk_score": 48.15,
+  "risk_score": 58.15,
   "entities": [
+    {
+      "type": "money",
+      "value": "482913",
+      "confidence": 1.0,
+      "source": "regex"
+    },
     {
       "type": "otp_like_code",
       "value": "482913",
@@ -29,6 +35,12 @@
       "evidence": null
     },
     {
+      "name": "money_present",
+      "score": 10.0,
+      "reason": "Message asks for or references money",
+      "evidence": null
+    },
+    {
       "name": "otp_signal",
       "score": 18.0,
       "reason": "Message references OTP/PIN/code details",
@@ -44,9 +56,10 @@
   "explanation": [
     "Classifier predicts otp_phishing with confidence 0.69",
     "Message references OTP/PIN/code details",
+    "Message asks for or references money",
     "Threat or coercion language detected"
   ],
-  "complaint_draft": "Suspected fraud type: otp_phishing\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected otp_like_code: 482913\nDetected threat_phrase: delete\nOriginal message: Login attempt detected. Send OTP code 482913 to verify ur identity or account delete ho jayega.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "complaint_draft": "Suspected fraud type: otp_phishing\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected money: 482913\nDetected otp_like_code: 482913\nDetected threat_phrase: delete\nOriginal message: Login attempt detected. Send OTP code 482913 to verify ur identity or account delete ho jayega.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
     "prediction_source": "baseline_model_with_rule_agreement",
     "user_notes": null

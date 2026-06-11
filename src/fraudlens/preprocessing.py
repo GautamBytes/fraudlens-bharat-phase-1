@@ -3,14 +3,127 @@ import unicodedata
 
 
 CATEGORY_MARKERS = {
-    "kyc_scam": ("kyc", "ekyc", "aadhaar", "pan", "account block", "wallet freeze", "re-verification"),
-    "digital_arrest": ("digital arrest", "arrest", "warrant", "cbi", "cyber cell", "court", "money laundering", "custody", "do not inform", "video", "officer", "fir", "settlement", "monitor"),
-    "fake_job": ("job", "salary", "registration fee", "joining", "hr", "work from home", "task", "offer letter", "selected", "interview", "ground staff", "typing work"),
-    "investment_scam": ("investment", "crypto", "trading", "double", "guaranteed", "profit", "vip", "stock"),
-    "loan_scam": ("loan", "processing fee", "cibil", "disbursal", "recovery", "instant loan", "noc fee"),
-    "courier_scam": ("parcel", "parcel no", "courier", "customs", "fedex", "dhl", "shipment", "delivery", "clearance", "drugs detected"),
-    "upi_refund_scam": ("refund", "cashback", "collect request", "receive money", "upi pin", "qr", "mandate"),
-    "otp_phishing": ("otp", "password", "cvv", "pin", "verification code", "login attempt", "code share"),
+    "kyc_scam": (
+        "kyc",
+        "ekyc",
+        "aadhaar",
+        "pan",
+        "account block",
+        "wallet freeze",
+        "re-verification",
+    ),
+    "digital_arrest": (
+        "digital arrest",
+        "arrest",
+        "warrant",
+        "cbi",
+        "cyber cell",
+        "court",
+        "money laundering",
+        "custody",
+        "do not inform",
+        "video",
+        "officer",
+        "close fir",
+        "fir case",
+        "case id",
+        "settlement",
+        "monitor",
+        "do not disconnect",
+        "line pe raho",
+        "senior officer",
+        "verification payment",
+        "security amount",
+    ),
+    "fake_job": (
+        "job",
+        "salary",
+        "registration fee",
+        "joining",
+        "hr",
+        "work from home",
+        "task",
+        "offer letter",
+        "selected",
+        "interview",
+        "ground staff",
+        "typing work",
+    ),
+    "investment_scam": (
+        "investment",
+        "crypto",
+        "trading",
+        "double",
+        "guaranteed",
+        "profit",
+        "vip",
+        "stock",
+        "2x return",
+    ),
+    "loan_scam": (
+        "loan",
+        "processing fee",
+        "cibil",
+        "disbursal",
+        "recovery",
+        "instant loan",
+        "noc fee",
+        "file charge",
+        "insurance fee",
+    ),
+    "courier_scam": (
+        "parcel no",
+        "courier",
+        "fedex",
+        "dhl",
+        "shipment",
+        "delivery",
+        "clearance",
+        "drugs detected",
+        "custom department",
+        "sim card parcel",
+        "parcel blocked",
+    ),
+    "upi_refund_scam": (
+        "refund",
+        "cashback",
+        "collect request",
+        "receive money",
+        "upi pin",
+        "qr",
+        "mandate",
+    ),
+    "otp_phishing": (
+        "otp",
+        "password",
+        "cvv",
+        "pin",
+        "verification code",
+        "login attempt",
+        "code share",
+    ),
+}
+
+STRONG_CATEGORY_MARKERS = {
+    "digital_arrest": (
+        "digital arrest",
+        "do not inform",
+        "close fir",
+        "money laundering",
+        "senior officer",
+        "verification payment",
+        "security amount",
+        "video call",
+        "on video",
+    ),
+    "courier_scam": (
+        "parcel no",
+        "drugs detected",
+        "custom department",
+        "sim card parcel",
+        "parcel blocked",
+        "shipment blocked",
+    ),
 }
 
 
@@ -39,7 +152,10 @@ def prepare_model_text(text: str) -> str:
         for keyword in keywords:
             if _contains_keyword(cleaned, keyword):
                 markers.append(f"__signal_{label}")
-                break
+    for label, keywords in STRONG_CATEGORY_MARKERS.items():
+        for keyword in keywords:
+            if _contains_keyword(cleaned, keyword):
+                markers.extend([f"__strong_signal_{label}"] * 4)
     if markers:
         return f"{cleaned} {' '.join(markers)}"
     return cleaned
