@@ -1,6 +1,6 @@
 {
-  "case_id": "d2db6a69-fa47-4940-922f-0db831ba2938",
-  "created_at": "2026-06-02T11:21:18.077698",
+  "case_id": "defa6cf9-d0a2-4f90-9b6d-6812a40f11f4",
+  "created_at": "2026-06-11T12:01:54.508784",
   "original_text": "Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.",
   "cleaned_text": "dear customer your bank kyc is expired. update pan at http://bank-kyc-verify.example/login or account will block today.",
   "predicted_label": "kyc_scam",

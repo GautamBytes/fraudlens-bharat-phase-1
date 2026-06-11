@@ -1,19 +1,13 @@
 {
-  "case_id": "ae281d6b-ff84-489e-85c0-ecab8e9381c3",
-  "created_at": "2026-06-02T11:21:18.081426",
+  "case_id": "12e652e0-2399-41dd-8c36-fd15e0304c4e",
+  "created_at": "2026-06-11T12:01:54.512061",
   "original_text": "Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.",
   "cleaned_text": "work from home job hai, salary 45000 monthly. joining kit fee rs 999 send karo to hr@jobpay.example.",
   "predicted_label": "fake_job",
   "confidence": 0.9,
   "risk_level": "medium",
-  "risk_score": 53.5,
+  "risk_score": 41.5,
   "entities": [
-    {
-      "type": "upi_id",
-      "value": "hr@jobpay",
-      "confidence": 1.0,
-      "source": "regex"
-    },
     {
       "type": "email",
       "value": "hr@jobpay.example",
@@ -23,6 +17,12 @@
     {
       "type": "money",
       "value": "rs 999",
+      "confidence": 1.0,
+      "source": "regex"
+    },
+    {
+      "type": "money",
+      "value": "45000",
       "confidence": 1.0,
       "source": "regex"
     }
@@ -35,12 +35,6 @@
       "evidence": null
     },
     {
-      "name": "upi_present",
-      "score": 12.0,
-      "reason": "Message contains a UPI ID",
-      "evidence": null
-    },
-    {
       "name": "money_present",
       "score": 10.0,
       "reason": "Message asks for or references money",
@@ -49,10 +43,9 @@
   ],
   "explanation": [
     "Classifier predicts fake_job with confidence 0.90",
-    "Message contains a UPI ID",
     "Message asks for or references money"
   ],
-  "complaint_draft": "Suspected fraud type: fake_job\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected email: hr@jobpay.example\nDetected money: rs 999\nDetected upi_id: hr@jobpay\nOriginal message: Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "complaint_draft": "Suspected fraud type: fake_job\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected email: hr@jobpay.example\nDetected money: rs 999, 45000\nOriginal message: Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
     "prediction_source": "baseline_model_with_rule_agreement",
     "user_notes": null

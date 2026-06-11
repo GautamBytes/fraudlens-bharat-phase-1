@@ -1,7 +1,7 @@
                  precision    recall  f1-score   support
 
-   courier_scam       0.50      0.50      0.50         2
- digital_arrest       0.50      0.50      0.50         2
+   courier_scam       1.00      1.00      1.00         2
+ digital_arrest       1.00      1.00      1.00         2
        fake_job       1.00      1.00      1.00         2
 investment_scam       1.00      1.00      1.00         2
        kyc_scam       1.00      1.00      1.00         2
@@ -9,6 +9,6 @@ investment_scam       1.00      1.00      1.00         2
    otp_phishing       1.00      1.00      1.00         2
 upi_refund_scam       1.00      1.00      1.00         2
 
-       accuracy                           0.88        16
-      macro avg       0.88      0.88      0.88        16
-   weighted avg       0.88      0.88      0.88        16
+       accuracy                           1.00        16
+      macro avg       1.00      1.00      1.00        16
+   weighted avg       1.00      1.00      1.00        16

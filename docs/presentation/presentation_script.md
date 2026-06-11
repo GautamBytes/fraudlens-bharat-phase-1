@@ -28,11 +28,11 @@ This slide shows the actual dashboard result. The user can paste scam text or us
 
 ## Slide 7 - Baseline Results
 
-The baseline model uses TF-IDF with Logistic Regression. On the seed evaluation split, it currently gives 0.875 accuracy and 0.875 macro-F1. Most classes perform well in this small seed setup, while courier scam and digital arrest show overlap, which is useful because it gives a clear Phase 2 improvement target.
+The baseline model uses TF-IDF with Logistic Regression and transparent domain markers. On the current 64-row synthetic seed dataset, the rule-only fallback gives 0.8125 accuracy and 0.7833 macro-F1 on the 16-row test split. The hybrid baseline gives 1.0000 accuracy and 1.0000 macro-F1 on the same split. I will present this carefully as an internal synthetic benchmark, not a production accuracy claim.
 
 ## Slide 8 - Testing Evidence
 
-The project includes pytest coverage for preprocessing, entity extraction, URL risk, risk scoring, and the API flow. The API health endpoint and test screenshots are included as evidence, and the generated artifacts include metrics JSON, classification report, confusion matrix, and demo-case JSON outputs. This makes Phase 1 reproducible for review.
+The project includes pytest coverage for preprocessing, entity extraction, URL risk, risk scoring, and the API flow. It also includes regression tests for email versus UPI extraction, contextual money extraction, and Hinglish FIR ambiguity. The generated artifacts include metrics JSON, classification report, confusion matrix, and demo-case JSON outputs. This makes Phase 1 reproducible for review.
 
 ## Slide 9 - Controls And Limitations
 

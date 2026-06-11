@@ -2,21 +2,21 @@
   "dataset_rows": 64,
   "train_rows": 48,
   "test_rows": 16,
-  "accuracy": 0.875,
-  "macro_f1": 0.875,
-  "macro_precision": 0.875,
-  "macro_recall": 0.875,
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "macro_precision": 1.0,
+  "macro_recall": 1.0,
   "per_class": {
     "courier_scam": {
-      "precision": 0.5,
-      "recall": 0.5,
-      "f1-score": 0.5,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
       "support": 2.0
     },
     "digital_arrest": {
-      "precision": 0.5,
-      "recall": 0.5,
-      "f1-score": 0.5,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
       "support": 2.0
     },
     "fake_job": {
@@ -55,17 +55,17 @@
       "f1-score": 1.0,
       "support": 2.0
     },
-    "accuracy": 0.875,
+    "accuracy": 1.0,
     "macro avg": {
-      "precision": 0.875,
-      "recall": 0.875,
-      "f1-score": 0.875,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
       "support": 16.0
     },
     "weighted avg": {
-      "precision": 0.875,
-      "recall": 0.875,
-      "f1-score": 0.875,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
       "support": 16.0
     }
   },
@@ -81,8 +81,8 @@
   ],
   "confusion_matrix": [
     [
-      1,
-      1,
+      2,
+      0,
       0,
       0,
       0,
@@ -91,8 +91,8 @@
       0
     ],
     [
-      1,
-      1,
+      0,
+      2,
       0,
       0,
       0,

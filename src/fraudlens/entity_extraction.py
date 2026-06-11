@@ -13,6 +13,13 @@ MONEY_RE = re.compile(
     r"(?:rs\.?|inr|rupees?)\s*[:\-]?\s*(?:\d{1,7}|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?|(?:\d{1,7}|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?\s*(?:rs\.?|inr|rupees?)",
     re.IGNORECASE,
 )
+MONEY_CONTEXT_RE = re.compile(
+    r"\b(?:pay|paid|send|deposit|invest|investment|fee|charge|refund|cashback|amount|salary|profit|loan|credit|return)"
+    r"\b[^0-9]{0,25}((?:\d{1,7}|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?)"
+    r"|((?:\d{1,7}|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?)\s*"
+    r"(?:cashback|refund|fee|charge|salary|profit|loan|credit|return)",
+    re.IGNORECASE,
+)
 OTP_CONTEXT_RE = re.compile(r"\b(?:otp|pin|code|verification code|cvv)\b[^0-9]{0,30}(\d{4,8})", re.IGNORECASE)
 
 
@@ -37,11 +44,23 @@ def _normalize_phone(phone: str) -> str:
 def extract_entities(text: str) -> List[Entity]:
     entities: List[Entity] = []
 
-    emails = _unique(EMAIL_RE.findall(text))
+    email_matches = list(EMAIL_RE.finditer(text))
+    email_spans = [match.span() for match in email_matches]
+    emails = _unique(match.group(0) for match in email_matches)
     urls = _unique(URL_RE.findall(text))
-    upi_ids = [upi for upi in _unique(UPI_RE.findall(text)) if upi not in emails]
+    upi_ids = _unique(
+        match.group(0)
+        for match in UPI_RE.finditer(text)
+        if not any(match.start() >= start and match.end() <= end for start, end in email_spans)
+    )
     phones = _unique(_normalize_phone(phone) for phone in PHONE_RE.findall(text))
-    money_amounts = _unique(MONEY_RE.findall(text))
+    currency_money = MONEY_RE.findall(text)
+    contextual_money = []
+    for match in MONEY_CONTEXT_RE.finditer(text):
+        amount = next(group for group in match.groups() if group)
+        if not any(re.search(rf"(?<!\d){re.escape(amount)}(?!\d)", value) for value in currency_money):
+            contextual_money.append(amount)
+    money_amounts = _unique([*currency_money, *contextual_money])
     otp_codes = _unique(match.group(1) for match in OTP_CONTEXT_RE.finditer(text))
 
     for value in phones:
