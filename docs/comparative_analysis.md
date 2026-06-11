@@ -37,7 +37,7 @@ Both rows below use the same 64-row synthetic seed dataset and the same 16-row s
 | Rule-only fallback | 0.8125 | 0.7917 | 0.8125 | 0.7833 | Useful as a safety fallback but misses some category phrasing |
 | Phase 1 hybrid baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 | TF-IDF + Logistic Regression with transparent domain markers |
 
-The improvement is caused by the model learning from text features while still receiving explainable domain signals.
+The improvement is caused by the model learning from text features while still receiving explainable domain signals. The implementation uses scikit-learn tooling for the reproducible TF-IDF and Logistic Regression baseline [12].
 
 The result should be described as an internal Phase 1 benchmark, not proof of real-world generalization.
 
@@ -53,7 +53,7 @@ After retraining, the same split reaches 1.0000 accuracy and 1.0000 macro-F1.
 
 ## Comparison With Published Hinglish Transformer Work
 
-Rani et al. report HingRoBERTa at 74.41 percent accuracy and 71.49 percent F1 on I4C CyberGuard AI Hackathon data.
+Rani et al. report HingRoBERTa at 74.41 percent accuracy and 71.49 percent F1 on I4C CyberGuard AI Hackathon data [7].
 
 That is a larger and more realistic classification benchmark than this Phase 1 synthetic split.
 
@@ -73,7 +73,7 @@ The fair comparison is:
 
 ## Comparison With URL-Only Phishing Models
 
-Phishing URL research can train neural models on URL datasets and evaluate accuracy, precision, recall, F1, uncertainty, and latency.
+Phishing URL research can train neural models on URL datasets and evaluate accuracy, precision, recall, F1, uncertainty, and latency [9].
 
 FraudLens Bharat Phase 1 does not train a URL classifier. It applies auditable heuristics inside a broader triage pipeline.
 
@@ -87,7 +87,7 @@ FraudLens Bharat Phase 1 does not train a URL classifier. It applies auditable h
 
 ## Comparison With Graph Fraud Models
 
-Graph fraud models are stronger when fraud is visible through relationships: repeated accounts, devices, UPI IDs, phone numbers, URLs, and transactions.
+Graph fraud models are stronger when fraud is visible through relationships: repeated accounts, devices, UPI IDs, phone numbers, URLs, and transactions [10].
 
 Phase 1 only extracts identifiers from one message at a time. It does not yet model relationships across cases.
 

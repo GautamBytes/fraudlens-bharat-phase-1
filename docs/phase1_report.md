@@ -100,19 +100,21 @@ The supporting questions are:
 
 ## 1.7 Literature Review Summary
 
-The Indian reporting context is shaped by I4C, NCRP, CFCFRMS, 1930, state law enforcement, banks, payment aggregators, telecom providers, and related cyber-response systems [1], [2].
+The Indian reporting context is shaped by I4C, NCRP, CFCFRMS, 1930, CERT-In, NCRB, state law enforcement, banks, payment aggregators, telecom providers, and related cyber-response systems [1]-[4].
 
 PIB reported 29,44,248 CERT-In tracked cyber incidents for 2025. It also reported that CFCFRMS saved more than Rs. 8,690 crore across more than 24.65 lakh complaints up to 31 January 2026 [1].
 
-Recent Hinglish cybercrime classification research used Hinglish-adapted transformers such as HingBERT and HingRoBERTa on I4C CyberGuard AI Hackathon data [3].
+RBI and NPCI digital-payment sources explain why UPI IDs, payment links, OTPs, transaction evidence, and grievance paths matter for financial-fraud triage [5], [6].
 
-That work reports HingRoBERTa at 74.41 percent accuracy and 71.49 percent F1. This is a useful Phase 2 benchmark but should not be compared directly with the small synthetic Phase 1 split [3].
+Recent Hinglish cybercrime classification research used Hinglish-adapted transformers such as HingBERT and HingRoBERTa on I4C CyberGuard AI Hackathon data [7].
 
-Phishing URL detection research shows that URL-only neural models can be evaluated through accuracy, precision, recall, F1, uncertainty, and latency [4].
+That work reports HingRoBERTa at 74.41 percent accuracy and 71.49 percent F1. This is a useful Phase 2 benchmark but should not be compared directly with the small synthetic Phase 1 split [7].
 
-Graph fraud research shows why repeated entities such as UPI IDs, phone numbers, URLs, devices, and accounts should become graph nodes in later phases [5].
+Phishing URL detection research shows that URL-only neural models can be evaluated through accuracy, precision, recall, F1, uncertainty, and latency [9].
 
-Explainability research motivates visible reasons for predictions. FraudLens Bharat implements this through extracted entities, risk signals, confidence, and a complaint draft [6].
+Graph fraud research shows why repeated entities such as UPI IDs, phone numbers, URLs, devices, and accounts should become graph nodes in later phases [10].
+
+Explainability and AI risk-management research motivate visible reasons for predictions, clear limitations, and accountable evaluation. FraudLens Bharat implements this through extracted entities, risk signals, confidence, and a complaint draft [11], [13].
 
 The detailed review is available in `docs/literature_review.md`.
 
