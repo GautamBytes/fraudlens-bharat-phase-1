@@ -1,0 +1,2 @@
+# Development and test dependencies are intentionally kept in requirements.txt
+# so the project remains runnable with one installation command.

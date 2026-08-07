@@ -37,13 +37,32 @@ Classification should be measured with:
 
 Macro F1 is the main Phase 1 classifier metric because every fraud class matters equally.
 
-## Current Calibrated Classification Result
+## Reproducible Comparison Evidence
+
+Run the following command to regenerate the committed evidence in
+`outputs/phase2/evaluation.json` and `outputs/phase2/summary.txt`:
+
+```bash
+python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output outputs/phase2
+```
+
+All vectorizers, classifiers, and calibration are fit only on train. Each
+model's abstention threshold is selected only on validation, then its frozen
+test result is calculated once. The marker-enhanced variant is an ablation and
+is not selected for runtime use. Metrics below are copied from the deterministic
+evidence output, not extrapolated beyond this synthetic bootstrap.
 
 | Model | Overall accuracy | Raw macro F1 | Coverage | Abstention | Accepted accuracy | Frozen test rows |
 |---|---:|---:|---:|---:|---:|---:|
+| Rule-only keyword baseline | 0.8750 | 0.8333 | 87.5% | 12.5% | 100.00% | 8 |
+| Raw-normalized TF-IDF | 0.3750 | 0.3333 | 100.0% | 0.0% | 37.50% | 8 |
+| Marker TF-IDF (ablation; not selected) | 0.8750 | 0.8333 | 62.5% | 37.5% | 100.00% | 8 |
 | Calibrated raw-normalized TF-IDF | 0.5000 | 0.5000 | 87.5% | 12.5% | 57.14% | 8 |
 
-The classifier is fit and calibrated from training data only; the abstention threshold is selected on the frozen validation split. The table reports the untouched frozen test split. It is a synthetic bootstrap result, not a production claim.
+The report also includes per-class metrics, confusion matrices, ECE, split row
+counts, and a deterministic latency note. Wall-clock measurements are excluded
+because they would make the committed evidence non-reproducible. This is a
+synthetic bootstrap result, not a production claim or a 9-class result.
 
 ## Extraction Metrics
 
@@ -117,8 +136,8 @@ Phase 1 can report these as reproducibility metrics.
 When new seed data is added:
 
 1. Keep class balance visible.
-2. Re-run `python -m fraudlens.model_training`.
-3. Compare raw macro-F1, coverage, abstention, and accepted accuracy with the prior calibrated artifact.
+2. Re-run `python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output outputs/phase2`.
+3. Compare raw macro-F1, coverage, abstention, accepted accuracy, ECE, and the confusion matrix with the prior evidence.
 4. Inspect the confusion matrix, not only the headline score.
 5. Add regression tests for any recurring confusion.
 6. Avoid hiding weak results; document them as Phase 2 targets.

@@ -4,11 +4,11 @@ FraudLens Bharat is a pure-software cyber-fraud triage prototype for Indian user
 
 The project is designed for my capstone project submission. It includes implementation code, dataset scaffolding, testing evidence, documentation, references, and demo cases aligned with the provided capstone format and rubric.
 
-## Current Phase 1 Evidence
+## Current Phase 2 Evaluation Evidence
 
 - Dataset: 64 synthetic, manually reviewed bootstrap examples across 8 fraud classes; no `legitimate` rows are present
-- Selected model: calibrated raw-normalized TF-IDF + Logistic Regression, trained only on the frozen 48-row train split and thresholded on the 8-row validation split
-- Frozen 8-row synthetic test: 0.5000 overall accuracy and 0.5000 raw macro-F1; 87.5% coverage, 12.5% abstention, and 57.14% accepted accuracy
+- Selected runtime candidate: calibrated raw-normalized TF-IDF + Logistic Regression, fit and calibrated only on the frozen 48-row train split and thresholded on the 8-row validation split
+- Frozen 8-row synthetic test evidence is committed in `outputs/phase2/evaluation.json` and `outputs/phase2/summary.txt`; it compares rule-only, raw TF-IDF, marker TF-IDF ablation, and calibrated TF-IDF without using the test split for fitting or threshold selection
 - The Phase 2 target is not met: the bootstrap is below 200 examples per label and lacks the `legitimate` label
 - Rule fallback: used only if calibrated artifacts are unavailable or corrupt, and abstains on weak generic keyword matches
 - Interfaces: FastAPI backend and Streamlit dashboard
@@ -96,6 +96,19 @@ even when the API/compatibility storage setting is enabled.
 ```bash
 pytest
 ```
+
+## Reproduce Phase 2 Evaluation
+
+```bash
+python -m fraudlens.evaluation \
+  --dataset data/samples/phase2_dataset.csv \
+  --output outputs/phase2
+```
+
+This writes deterministic `evaluation.json` and a readable `summary.txt`.
+The report intentionally omits wall-clock timings, which are not stable enough
+for byte-for-byte reproducible evidence. It records that the 64-row synthetic
+bootstrap is missing `legitimate` and does not meet the 200-rows-per-label target.
 
 ## Demo Cases
 

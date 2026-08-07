@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+          if grep -Eq '^[[:space:]]*[^#[:space:]]' requirements-dev.txt; then python -m pip install -r requirements-dev.txt; fi
+      - name: Compile Python sources
+        run: python -m compileall -q src tests
+      - name: Run tests
+        run: python -m pytest
+      - name: Validate dataset and provenance contract
+        run: >-
+          python -c "from fraudlens.data_contract import load_phase2_dataset;
+          load_phase2_dataset('data/samples/phase2_dataset.csv', minimum_per_label=0)"
+      - name: Verify deterministic evaluation evidence
+        if: matrix.python-version == '3.11'
+        run: |
+          evaluation_tmp=$(mktemp -d)
+          python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output "$evaluation_tmp/first"
+          python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output "$evaluation_tmp/second"
+          cmp "$evaluation_tmp/first/evaluation.json" "$evaluation_tmp/second/evaluation.json"
+          cmp "$evaluation_tmp/first/summary.txt" "$evaluation_tmp/second/summary.txt"
+          cmp "$evaluation_tmp/first/evaluation.json" outputs/phase2/evaluation.json
+          cmp "$evaluation_tmp/first/summary.txt" outputs/phase2/summary.txt
+          git diff --exit-code -- outputs/phase2

@@ -1,0 +1,14 @@
+FraudLens Phase 2 reproducible evaluation
+dataset_sha256: 52a06466538f5e14a509c075b9bfd112cd0be2ef99df9b81ba1da5aa5783dfcc
+rows: 64 (train=48, validation=8, test=8)
+present_labels: courier_scam, digital_arrest, fake_job, investment_scam, kyc_scam, loan_scam, otp_phishing, upi_refund_scam
+missing_labels: legitimate
+phase2_target_met: false
+
+Test split results (raw predicted-label metrics; abstentions reported separately):
+calibrated_tfidf: accuracy=0.5000 macro_f1=0.5000 coverage=0.8750 abstention=0.1250 accepted_accuracy=0.5714
+marker_tfidf: accuracy=0.8750 macro_f1=0.8333 coverage=0.6250 abstention=0.3750 accepted_accuracy=1.0000
+raw_tfidf: accuracy=0.3750 macro_f1=0.3333 coverage=1.0000 abstention=0.0000 accepted_accuracy=0.3750
+rule_only: accuracy=0.8750 macro_f1=0.8333 coverage=0.8750 abstention=0.1250 accepted_accuracy=1.0000
+
+Limitation: Synthetic bootstrap only: legitimate is absent and no supported label has 200 rows.
