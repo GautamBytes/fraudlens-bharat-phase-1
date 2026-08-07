@@ -9,6 +9,7 @@ Test split results (raw predicted-label metrics; abstentions reported separately
 calibrated_tfidf: accuracy=0.5000 macro_f1=0.5000 coverage=0.8750 abstention=0.1250 accepted_accuracy=0.5714
 marker_tfidf: accuracy=0.8750 macro_f1=0.8333 coverage=0.6250 abstention=0.3750 accepted_accuracy=1.0000
 raw_tfidf: accuracy=0.3750 macro_f1=0.3333 coverage=1.0000 abstention=0.0000 accepted_accuracy=0.3750
-rule_only: accuracy=0.8750 macro_f1=0.8333 coverage=0.8750 abstention=0.1250 accepted_accuracy=1.0000
+rule_only: accuracy=0.2500 macro_f1=0.2500 coverage=0.2500 abstention=0.7500 accepted_accuracy=1.0000
 
+Rule-only uses canonical runtime acceptance (label != unknown); unknown counts as an overall error.
 Limitation: Synthetic bootstrap only: legitimate is absent and no supported label has 200 rows.

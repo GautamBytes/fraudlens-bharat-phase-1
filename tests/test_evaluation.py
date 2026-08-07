@@ -9,7 +9,8 @@ import pandas as pd
 import pytest
 
 from fraudlens import evaluation
-from fraudlens.evaluation import _rule_probabilities, evaluate_all
+from fraudlens import model_inference
+from fraudlens.evaluation import _runtime_rule_predictions, evaluate_all
 
 
 DATASET = Path("data/samples/phase2_dataset.csv")
@@ -34,18 +35,25 @@ def test_evaluation_reports_the_four_comparable_classifiers(tmp_path):
     with pytest.raises(TypeError):
         bundle.document["schema_version"] = 2
 
-    for classifier in report["classifiers"].values():
-        assert classifier["threshold_selected_on"] == "validation"
+    for name, classifier in report["classifiers"].items():
+        if name == "rule_only":
+            assert classifier["threshold"] is None
+            assert classifier["threshold_selected_on"] == "not_applicable_runtime_rule"
+            assert classifier["test"]["expected_calibration_error"] is None
+            assert classifier["test"]["confusion_matrix_labels"][-1] == "unknown"
+        else:
+            assert classifier["threshold_selected_on"] == "validation"
+            assert 0.0 <= classifier["test"]["expected_calibration_error"] <= 1.0
         assert classifier["split_rows"] == {"train": 48, "validation": 8, "test": 8}
         assert classifier["test"]["rows"] == 8
         assert classifier["test"]["split"] == "test"
-        assert 0.0 <= classifier["test"]["expected_calibration_error"] <= 1.0
         assert 0.0 <= classifier["test"]["coverage"] <= 1.0
         assert classifier["test"]["abstention_rate"] == 1.0 - classifier["test"]["coverage"]
         assert classifier["test"]["latency"]["method"]
-        assert classifier["test"]["confusion_matrix_labels"] == sorted(
-            classifier["test"]["per_class"]
-        )
+        expected_labels = sorted(classifier["test"]["per_class"])
+        if name == "rule_only":
+            expected_labels.append("unknown")
+        assert classifier["test"]["confusion_matrix_labels"] == expected_labels
 
 
 def test_evaluation_fits_tfidf_on_train_text_only_and_does_not_emit_holdout_text(tmp_path, monkeypatch):
@@ -79,11 +87,31 @@ def test_evaluation_fits_tfidf_on_train_text_only_and_does_not_emit_holdout_text
     assert test_secret not in serialized
 
 
-def test_rule_baseline_abstains_for_a_future_label_without_markers():
-    probabilities, evidence = _rule_probabilities(["An ordinary account notification."], ["legitimate"])
+def test_rule_baseline_calls_the_canonical_runtime_for_every_frozen_row(tmp_path, monkeypatch):
+    frame = pd.read_csv(DATASET)
+    frozen_text = (
+        frame.loc[frame["split"] == "validation", "text"].tolist()
+        + frame.loc[frame["split"] == "test", "text"].tolist()
+    )
+    expected = [model_inference.rule_based_predict(text) for text in frozen_text]
+    observed = []
+    original = model_inference.rule_based_predict
 
-    assert probabilities.tolist() == [[1.0]]
-    assert evidence.tolist() == [False]
+    def capture_runtime_prediction(text):
+        prediction = original(text)
+        observed.append(prediction)
+        return prediction
+
+    monkeypatch.setattr(model_inference, "rule_based_predict", capture_runtime_prediction)
+    report = evaluate_all(DATASET, tmp_path).to_dict()
+
+    assert observed == expected
+    assert _runtime_rule_predictions(frozen_text) == expected
+    rule_test = report["classifiers"]["rule_only"]["test"]
+    assert rule_test["coverage"] == 0.25
+    assert rule_test["accuracy"] == 0.25
+    assert rule_test["accepted_accuracy"] == 1.0
+    assert rule_test["confusion_matrix"][-1] == [0] * 9
 
 
 def test_evaluation_json_and_summary_are_byte_identical_across_runs(tmp_path):

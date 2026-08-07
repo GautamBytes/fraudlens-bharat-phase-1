@@ -9,6 +9,7 @@ The project is designed for my capstone project submission. It includes implemen
 - Dataset: 64 synthetic, manually reviewed bootstrap examples across 8 fraud classes; no `legitimate` rows are present
 - Selected runtime candidate: calibrated raw-normalized TF-IDF + Logistic Regression, fit and calibrated only on the frozen 48-row train split and thresholded on the 8-row validation split
 - Frozen 8-row synthetic test evidence is committed in `outputs/phase2/evaluation.json` and `outputs/phase2/summary.txt`; it compares rule-only, raw TF-IDF, marker TF-IDF ablation, and calibrated TF-IDF without using the test split for fitting or threshold selection
+- Rule-only evidence calls the canonical runtime fallback for every frozen row. Its runtime acceptance is `label != unknown`; it does not receive an evaluator-tuned threshold or calibration score.
 - The Phase 2 target is not met: the bootstrap is below 200 examples per label and lacks the `legitimate` label
 - Rule fallback: used only if calibrated artifacts are unavailable or corrupt, and abstains on weak generic keyword matches
 - Interfaces: FastAPI backend and Streamlit dashboard

@@ -15,8 +15,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_f
 
 from fraudlens.config import DATASET_PATH
 from fraudlens.data_contract import PHASE2_TARGET_PER_LABEL, TRAINED_LABELS
+from fraudlens import model_inference
 from fraudlens.model_training import _fit_deterministic_vectorizer, _select_threshold, load_dataset
-from fraudlens.preprocessing import CATEGORY_MARKERS, STRONG_CATEGORY_MARKERS, _contains_keyword, prepare_model_text
+from fraudlens.preprocessing import prepare_model_text
 
 
 CLASSIFIER_NAMES = ("calibrated_tfidf", "marker_tfidf", "raw_tfidf", "rule_only")
@@ -86,7 +87,7 @@ def evaluate_all(dataset_path: Path, output_dir: Path) -> EvaluationBundle:
         },
         "protocol": {
             "train": "fit vectorizers, models, and calibration only",
-            "validation": "select abstention threshold only",
+            "validation": "select TF-IDF abstention thresholds only",
             "test": "single untouched frozen evaluation",
             "random_seed": 42,
             "marker_tfidf": "ablation only; not selected for runtime use",
@@ -149,47 +150,72 @@ def _evaluate_rule(
     y_by_split: Mapping[str, np.ndarray],
     labels: Sequence[str],
 ) -> Dict[str, Any]:
-    validation_probabilities, validation_evidence = _rule_probabilities(
-        _texts(split_frames["validation"], "model_text"), labels
-    )
-    threshold = _select_threshold(y_by_split["validation"], validation_probabilities)
-    test_probabilities, test_evidence = _rule_probabilities(
-        _texts(split_frames["test"], "model_text"), labels
-    )
+    validation_predictions = _runtime_rule_predictions(_texts(split_frames["validation"], "text"))
+    test_predictions = _runtime_rule_predictions(_texts(split_frames["test"], "text"))
     return {
-        "kind": "transparent_keyword_rule",
+        "kind": "canonical_runtime_keyword_rule",
         "selection_status": "baseline_not_selected",
-        "text_representation": "raw_normalized_text",
-        "calibration": "none",
-        "fit_split": "none; deterministic rules",
+        "text_representation": "runtime_normalized_text",
+        "calibration": "none; runtime rule confidence is not a calibrated probability",
+        "fit_split": "none; canonical runtime rules",
         "split_rows": _split_rows(split_frames),
-        "threshold": threshold,
-        "threshold_selected_on": "validation",
-        "validation": _metrics(
-            "validation", y_by_split["validation"], validation_probabilities, threshold,
-            labels, validation_evidence,
-        ),
-        "test": _metrics("test", y_by_split["test"], test_probabilities, threshold, labels, test_evidence),
+        "threshold": None,
+        "threshold_selected_on": "not_applicable_runtime_rule",
+        "runtime_acceptance": "label != unknown",
+        "validation": _rule_metrics("validation", y_by_split["validation"], validation_predictions, labels),
+        "test": _rule_metrics("test", y_by_split["test"], test_predictions, labels),
     }
 
 
-def _rule_probabilities(texts: Sequence[str], labels: Sequence[str]) -> Tuple[np.ndarray, np.ndarray]:
-    probabilities = np.zeros((len(texts), len(labels)), dtype=float)
-    evidence = np.zeros(len(texts), dtype=bool)
-    for row, text in enumerate(texts):
-        scores = []
-        for label in labels:
-            marker_hits = sum(_contains_keyword(text, marker) for marker in CATEGORY_MARKERS.get(label, ()))
-            strong_hits = sum(_contains_keyword(text, marker) for marker in STRONG_CATEGORY_MARKERS.get(label, ()))
-            scores.append(float(marker_hits + 3 * strong_hits))
-        strongest = max(scores)
-        if strongest <= 0:
-            probabilities[row, :] = 1.0 / len(labels)
-            continue
-        evidence[row] = True
-        winning = [index for index, score in enumerate(scores) if score == strongest]
-        probabilities[row, winning] = 1.0 / len(winning)
-    return probabilities, evidence
+def _runtime_rule_predictions(texts: Sequence[str]) -> List[Tuple[str, float]]:
+    """Call the same fallback function used by the runtime for every row."""
+    return [model_inference.rule_based_predict(text) for text in texts]
+
+
+def _rule_metrics(
+    split: str,
+    y_true: np.ndarray,
+    runtime_predictions: Sequence[Tuple[str, float]],
+    labels: Sequence[str],
+) -> Dict[str, Any]:
+    true_labels = [labels[index] for index in y_true.tolist()]
+    predicted_labels = [prediction[0] for prediction in runtime_predictions]
+    accepted = np.asarray([label != "unknown" for label in predicted_labels], dtype=bool)
+    precision, recall, f1, support = precision_recall_fscore_support(
+        true_labels, predicted_labels, labels=list(labels), zero_division=0
+    )
+    per_class = {
+        label: {
+            "precision": _number(precision[index]),
+            "recall": _number(recall[index]),
+            "f1": _number(f1[index]),
+            "support": int(support[index]),
+        }
+        for index, label in enumerate(labels)
+    }
+    coverage = _number(accepted.mean())
+    accepted_accuracy = (
+        _number(accuracy_score(np.asarray(true_labels)[accepted], np.asarray(predicted_labels)[accepted]))
+        if accepted.any() else None
+    )
+    confusion_labels = list(labels) + ["unknown"]
+    return {
+        "split": split,
+        "rows": int(len(y_true)),
+        "accuracy": _number(accuracy_score(true_labels, predicted_labels)),
+        "macro_precision": _number(float(np.mean(precision))),
+        "macro_recall": _number(float(np.mean(recall))),
+        "macro_f1": _number(float(np.mean(f1))),
+        "per_class": per_class,
+        "confusion_matrix_labels": confusion_labels,
+        "confusion_matrix": confusion_matrix(true_labels, predicted_labels, labels=confusion_labels).tolist(),
+        "expected_calibration_error": None,
+        "calibration_note": "Not applicable: runtime rule confidence is not calibrated.",
+        "coverage": coverage,
+        "abstention_rate": _number(1.0 - coverage),
+        "accepted_accuracy": accepted_accuracy,
+        "latency": _latency_note(),
+    }
 
 
 def _metrics(
@@ -235,11 +261,7 @@ def _metrics(
         "coverage": coverage,
         "abstention_rate": _number(1.0 - coverage),
         "accepted_accuracy": accepted_accuracy,
-        "latency": {
-            "method": "not measured; wall-clock excluded from deterministic evidence",
-            "unit": "milliseconds_per_row",
-            "value": None,
-        },
+        "latency": _latency_note(),
     }
 
 
@@ -257,6 +279,14 @@ def _expected_calibration_error(
         accuracy = (predicted[in_bin] == y_true[in_bin]).mean()
         error += abs(float(accuracy) - float(confidence[in_bin].mean())) * (in_bin.sum() / total)
     return _number(error)
+
+
+def _latency_note() -> Dict[str, Any]:
+    return {
+        "method": "not measured; wall-clock excluded from deterministic evidence",
+        "unit": "milliseconds_per_row",
+        "value": None,
+    }
 
 
 def _ensure_split_labels(split_frames: Mapping[str, Any], labels: Sequence[str]) -> None:
@@ -334,7 +364,12 @@ def _summary(document: Mapping[str, Any]) -> str:
                 **metrics
             )
         )
-    lines.extend(["", "Limitation: {}".format(dataset["limitation"]), ""])
+    lines.extend([
+        "",
+        "Rule-only uses canonical runtime acceptance (label != unknown); unknown counts as an overall error.",
+        "Limitation: {}".format(dataset["limitation"]),
+        "",
+    ])
     return "\n".join(lines)
 
 
