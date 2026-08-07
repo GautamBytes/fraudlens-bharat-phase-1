@@ -66,6 +66,7 @@ TRAINING_CONFIGURATION: Mapping[str, Any] = {
         "random_state": 42,
         "calibration_method": "sigmoid",
         "calibration_cv": 3,
+        "learned_parameter_decimal_places": 12,
     },
     "threshold": {
         "selection_split": "validation",

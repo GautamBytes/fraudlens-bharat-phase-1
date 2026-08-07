@@ -323,10 +323,10 @@
   "missing_labels": [
     "legitimate"
   ],
-  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-ef98634efe9e",
+  "model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
   "phase2_target_met": false,
   "phase2_target_per_label": 200,
-  "pipeline_code_sha256": "ef98634efe9e60b35ae85650438ce7450e4288cf1d908d62f169ae1b6121cf5c",
+  "pipeline_code_sha256": "cb78757b5ccd0599abf7e15375ba1b47809f6beff3d25f932684303497729dbd",
   "pipeline_code_sources": [
     "model_training.py",
     "preprocessing.py"
@@ -426,5 +426,5 @@
   "target_status": "not_met; legitimate absent and bootstrap has fewer than 200 rows per label",
   "text_representation": "raw_normalized_text",
   "threshold": 0.38542777,
-  "training_configuration_sha256": "7ac6262ca9be61754a90e875a101dbc2e9eae5f38ca79e7cde5a3837e512cc16"
+  "training_configuration_sha256": "be839d256e7f969f0398e3bd2ab8c53e64310dd0843e25e28563da7ad7dfcee6"
 }

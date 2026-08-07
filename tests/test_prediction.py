@@ -254,6 +254,26 @@ def test_training_writes_honest_metadata_and_keeps_validation_and_test_out_of_vo
     assert "testonlytoken" not in vectorizer.vocabulary_
 
 
+def test_training_normalizes_all_learned_classifier_floats_to_twelve_decimals(tmp_path):
+    project_root = Path(__file__).resolve().parents[1]
+    train_baseline(
+        dataset_path=project_root / "data" / "samples" / "phase2_dataset.csv",
+        artifact_dir=tmp_path,
+    )
+    classifier = joblib.load(artifact_paths(tmp_path).model)
+
+    for calibrated in classifier.calibrated_classifiers_:
+        np.testing.assert_array_equal(
+            calibrated.estimator.coef_, np.round(calibrated.estimator.coef_, 12)
+        )
+        np.testing.assert_array_equal(
+            calibrated.estimator.intercept_, np.round(calibrated.estimator.intercept_, 12)
+        )
+        for calibrator in calibrated.calibrators:
+            assert calibrator.a_ == round(calibrator.a_, 12)
+            assert calibrator.b_ == round(calibrator.b_, 12)
+
+
 def test_training_rejects_unsupported_backend(tmp_path):
     project_root = Path(__file__).resolve().parents[1]
 

@@ -83,6 +83,21 @@ def _fit_deterministic_vectorizer(train_text: pd.Series) -> Tuple[TfidfVectorize
     return vectorizer, vectorizer.fit_transform(train_text)
 
 
+def _normalize_learned_classifier_floats(classifier: CalibratedClassifierCV) -> None:
+    """Remove sub-precision BLAS drift before evaluation and serialization."""
+    decimals = int(
+        TRAINING_CONFIGURATION["classifier"]["learned_parameter_decimal_places"]
+    )
+    for calibrated in classifier.calibrated_classifiers_:
+        calibrated.estimator.coef_ = np.round(calibrated.estimator.coef_, decimals)
+        calibrated.estimator.intercept_ = np.round(
+            calibrated.estimator.intercept_, decimals
+        )
+        for calibrator in calibrated.calibrators:
+            calibrator.a_ = round(float(calibrator.a_), decimals)
+            calibrator.b_ = round(float(calibrator.b_), decimals)
+
+
 def _select_threshold(y_true: np.ndarray, probabilities: np.ndarray) -> float:
     """Select on validation only, rewarding correct coverage and penalising errors."""
     confidences = probabilities.max(axis=1)
@@ -176,6 +191,7 @@ def train_baseline(
         cv=3,
     )
     classifier.fit(train_features, y_train)
+    _normalize_learned_classifier_floats(classifier)
     validation_probabilities = classifier.predict_proba(validation_features)
     threshold = _select_threshold(y_validation, validation_probabilities)
     test_probabilities = classifier.predict_proba(test_features)
