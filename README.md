@@ -35,6 +35,8 @@ OCR, transformer fine-tuning, graph analytics, and screenshot analysis are inten
 
 ## Setup
 
+FraudLens Bharat requires Python 3.10 or later.
+
 ```bash
 cd "/Users/gautammanch/capstone-project(phase-1)"
 python3 -m venv .venv

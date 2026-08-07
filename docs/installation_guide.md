@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - macOS/Linux/Windows terminal
 - Internet access for first-time package installation
 
@@ -63,4 +63,3 @@ streamlit run src/fraudlens/dashboard.py
 ```bash
 pytest
 ```
-

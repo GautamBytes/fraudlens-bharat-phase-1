@@ -1,2 +1,5 @@
-# Development and test dependencies are intentionally kept in requirements.txt
-# so the project remains runnable with one installation command.
+# Development-only dependencies build on the runtime requirements.
+-r requirements.txt
+pip==26.1.2
+pytest==9.0.3
+setuptools==83.0.0
