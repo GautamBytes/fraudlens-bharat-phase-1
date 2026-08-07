@@ -25,8 +25,23 @@ class AnalysisInput:
 
 
 class CaseStore(Protocol):
+    def initialize(self) -> None:
+        """Prepare storage and run safe migrations."""
+
     def save(self, result: AnalysisResult) -> None:
         """Persist an analysis result."""
+
+    def list_cases(self, limit: int) -> list[dict]:
+        """Return bounded case summaries."""
+
+    def get_case(self, case_id: str) -> Optional[dict]:
+        """Return one public case result when present."""
+
+    def delete(self, case_id: str) -> bool:
+        """Delete one case and report whether it existed."""
+
+    def clear(self) -> int:
+        """Delete all stored cases and return the affected count."""
 
 
 class DatabaseCaseStore:

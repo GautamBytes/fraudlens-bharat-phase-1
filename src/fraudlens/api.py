@@ -110,6 +110,19 @@ def create_app(
         except Exception:
             raise HTTPException(status_code=500, detail="Internal server error") from None
 
+    @application.delete("/cases")
+    def clear_case_history(
+        request: Request,
+        confirm: bool = Query(default=False),
+    ) -> dict:
+        if not confirm:
+            raise HTTPException(status_code=400, detail="Explicit confirmation is required")
+        try:
+            deleted_count = request.app.state.case_store.clear()
+        except Exception:
+            raise HTTPException(status_code=500, detail="Internal server error") from None
+        return {"deleted_count": deleted_count}
+
     @application.get("/cases/{case_id}")
     def case_detail(case_id: str, request: Request) -> dict:
         try:
@@ -119,6 +132,16 @@ def create_app(
         if result is None:
             raise HTTPException(status_code=404, detail="Case not found")
         return result
+
+    @application.delete("/cases/{case_id}")
+    def delete_case(case_id: str, request: Request) -> dict:
+        try:
+            deleted = request.app.state.case_store.delete(case_id)
+        except Exception:
+            raise HTTPException(status_code=500, detail="Internal server error") from None
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Case not found")
+        return {"deleted": True, "case_id": case_id}
 
     return application
 

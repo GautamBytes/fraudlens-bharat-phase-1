@@ -19,10 +19,11 @@ class _StubPredictor:
 
 
 class _Store:
-    def __init__(self, error=None):
+    def __init__(self, error=None, case_ids=()):
         self.error = error
         self.initialized = 0
         self.saved = []
+        self.case_ids = set(case_ids)
 
     def initialize(self):
         self.initialized += 1
@@ -37,6 +38,21 @@ class _Store:
 
     def get_case(self, case_id):
         return None
+
+    def delete(self, case_id):
+        if self.error:
+            raise self.error
+        if case_id not in self.case_ids:
+            return False
+        self.case_ids.remove(case_id)
+        return True
+
+    def clear(self):
+        if self.error:
+            raise self.error
+        deleted_count = len(self.case_ids)
+        self.case_ids.clear()
+        return deleted_count
 
 
 def _settings(store_cases_by_default=False, allowed_hosts=()):
@@ -273,3 +289,47 @@ def test_create_app_rejects_an_unregistered_configured_backend(tmp_path):
 
     with pytest.raises(ValueError, match="Application configuration is invalid"):
         api.create_app(settings=settings, predictor_registry=PredictorRegistry({}))
+
+
+def test_delete_case_returns_success_once_then_not_found():
+    store = _Store(case_ids=("case-1",))
+    _, test_client = _client(store=store)
+
+    with test_client:
+        deleted = test_client.delete("/cases/case-1")
+        missing = test_client.delete("/cases/case-1")
+
+    assert deleted.status_code == 200
+    assert deleted.json() == {"deleted": True, "case_id": "case-1"}
+    assert missing.status_code == 404
+    assert missing.json() == {"detail": "Case not found"}
+
+
+def test_clear_case_history_requires_explicit_confirmation():
+    store = _Store(case_ids=("case-1", "case-2"))
+    _, test_client = _client(store=store)
+
+    with test_client:
+        omitted = test_client.delete("/cases")
+        refused = test_client.delete("/cases", params={"confirm": "false"})
+        cleared = test_client.delete("/cases", params={"confirm": "true"})
+
+    assert omitted.status_code == 400
+    assert refused.status_code == 400
+    assert omitted.json() == {"detail": "Explicit confirmation is required"}
+    assert cleared.status_code == 200
+    assert cleared.json() == {"deleted_count": 2}
+
+
+def test_delete_endpoints_hide_storage_error_details():
+    store = _Store(error=RuntimeError("/private/cases.sqlite3 failed"), case_ids=("case-1",))
+    _, test_client = _client(store=store)
+
+    with test_client:
+        one = test_client.delete("/cases/case-1")
+        all_cases = test_client.delete("/cases", params={"confirm": "true"})
+
+    assert one.status_code == 500
+    assert all_cases.status_code == 500
+    assert one.json() == {"detail": "Internal server error"}
+    assert "/private" not in one.text + all_cases.text
