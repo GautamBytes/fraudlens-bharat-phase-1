@@ -56,7 +56,18 @@ def _add_column_if_missing(conn: sqlite3.Connection, name: str, definition: str)
         conn.execute("ALTER TABLE cases ADD COLUMN {} {}".format(name, definition))
 
 
-def _migrate_cases(conn: sqlite3.Connection) -> None:
+def _purge_expired(conn: sqlite3.Connection, now: datetime) -> int:
+    expired_case_ids = []
+    for row in conn.execute("SELECT case_id, expires_at FROM cases WHERE expires_at IS NOT NULL"):
+        expires_at = _parse_utc(row["expires_at"])
+        if expires_at is None or expires_at <= now:
+            expired_case_ids.append(row["case_id"])
+    for case_id in expired_case_ids:
+        conn.execute("DELETE FROM cases WHERE case_id = ?", (case_id,))
+    return len(expired_case_ids)
+
+
+def _migrate_cases(conn: sqlite3.Connection, retention_days: int, now: datetime) -> int:
     _add_column_if_missing(conn, "stored_raw_text", "INTEGER NOT NULL DEFAULT 1")
     _add_column_if_missing(conn, "expires_at", "TEXT")
     _add_column_if_missing(conn, "model_version", "TEXT")
@@ -75,27 +86,45 @@ def _migrate_cases(conn: sqlite3.Connection) -> None:
     conn.execute("CREATE INDEX IF NOT EXISTS idx_cases_expires_at ON cases(expires_at)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_case_entities_entity ON case_entities(entity_type, entity_id)")
 
+    deleted_count = 0
+    for row in conn.execute("SELECT case_id, created_at FROM cases WHERE expires_at IS NULL"):
+        created_at = _parse_utc(row["created_at"])
+        if created_at is None:
+            cursor = conn.execute("DELETE FROM cases WHERE case_id = ?", (row["case_id"],))
+            deleted_count += cursor.rowcount
+            continue
+        conn.execute(
+            "UPDATE cases SET expires_at = ? WHERE case_id = ?",
+            (_utc_iso(created_at + timedelta(days=retention_days)), row["case_id"]),
+        )
+    return deleted_count + _purge_expired(conn, now)
+
+
+def _initialize_database(conn: sqlite3.Connection, retention_days: int, now: datetime) -> int:
+    if retention_days <= 0:
+        raise ValueError("retention_days must be positive")
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cases (
+            case_id TEXT PRIMARY KEY,
+            created_at TEXT NOT NULL,
+            original_text TEXT NOT NULL,
+            predicted_label TEXT NOT NULL,
+            confidence REAL NOT NULL,
+            risk_level TEXT NOT NULL,
+            risk_score REAL NOT NULL,
+            result_json TEXT NOT NULL
+        )
+        """
+    )
+    return _migrate_cases(conn, retention_days, now)
+
+
 def init_db(path: Optional[Path] = None, retention_days: int = _DEFAULT_RETENTION_DAYS) -> None:
     """Create and idempotently migrate the local case database."""
 
-    if retention_days <= 0:
-        raise ValueError("retention_days must be positive")
     with _connect(path) as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS cases (
-                case_id TEXT PRIMARY KEY,
-                created_at TEXT NOT NULL,
-                original_text TEXT NOT NULL,
-                predicted_label TEXT NOT NULL,
-                confidence REAL NOT NULL,
-                risk_level TEXT NOT NULL,
-                risk_score REAL NOT NULL,
-                result_json TEXT NOT NULL
-            )
-            """
-        )
-        _migrate_cases(conn)
+        _initialize_database(conn, retention_days, datetime.now(timezone.utc))
 
 
 def save_case(
@@ -106,7 +135,6 @@ def save_case(
 ) -> None:
     """Persist a consented result and opaque entity links as one transaction."""
 
-    init_db(path, retention_days=retention_days)
     payload = _model_dump(result)
     created_at = _utc_iso(result.created_at)
     expires_at = _utc_iso(_parse_utc(created_at) + timedelta(days=retention_days))
@@ -125,6 +153,7 @@ def save_case(
         result.case_id,
     )
     with _connect(path) as conn:
+        _initialize_database(conn, retention_days, datetime.now(timezone.utc))
         existing = conn.execute("SELECT 1 FROM cases WHERE case_id = ?", (result.case_id,)).fetchone()
         if existing is None:
             conn.execute(
@@ -147,45 +176,38 @@ def save_case(
             )
             conn.execute("DELETE FROM case_entities WHERE case_id = ?", (result.case_id,))
 
+        seen_entities = set()
         for entity in result.entities:
             try:
                 entity_id = stable_entity_id(entity.type, entity.value, hmac_secret)
                 masked_value = mask_entity(entity.type, entity.value)
             except ValueError:
                 continue
+            normalized_type = entity.type.strip().casefold()
+            entity_key = (normalized_type, entity_id)
+            if entity_key in seen_entities:
+                continue
+            seen_entities.add(entity_key)
             conn.execute(
                 """
                 INSERT INTO case_entities (case_id, entity_type, entity_id, masked_value)
                 VALUES (?, ?, ?, ?)
                 """,
-                (result.case_id, entity.type.casefold(), entity_id, masked_value),
+                (result.case_id, normalized_type, entity_id, masked_value),
             )
-
-
-def _purge_expired(conn: sqlite3.Connection, now: datetime) -> int:
-    expired_case_ids = []
-    for row in conn.execute("SELECT case_id, expires_at FROM cases WHERE expires_at IS NOT NULL"):
-        expires_at = _parse_utc(row["expires_at"])
-        if expires_at is not None and expires_at <= now:
-            expired_case_ids.append(row["case_id"])
-    for case_id in expired_case_ids:
-        conn.execute("DELETE FROM cases WHERE case_id = ?", (case_id,))
-    return len(expired_case_ids)
-
 
 def purge_expired(
     path: Optional[Path] = None,
     now: Optional[datetime] = None,
     retention_days: int = _DEFAULT_RETENTION_DAYS,
 ) -> int:
-    init_db(path, retention_days=retention_days)
     reference_time = now or datetime.now(timezone.utc)
     if reference_time.tzinfo is None:
         reference_time = reference_time.replace(tzinfo=timezone.utc)
     else:
         reference_time = reference_time.astimezone(timezone.utc)
     with _connect(path) as conn:
-        return _purge_expired(conn, reference_time)
+        return _initialize_database(conn, retention_days, reference_time)
 
 
 def list_cases(

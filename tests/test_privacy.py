@@ -47,3 +47,15 @@ def test_masks_are_type_specific_and_do_not_return_the_original_value(entity_typ
 def test_empty_or_unsupported_entities_are_rejected(entity_type, value):
     with pytest.raises(ValueError):
         stable_entity_id(entity_type, value, "secret")
+
+
+@pytest.mark.parametrize("value", ["1234", "12345678901", "1234567890"])
+def test_phone_entity_id_rejects_invalid_indian_subscriber_numbers(value):
+    with pytest.raises(ValueError, match="valid Indian subscriber number"):
+        stable_entity_id("phone", value, "secret")
+
+
+@pytest.mark.parametrize("value", ["1234", "12345678901", "1234567890"])
+def test_phone_mask_rejects_values_that_could_be_returned_raw_or_are_invalid(value):
+    with pytest.raises(ValueError, match="valid Indian subscriber number"):
+        mask_entity("phone", value)

@@ -51,7 +51,7 @@ def test_initialize_migrates_old_cases_without_losing_them_and_is_idempotent(tmp
         )
         conn.execute(
             "INSERT INTO cases VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            ("legacy", "2026-08-07T12:00:00+00:00", "legacy raw", "kyc_scam", 0.8, "high", 70, "{}"),
+            ("legacy", "2099-01-01T00:00:00+00:00", "legacy raw", "kyc_scam", 0.8, "high", 70, "{}"),
         )
 
     store = _store(tmp_path)
@@ -65,8 +65,42 @@ def test_initialize_migrates_old_cases_without_losing_them_and_is_idempotent(tmp
     assert {"stored_raw_text", "expires_at", "model_version"} <= columns
     assert {"case_id", "entity_type", "entity_id", "masked_value"} <= entities_columns
     assert legacy[0] == 1
-    assert legacy[1] is None
+    assert legacy[1] == "2099-01-31T00:00:00+00:00"
     assert store.get_case("legacy") == {}
+
+
+def test_migration_removes_expired_or_malformed_legacy_raw_rows(tmp_path):
+    database_path = tmp_path / "cases.sqlite3"
+    with sqlite3.connect(database_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE cases (
+                case_id TEXT PRIMARY KEY, created_at TEXT NOT NULL, original_text TEXT NOT NULL,
+                predicted_label TEXT NOT NULL, confidence REAL NOT NULL, risk_level TEXT NOT NULL,
+                risk_score REAL NOT NULL, result_json TEXT NOT NULL,
+                stored_raw_text INTEGER NOT NULL DEFAULT 1, expires_at TEXT, model_version TEXT
+            )
+            """
+        )
+        rows = [
+            ("future", "2099-01-01T00:00:00+00:00", None),
+            ("expired", "2000-01-01T00:00:00+00:00", None),
+            ("bad-created", "not-a-date", None),
+            ("bad-expiry", "2099-01-01T00:00:00+00:00", "not-a-date"),
+        ]
+        for case_id, created_at, expires_at in rows:
+            conn.execute(
+                "INSERT INTO cases VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (case_id, created_at, "legacy raw", "kyc_scam", 0.8, "high", 70, "{}", 1, expires_at, None),
+            )
+
+    store = _store(tmp_path)
+    store.initialize()
+    store.initialize()
+
+    with sqlite3.connect(database_path) as conn:
+        remaining = conn.execute("SELECT case_id, expires_at FROM cases").fetchall()
+    assert remaining == [("future", "2099-01-31T00:00:00+00:00")]
 
 
 def test_saved_cases_persist_raw_result_only_in_case_record_and_masked_entities(tmp_path):
@@ -93,9 +127,47 @@ def test_saved_cases_persist_raw_result_only_in_case_record_and_masked_entities(
     assert {row[0] for row in entities} == {"phone", "upi_id", "email", "url"}
 
 
+@pytest.mark.parametrize(
+    ("duplicate_entities", "expected_mask"),
+    [
+        (
+            [
+                Entity(type="email", value="Alice@Example.COM"),
+                Entity(type="email", value="alice@example.com"),
+            ],
+            "a***@example.com",
+        ),
+        (
+            [
+                Entity(type="url", value="https://login.example.com/reset#first"),
+                Entity(type="url", value="https://login.example.com/reset#second"),
+            ],
+            "login.example.com",
+        ),
+    ],
+)
+def test_save_deduplicates_entities_with_the_same_canonical_identity(
+    tmp_path, duplicate_entities, expected_mask
+):
+    store = _store(tmp_path)
+    result = _result()
+    result.entities = duplicate_entities
+
+    store.save(result)
+
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        rows = conn.execute(
+            "SELECT entity_type, entity_id, masked_value FROM case_entities WHERE case_id = ?",
+            (result.case_id,),
+        ).fetchall()
+    assert len(rows) == 1
+    assert rows[0][2] == expected_mask
+
+
 def test_save_rolls_back_case_when_an_entity_insert_fails(tmp_path):
     store = _store(tmp_path)
     store.initialize()
+    store.save(_result("expired", datetime(2000, 1, 1, tzinfo=timezone.utc)))
     with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
         conn.execute(
             """CREATE TRIGGER reject_entities BEFORE INSERT ON case_entities
@@ -106,8 +178,8 @@ def test_save_rolls_back_case_when_an_entity_insert_fails(tmp_path):
         store.save(_result())
 
     with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
-        assert conn.execute("SELECT COUNT(*) FROM cases").fetchone()[0] == 0
-        assert conn.execute("SELECT COUNT(*) FROM case_entities").fetchone()[0] == 0
+        assert conn.execute("SELECT case_id FROM cases").fetchall() == [("expired",)]
+        assert conn.execute("SELECT COUNT(*) FROM case_entities").fetchone()[0] == 4
 
 
 def test_delete_clear_and_case_id_sql_injection_are_safe(tmp_path):
@@ -123,13 +195,24 @@ def test_delete_clear_and_case_id_sql_injection_are_safe(tmp_path):
     assert store.list_cases(10) == []
 
 
-def test_purge_expired_uses_an_inclusive_utc_boundary_and_keeps_malformed_old_expiry(tmp_path):
+def test_save_purges_expired_raw_cases_without_a_list_or_get_request(tmp_path):
     store = _store(tmp_path, retention_days=1)
-    created_at = datetime(2026, 8, 7, 12, 0, tzinfo=timezone.utc)
+    store.save(_result("expired", datetime(2000, 1, 1, tzinfo=timezone.utc)))
+
+    store.save(_result("active", datetime(2099, 1, 1, tzinfo=timezone.utc)))
+
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        case_ids = [row[0] for row in conn.execute("SELECT case_id FROM cases ORDER BY case_id")]
+    assert case_ids == ["active"]
+
+
+def test_purge_expired_uses_an_inclusive_utc_boundary_and_deletes_malformed_expiry(tmp_path):
+    store = _store(tmp_path, retention_days=1)
+    created_at = datetime(2099, 1, 1, 12, 0, tzinfo=timezone.utc)
     store.save(_result("expires-now", created_at))
     store.save(_result("later", created_at + timedelta(seconds=1)))
     with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
         conn.execute("UPDATE cases SET expires_at = ? WHERE case_id = ?", ("not-a-date", "later"))
 
-    assert store.purge_expired(datetime(2026, 8, 8, 12, 0, tzinfo=timezone.utc)) == 1
-    assert [case["case_id"] for case in store.list_cases(10)] == ["later"]
+    assert store.purge_expired(datetime(2099, 1, 2, 12, 0, tzinfo=timezone.utc)) == 2
+    assert store.list_cases(10) == []

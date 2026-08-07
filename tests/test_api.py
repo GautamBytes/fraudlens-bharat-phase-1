@@ -1,4 +1,5 @@
 import inspect
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -248,6 +249,54 @@ def test_default_api_store_persists_only_to_the_configured_database_path(tmp_pat
     assert configured_path.exists()
     assert [case["case_id"] for case in listed.json()] == [case_id]
     assert database.get_case(case_id, path=config.DB_PATH) is None
+
+
+def test_analyze_post_purges_an_expired_raw_case_during_the_save_transaction(tmp_path):
+    configured_path = Path(tmp_path) / "configured.sqlite3"
+    settings = Settings(
+        model_backend="tfidf",
+        database_path=configured_path,
+        hmac_secret="test-secret",
+        retention_days=30,
+        store_cases_by_default=True,
+        environment="test",
+        allowed_hosts=(),
+    )
+    application = api.create_app(
+        settings=settings,
+        predictor=_StubPredictor(Prediction("kyc_scam", 0.91, "test", "test-v1", False)),
+    )
+
+    with TestClient(application) as test_client:
+        with sqlite3.connect(configured_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO cases
+                (case_id, created_at, original_text, predicted_label, confidence, risk_level, risk_score,
+                 result_json, stored_raw_text, expires_at, model_version)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "expired-raw",
+                    "2000-01-01T00:00:00+00:00",
+                    "expired raw text",
+                    "kyc_scam",
+                    0.8,
+                    "high",
+                    70,
+                    "{}",
+                    1,
+                    "2000-01-31T00:00:00+00:00",
+                    "legacy",
+                ),
+            )
+
+        response = test_client.post("/analyze", json={"text": "urgent verification"})
+
+    with sqlite3.connect(configured_path) as conn:
+        remaining_ids = [row[0] for row in conn.execute("SELECT case_id FROM cases")]
+    assert response.status_code == 200
+    assert remaining_ids == [response.json()["case_id"]]
 
 
 def test_analyze_message_uses_the_settings_default_when_storage_is_omitted(monkeypatch, tmp_path):

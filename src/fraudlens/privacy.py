@@ -23,8 +23,8 @@ def _normalize_phone(value: str) -> str:
     digits = re.sub(r"\D", "", value)
     if digits.startswith("91") and len(digits) == 12:
         digits = digits[2:]
-    if not digits:
-        raise ValueError("Entity value must not be empty")
+    if re.fullmatch(r"[6-9]\d{9}", digits) is None:
+        raise ValueError("Phone entity must be a valid Indian subscriber number")
     return digits
 
 
