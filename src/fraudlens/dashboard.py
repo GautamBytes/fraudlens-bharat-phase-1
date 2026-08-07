@@ -1,8 +1,8 @@
 import pandas as pd
 import streamlit as st
 
-from fraudlens.analysis_service import AnalysisInput, create_analysis_service
-from fraudlens.database import list_cases
+from fraudlens.analysis_service import AnalysisInput, DatabaseCaseStore, create_analysis_service
+from fraudlens.settings import Settings
 
 
 DEMO_MESSAGES = {
@@ -20,8 +20,10 @@ def _result_to_dict(result):
 
 
 @st.cache_resource
-def _analysis_service():
-    return create_analysis_service()
+def _analysis_dependencies():
+    settings = Settings.from_env()
+    case_store = DatabaseCaseStore(settings.database_path)
+    return create_analysis_service(settings=settings, store=case_store), case_store
 
 
 st.set_page_config(page_title="FraudLens Bharat", page_icon="FL", layout="wide")
@@ -44,7 +46,8 @@ message = st.text_area(
 store_case = st.checkbox("Store this analysis locally", value=False)
 
 if st.button("Analyze Message", type="primary"):
-    result = _analysis_service().analyze(
+    analysis_service, _ = _analysis_dependencies()
+    result = analysis_service.analyze(
         AnalysisInput(text=message, store_case=store_case)
     )
     result_data = _result_to_dict(result)
@@ -93,7 +96,8 @@ if "last_result" in st.session_state:
 
 st.divider()
 st.subheader("Recent Analysis History")
-recent_cases = list_cases(limit=10)
+_, case_store = _analysis_dependencies()
+recent_cases = case_store.list_cases(limit=10)
 if recent_cases:
     st.dataframe(pd.DataFrame(recent_cases), use_container_width=True)
 else:
