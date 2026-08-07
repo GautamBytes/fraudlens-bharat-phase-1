@@ -14,7 +14,7 @@ I hereby declare that this capstone project titled "FraudLens Bharat: AI-Based H
 
 ## Abstract
 
-Cyber-fraud reporting in India often begins with unstructured evidence such as SMS messages, WhatsApp chats, suspicious links, phone numbers, UPI IDs, payment amounts, and threat language. Victims may describe incidents in English, Hindi, or Hinglish, which makes direct use of English-only tools less reliable. FraudLens Bharat is a Phase 1 software prototype for early cyber-fraud triage. It accepts pasted scam text, classifies the likely fraud type, extracts evidence entities, checks risky URL patterns, assigns an explainable low/medium/high risk level, stores the case locally, and generates a complaint-ready summary for manual reporting. The current checked-in predictor is calibrated raw-normalized TF-IDF with Logistic Regression. On its frozen 8-row synthetic test split, it has 0.5000 overall accuracy and raw macro-F1, 87.5% coverage, 12.5% abstention, and 57.14% accepted accuracy. The bootstrap has no legitimate examples and does not meet the 200-examples-per-label target, so it is not production-ready. The historical 16-row, marker-enhanced Phase 1 result of 1.0000 is superseded and not comparable to the current artifact. The main contribution is an explainable end-to-end triage workflow for Indian Hinglish cyber-fraud messages. Future phases should add larger real-world validation, OCR, transformer comparison, URL-model benchmarking, and graph analytics for repeated fraud identifiers.
+Cyber-fraud reporting in India often begins with unstructured evidence such as SMS messages, WhatsApp chats, suspicious links, phone numbers, UPI IDs, payment amounts, and threat language. Victims may describe incidents in English, Hindi, or Hinglish, which makes direct use of English-only tools less reliable. FraudLens Bharat is a Phase 1 software prototype for early cyber-fraud triage. It accepts pasted scam text, classifies the likely fraud type, extracts evidence entities, checks risky URL patterns, assigns an explainable low/medium/high risk level, optionally stores a case after explicit consent, and generates a complaint-ready summary for manual reporting. The current checked-in predictor is calibrated raw-normalized TF-IDF with Logistic Regression. Current metrics are generated from the frozen 8-row synthetic test split in `outputs/phase2/`; the bootstrap has no legitimate examples and does not meet the 200-examples-per-label target, so it is not production-ready. The historical 16-row, marker-enhanced Phase 1 result of 1.0000 is superseded and not comparable to the current artifact. The main contribution is an explainable end-to-end triage workflow for Indian Hinglish cyber-fraud messages. Future phases should add larger real-world validation, OCR, transformer comparison, URL-model benchmarking, and graph analytics for repeated fraud identifiers.
 
 # Table of Contents
 
@@ -174,7 +174,7 @@ flowchart TD
 - **Preprocessing:** Cleans whitespace, lowercases text, and preserves URLs, phone numbers, UPI IDs, and fraud tokens.
 - **Entity Extraction:** Extracts phone numbers, UPI IDs, URLs, emails, money amounts, OTP-like codes, urgency phrases, and threat phrases.
 - **URL Risk:** Flags shorteners, non-HTTPS links, IP-based URLs, and suspicious fraud keywords.
-- **Model Training:** Trains a keyword-enriched TF-IDF + Logistic Regression baseline classifier.
+- **Model Training:** Trains the selected calibrated raw-normalized TF-IDF + Logistic Regression baseline; keyword markers remain an unselected historical ablation.
 - **Model Inference:** Predicts fraud category and confidence; falls back to rule-based classification if model files are unavailable.
 - **Risk Scoring:** Combines classifier confidence, risky entities, URL signals, and urgency/threat signals.
 - **API:** Provides health, analyze, and case-history endpoints.
@@ -191,7 +191,7 @@ Input: suspicious message text
 5. Combine model confidence and risk signals.
 6. Assign low, medium, or high risk level.
 7. Generate explanation and complaint summary.
-8. Store case and return result.
+8. Store the case only when the user opts in, then return the result.
 ```
 
 ## 2.6 Screenshots / Code Snippets
@@ -290,7 +290,7 @@ The detailed comparison is available in `docs/comparative_analysis.md`.
 ## 3.7 Limitations Of Current Evaluation
 
 - The seed dataset is synthetic and small.
-- The test split has only two examples per class.
+- The frozen test split has only one example per available fraud class.
 - The current score should not be interpreted as real-world generalization.
 - More noisy Hinglish, transliteration, misspellings, and adversarial examples are needed.
 - Real victim data must not be used without privacy controls and approval.
@@ -299,7 +299,7 @@ The detailed comparison is available in `docs/comparative_analysis.md`.
 
 ## Execution Environment
 
-- Python 3.9+
+- Python 3.10+
 - Local virtual environment
 - SQLite local database
 
@@ -343,17 +343,16 @@ Refer to `docs/supervisor_interaction.md`.
 
 ## Summary of Implementation
 
-Phase 1 implements a complete text-based baseline cyber-fraud triage prototype. It classifies scam text, extracts evidence, detects URL risk, generates explanations, creates a complaint draft, and stores case history.
+Phase 1 implements a complete text-based baseline cyber-fraud triage prototype. It classifies scam text, extracts evidence, detects URL risk, generates explanations, creates a complaint draft, and stores case history only after explicit opt-in.
 
 ## Achievements
 
-- Built a working hybrid TF-IDF baseline classifier.
+- Built a calibrated raw-normalized TF-IDF baseline with explicit abstention and a separate rule fallback.
 - Implemented practical entity extraction.
 - Added explainable risk scoring.
 - Created API and dashboard interfaces.
 - Added test cases and metrics generation.
-- Compared rule-only fallback against the hybrid baseline on the same split.
-- Improved the courier-scam vs digital-arrest distinction with clearer domain markers.
+- Compared the canonical runtime rule fallback, raw TF-IDF, marker ablation, and calibrated baseline on the same frozen split.
 
 ## Limitations
 

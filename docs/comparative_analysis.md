@@ -9,7 +9,7 @@ The key rule is fairness: do not compare a small synthetic Phase 1 split directl
 ## Comparison Questions
 
 1. Is the Phase 1 prototype better than the initial manual/no-system state?
-2. Is the hybrid baseline better than the rule-only fallback on the same seed split?
+2. How does the selected calibrated baseline compare with the canonical rule fallback on the same frozen split?
 3. How does Phase 1 compare with specialized published approaches?
 4. Which metrics should be improved in Phase 2?
 
@@ -19,7 +19,7 @@ The key rule is fairness: do not compare a small synthetic Phase 1 split directl
 |---|---|---|
 | Input handling | Unstructured pasted text only in notes | Pasted text accepted through API and dashboard |
 | Fraud taxonomy | No reproducible taxonomy | 8 fraud classes with labeling guide |
-| Classification | Manual guesswork | Hybrid TF-IDF + Logistic Regression classifier |
+| Classification | Manual guesswork | Calibrated raw-normalized TF-IDF + Logistic Regression with explicit abstention |
 | Evidence extraction | Manual reading | Regex extraction for phone, URL, UPI ID, email, money, OTP-like code, urgency, threat |
 | URL risk | Manual inspection | Non-HTTPS, shortener, IP-host, suspicious keyword, and hyphenated-domain checks |
 | Risk level | Not measured | Low/medium/high score with visible reasons |
