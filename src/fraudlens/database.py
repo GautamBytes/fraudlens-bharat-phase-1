@@ -15,6 +15,10 @@ _DEFAULT_HMAC_SECRET = "local-demo-only-secret-not-for-production"
 _DEFAULT_RETENTION_DAYS = 30
 
 
+class ExpiredCaseError(ValueError):
+    """Raised when a case is already outside its configured retention window."""
+
+
 def _connect(path: Optional[Path] = None) -> sqlite3.Connection:
     database_path = Path(path) if path is not None else DB_PATH
     database_path.parent.mkdir(parents=True, exist_ok=True)
@@ -137,7 +141,8 @@ def save_case(
 
     payload = _model_dump(result)
     created_at = _utc_iso(result.created_at)
-    expires_at = _utc_iso(_parse_utc(created_at) + timedelta(days=retention_days))
+    expires_at_value = _parse_utc(created_at) + timedelta(days=retention_days)
+    expires_at = _utc_iso(expires_at_value)
     model_version = result.metadata.get("prediction_model_version")
     values = (
         created_at,
@@ -152,49 +157,56 @@ def save_case(
         model_version,
         result.case_id,
     )
+    expired = False
     with _connect(path) as conn:
-        _initialize_database(conn, retention_days, datetime.now(timezone.utc))
-        existing = conn.execute("SELECT 1 FROM cases WHERE case_id = ?", (result.case_id,)).fetchone()
-        if existing is None:
-            conn.execute(
-                """
-                INSERT INTO cases
-                (case_id, created_at, original_text, predicted_label, confidence, risk_level, risk_score,
-                 result_json, stored_raw_text, expires_at, model_version)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (result.case_id,) + values[:-1],
-            )
+        transaction_now = datetime.now(timezone.utc)
+        _initialize_database(conn, retention_days, transaction_now)
+        if expires_at_value <= transaction_now:
+            expired = True
         else:
-            conn.execute(
-                """
-                UPDATE cases SET created_at = ?, original_text = ?, predicted_label = ?, confidence = ?,
-                risk_level = ?, risk_score = ?, result_json = ?, stored_raw_text = ?, expires_at = ?,
-                model_version = ? WHERE case_id = ?
-                """,
-                values,
-            )
-            conn.execute("DELETE FROM case_entities WHERE case_id = ?", (result.case_id,))
+            existing = conn.execute("SELECT 1 FROM cases WHERE case_id = ?", (result.case_id,)).fetchone()
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO cases
+                    (case_id, created_at, original_text, predicted_label, confidence, risk_level, risk_score,
+                     result_json, stored_raw_text, expires_at, model_version)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (result.case_id,) + values[:-1],
+                )
+            else:
+                conn.execute(
+                    """
+                    UPDATE cases SET created_at = ?, original_text = ?, predicted_label = ?, confidence = ?,
+                    risk_level = ?, risk_score = ?, result_json = ?, stored_raw_text = ?, expires_at = ?,
+                    model_version = ? WHERE case_id = ?
+                    """,
+                    values,
+                )
+                conn.execute("DELETE FROM case_entities WHERE case_id = ?", (result.case_id,))
 
-        seen_entities = set()
-        for entity in result.entities:
-            try:
-                entity_id = stable_entity_id(entity.type, entity.value, hmac_secret)
-                masked_value = mask_entity(entity.type, entity.value)
-            except ValueError:
-                continue
-            normalized_type = entity.type.strip().casefold()
-            entity_key = (normalized_type, entity_id)
-            if entity_key in seen_entities:
-                continue
-            seen_entities.add(entity_key)
-            conn.execute(
-                """
-                INSERT INTO case_entities (case_id, entity_type, entity_id, masked_value)
-                VALUES (?, ?, ?, ?)
-                """,
-                (result.case_id, normalized_type, entity_id, masked_value),
-            )
+            seen_entities = set()
+            for entity in result.entities:
+                try:
+                    entity_id = stable_entity_id(entity.type, entity.value, hmac_secret)
+                    masked_value = mask_entity(entity.type, entity.value)
+                except ValueError:
+                    continue
+                normalized_type = entity.type.strip().casefold()
+                entity_key = (normalized_type, entity_id)
+                if entity_key in seen_entities:
+                    continue
+                seen_entities.add(entity_key)
+                conn.execute(
+                    """
+                    INSERT INTO case_entities (case_id, entity_type, entity_id, masked_value)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (result.case_id, normalized_type, entity_id, masked_value),
+                )
+    if expired:
+        raise ExpiredCaseError("Case retention period has already expired")
 
 def purge_expired(
     path: Optional[Path] = None,

@@ -127,6 +127,20 @@ def test_saved_cases_persist_raw_result_only_in_case_record_and_masked_entities(
     assert {row[0] for row in entities} == {"phone", "upi_id", "email", "url"}
 
 
+def test_save_rejects_an_already_expired_result_without_persisting_raw_data(tmp_path):
+    store = _store(tmp_path, retention_days=1)
+    store.save(_result("stale", datetime(2099, 1, 1, tzinfo=timezone.utc)))
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        conn.execute("UPDATE cases SET expires_at = ? WHERE case_id = ?", ("2000-01-01T00:00:00+00:00", "stale"))
+
+    with pytest.raises(ValueError, match="already expired"):
+        store.save(_result("expired", datetime(2000, 1, 1, tzinfo=timezone.utc)))
+
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        assert conn.execute("SELECT COUNT(*) FROM cases").fetchone()[0] == 0
+        assert conn.execute("SELECT COUNT(*) FROM case_entities").fetchone()[0] == 0
+
+
 @pytest.mark.parametrize(
     ("duplicate_entities", "expected_mask"),
     [
@@ -167,15 +181,16 @@ def test_save_deduplicates_entities_with_the_same_canonical_identity(
 def test_save_rolls_back_case_when_an_entity_insert_fails(tmp_path):
     store = _store(tmp_path)
     store.initialize()
-    store.save(_result("expired", datetime(2000, 1, 1, tzinfo=timezone.utc)))
+    store.save(_result("expired", datetime(2099, 1, 1, tzinfo=timezone.utc)))
     with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        conn.execute("UPDATE cases SET expires_at = ? WHERE case_id = ?", ("2000-01-01T00:00:00+00:00", "expired"))
         conn.execute(
             """CREATE TRIGGER reject_entities BEFORE INSERT ON case_entities
             WHEN NEW.entity_type = 'email' BEGIN SELECT RAISE(ABORT, 'reject'); END"""
         )
 
     with pytest.raises(sqlite3.IntegrityError):
-        store.save(_result())
+        store.save(_result(created_at=datetime(2099, 1, 1, tzinfo=timezone.utc)))
 
     with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
         assert conn.execute("SELECT case_id FROM cases").fetchall() == [("expired",)]
@@ -197,9 +212,11 @@ def test_delete_clear_and_case_id_sql_injection_are_safe(tmp_path):
 
 def test_save_purges_expired_raw_cases_without_a_list_or_get_request(tmp_path):
     store = _store(tmp_path, retention_days=1)
-    store.save(_result("expired", datetime(2000, 1, 1, tzinfo=timezone.utc)))
+    store.save(_result("expired", datetime(2099, 1, 1, tzinfo=timezone.utc)))
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        conn.execute("UPDATE cases SET expires_at = ? WHERE case_id = ?", ("2000-01-01T00:00:00+00:00", "expired"))
 
-    store.save(_result("active", datetime(2099, 1, 1, tzinfo=timezone.utc)))
+    store.save(_result("active", datetime(2099, 1, 2, tzinfo=timezone.utc)))
 
     with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
         case_ids = [row[0] for row in conn.execute("SELECT case_id FROM cases ORDER BY case_id")]

@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
-from fraudlens.analysis_service import AnalysisInput, create_analysis_service
+from fraudlens.analysis_service import AnalysisInput, AnalysisService, DatabaseCaseStore, create_analysis_service
 from fraudlens.prediction import Prediction
 from fraudlens.prediction import PredictorRegistry
 from fraudlens.settings import Settings
@@ -96,6 +96,29 @@ def test_service_returns_a_generic_storage_warning_when_persistence_fails():
     assert result.metadata["stored"] is False
     assert result.metadata["storage_warning"] == "Case storage was unavailable."
     assert "/private" not in result.metadata["storage_warning"]
+
+
+def test_service_reports_expired_case_storage_as_a_generic_failure(tmp_path):
+    store = DatabaseCaseStore(
+        Path(tmp_path) / "expired.sqlite3",
+        hmac_secret="test-secret",
+        retention_days=1,
+    )
+    service = AnalysisService(
+        predictor=_StubPredictor(
+            Prediction("kyc_scam", 0.91, "tfidf_calibrated", "tfidf-v1", False)
+        ),
+        store=store,
+        clock=lambda: datetime(2000, 1, 1, tzinfo=timezone.utc),
+        id_generator=lambda: "expired-case",
+    )
+
+    result = service.analyze(AnalysisInput(text="Urgent KYC update", store_case=True))
+
+    assert result.metadata["stored"] is False
+    assert result.metadata["storage_warning"] == "Case storage was unavailable."
+    assert "expired" not in result.metadata["storage_warning"].casefold()
+    assert store.list_cases(10) == []
 
 
 def test_legitimate_prediction_does_not_create_classifier_fraud_risk():
