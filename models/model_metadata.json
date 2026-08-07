@@ -1,0 +1,430 @@
+{
+  "backend": "tfidf",
+  "calibration": {
+    "cv": 3,
+    "method": "sigmoid",
+    "threshold_objective": "maximise correct-minus-incorrect coverage",
+    "threshold_selected_on": "validation",
+    "training_only": true
+  },
+  "dataset_filename": "phase2_dataset.csv",
+  "dataset_rows": 64,
+  "dataset_sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816",
+  "evaluation": {
+    "frozen_test_split": true,
+    "test": {
+      "abstention_rate": 0.125,
+      "accepted_accuracy": 0.5714285714285714,
+      "classification_report": {
+        "accuracy": 0.5,
+        "courier_scam": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "digital_arrest": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "fake_job": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "investment_scam": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "kyc_scam": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "loan_scam": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "macro avg": {
+          "f1-score": 0.5,
+          "precision": 0.5,
+          "recall": 0.5,
+          "support": 8.0
+        },
+        "otp_phishing": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "upi_refund_scam": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "weighted avg": {
+          "f1-score": 0.5,
+          "precision": 0.5,
+          "recall": 0.5,
+          "support": 8.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "coverage": 0.875,
+      "macro_f1_all_predictions": 0.5,
+      "overall_accuracy_with_abstentions": 0.5,
+      "rows": 8
+    },
+    "validation": {
+      "abstention_rate": 0.25,
+      "accepted_accuracy": 0.6666666666666666,
+      "classification_report": {
+        "accuracy": 0.625,
+        "courier_scam": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "digital_arrest": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "fake_job": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "investment_scam": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "kyc_scam": {
+          "f1-score": 0.5,
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "loan_scam": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "macro avg": {
+          "f1-score": 0.5625,
+          "precision": 0.5416666666666666,
+          "recall": 0.625,
+          "support": 8.0
+        },
+        "otp_phishing": {
+          "f1-score": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 1.0
+        },
+        "upi_refund_scam": {
+          "f1-score": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 1.0
+        },
+        "weighted avg": {
+          "f1-score": 0.5625,
+          "precision": 0.5416666666666666,
+          "recall": 0.625,
+          "support": 8.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "coverage": 0.75,
+      "macro_f1_all_predictions": 0.5625,
+      "overall_accuracy_with_abstentions": 0.5,
+      "rows": 8
+    }
+  },
+  "marker_enhancement_selected": false,
+  "missing_labels": [
+    "legitimate"
+  ],
+  "model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
+  "phase2_target_met": false,
+  "phase2_target_per_label": 200,
+  "pipeline_code_sha256": "cb78757b5ccd0599abf7e15375ba1b47809f6beff3d25f932684303497729dbd",
+  "pipeline_code_sources": [
+    "model_training.py",
+    "preprocessing.py"
+  ],
+  "present_labels": [
+    "courier_scam",
+    "digital_arrest",
+    "fake_job",
+    "investment_scam",
+    "kyc_scam",
+    "loan_scam",
+    "otp_phishing",
+    "upi_refund_scam"
+  ],
+  "runtime_versions": {
+    "joblib": "1.4.2",
+    "python": "3.11.15",
+    "sklearn": "1.5.2"
+  },
+  "split_ids": {
+    "test": [
+      7,
+      10,
+      17,
+      27,
+      33,
+      47,
+      55,
+      62
+    ],
+    "train": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      8,
+      9,
+      11,
+      12,
+      13,
+      15,
+      16,
+      18,
+      19,
+      20,
+      21,
+      22,
+      24,
+      25,
+      28,
+      29,
+      30,
+      31,
+      32,
+      34,
+      35,
+      36,
+      37,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      56,
+      57,
+      59,
+      60,
+      61,
+      63,
+      64
+    ],
+    "validation": [
+      4,
+      14,
+      23,
+      26,
+      38,
+      46,
+      54,
+      58
+    ]
+  },
+  "split_rows": {
+    "test": 8,
+    "train": 48,
+    "validation": 8
+  },
+  "target_status": "not_met; legitimate absent and bootstrap has fewer than 200 rows per label",
+  "text_representation": "raw_normalized_text",
+  "threshold": 0.38542777,
+  "training_configuration_sha256": "be839d256e7f969f0398e3bd2ab8c53e64310dd0843e25e28563da7ad7dfcee6"
+}

@@ -2,19 +2,20 @@
 
 ## Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - macOS/Linux/Windows terminal
 - Internet access for first-time package installation
 
-## Steps
+## Runtime installation
+
+Use this installation for the API, dashboard, or training command.
 
 ```bash
 cd "/Users/gautammanch/capstone-project(phase-1)"
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
 pip install -r requirements.txt
-pip install -e .
+pip install -e . --no-deps
 ```
 
 On Windows PowerShell:
@@ -23,9 +24,18 @@ On Windows PowerShell:
 cd "C:\path\to\capstone-project(phase-1)"
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install --upgrade pip
 pip install -r requirements.txt
-pip install -e .
+pip install -e . --no-deps
+```
+
+## Contributor and test installation
+
+After activating the virtual environment, contributors should install the
+development requirements, which include the runtime dependencies and `pytest`:
+
+```bash
+pip install -r requirements-dev.txt
+pip install -e . --no-deps
 ```
 
 ## Train Model
@@ -63,4 +73,3 @@ streamlit run src/fraudlens/dashboard.py
 ```bash
 pytest
 ```
-

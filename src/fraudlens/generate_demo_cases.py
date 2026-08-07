@@ -1,6 +1,6 @@
 import json
 
-from fraudlens.api import analyze_message
+from fraudlens.analysis_service import AnalysisInput, create_analysis_service
 from fraudlens.config import DEMO_CASES_DIR
 
 
@@ -20,12 +20,12 @@ def _dump(result):
 
 def main() -> None:
     DEMO_CASES_DIR.mkdir(parents=True, exist_ok=True)
+    service = create_analysis_service()
     for name, text in DEMO_CASES.items():
-        result = analyze_message(text)
+        result = service.analyze(AnalysisInput(text=text, store_case=False))
         (DEMO_CASES_DIR / f"{name}.json").write_text(json.dumps(_dump(result), indent=2), encoding="utf-8")
         print(f"wrote {name}.json")
 
 
 if __name__ == "__main__":
     main()
-

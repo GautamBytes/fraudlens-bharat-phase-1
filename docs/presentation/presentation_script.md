@@ -28,7 +28,7 @@ This slide shows the actual dashboard result. The user can paste scam text or us
 
 ## Slide 7 - Baseline Results
 
-The baseline model uses TF-IDF with Logistic Regression and transparent domain markers. On the current 64-row synthetic seed dataset, the rule-only fallback gives 0.8125 accuracy and 0.7833 macro-F1 on the 16-row test split. The hybrid baseline gives 1.0000 accuracy and 1.0000 macro-F1 on the same split. I will present this carefully as an internal synthetic benchmark, not a production accuracy claim.
+The current checked-in model is calibrated raw-normalized TF-IDF with Logistic Regression. Its frozen 8-row synthetic test result is 0.5000 overall accuracy and raw macro-F1, 87.5% coverage, 12.5% abstention, and 57.14% accepted accuracy. The bootstrap has no legitimate examples and does not meet the target dataset size, so it is not production-ready. `models/model_metadata.json` and `models/metrics.json` are the source of truth. The earlier marker-enhanced hybrid result of 1.0000 accuracy and macro-F1 on a 16-row split is a historical Phase 1 marker, superseded and not comparable to the current artifact.
 
 ## Slide 8 - Testing Evidence
 

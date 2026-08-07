@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11.15", "3.12"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --require-hashes -r requirements.lock
+          python -m pip install --no-index --no-deps -r requirements-dev.txt
+          python -m pip install -e . --no-deps
+      - name: Compile Python sources
+        run: python -m compileall -q src tests
+      - name: Verify reproducible release artifacts
+        if: matrix.python-version == '3.11.15'
+        run: |
+          artifact_tmp=$(mktemp -d)
+          python -c "from pathlib import Path; from fraudlens.model_training import train_baseline; train_baseline(artifact_dir=Path('$artifact_tmp'))"
+          for artifact in \
+            baseline_classifier.joblib \
+            vectorizer.joblib \
+            label_encoder.joblib \
+            metrics.json \
+            model_metadata.json \
+            artifact_manifest.json
+          do
+            cmp "$artifact_tmp/$artifact" "models/$artifact"
+          done
+      - name: Run tests
+        run: python -m pytest
+      - name: Validate dataset and provenance contract
+        run: >-
+          python -c "from fraudlens.data_contract import load_phase2_dataset;
+          load_phase2_dataset('data/samples/phase2_dataset.csv', minimum_per_label=0)"
+      - name: Verify deterministic evaluation evidence
+        if: matrix.python-version == '3.11.15'
+        run: |
+          evaluation_tmp=$(mktemp -d)
+          python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output "$evaluation_tmp/first"
+          python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output "$evaluation_tmp/second"
+          cmp "$evaluation_tmp/first/evaluation.json" "$evaluation_tmp/second/evaluation.json"
+          cmp "$evaluation_tmp/first/summary.txt" "$evaluation_tmp/second/summary.txt"
+          cmp "$evaluation_tmp/first/evaluation.json" outputs/phase2/evaluation.json
+          cmp "$evaluation_tmp/first/summary.txt" outputs/phase2/summary.txt
+          git diff --exit-code -- outputs/phase2

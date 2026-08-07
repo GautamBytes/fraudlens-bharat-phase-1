@@ -9,7 +9,7 @@ The key rule is fairness: do not compare a small synthetic Phase 1 split directl
 ## Comparison Questions
 
 1. Is the Phase 1 prototype better than the initial manual/no-system state?
-2. Is the hybrid baseline better than the rule-only fallback on the same seed split?
+2. How does the selected calibrated baseline compare with the canonical rule fallback on the same frozen split?
 3. How does Phase 1 compare with specialized published approaches?
 4. Which metrics should be improved in Phase 2?
 
@@ -19,7 +19,7 @@ The key rule is fairness: do not compare a small synthetic Phase 1 split directl
 |---|---|---|
 | Input handling | Unstructured pasted text only in notes | Pasted text accepted through API and dashboard |
 | Fraud taxonomy | No reproducible taxonomy | 8 fraud classes with labeling guide |
-| Classification | Manual guesswork | Hybrid TF-IDF + Logistic Regression classifier |
+| Classification | Manual guesswork | Calibrated raw-normalized TF-IDF + Logistic Regression with explicit abstention |
 | Evidence extraction | Manual reading | Regex extraction for phone, URL, UPI ID, email, money, OTP-like code, urgency, threat |
 | URL risk | Manual inspection | Non-HTTPS, shortener, IP-host, suspicious keyword, and hyphenated-domain checks |
 | Risk level | Not measured | Low/medium/high score with visible reasons |
@@ -28,16 +28,20 @@ The key rule is fairness: do not compare a small synthetic Phase 1 split directl
 | Reproducibility | Not reproducible | Seed dataset, tests, demo JSON, screenshots, model artifacts |
 | Safety | Undefined | Synthetic data, no real PII requirement, no automatic complaint submission |
 
-## Rule-Only Vs Hybrid Baseline
+## Historical Rule-Only Vs Marker-Enhanced Hybrid Baseline
 
-Both rows below use the same 64-row synthetic seed dataset and the same 16-row stratified test split.
+Both rows below use the earlier 64-row synthetic seed dataset and the same 16-row stratified test split. This is an archival Phase 1 comparison, not the current model result.
 
 | Model | Accuracy | Macro Precision | Macro Recall | Macro F1 | Notes |
 |---|---:|---:|---:|---:|---|
 | Rule-only fallback | 0.8125 | 0.7917 | 0.8125 | 0.7833 | Useful as a safety fallback but misses some category phrasing |
-| Phase 1 hybrid baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 | TF-IDF + Logistic Regression with transparent domain markers |
+| Historical marker-enhanced Phase 1 hybrid baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 | Superseded TF-IDF + Logistic Regression with transparent domain markers |
 
-The improvement is caused by the model learning from text features while still receiving explainable domain signals. The implementation uses scikit-learn tooling for the reproducible TF-IDF and Logistic Regression baseline [12].
+The historical improvement was caused by the model learning from text features while receiving explainable domain signals. It must not be compared with the current calibrated raw-normalized artifact, which uses frozen 48/8/8 splits. The implementation uses scikit-learn tooling for the reproducible TF-IDF and Logistic Regression baseline [12].
+
+## Current Calibrated Artifact
+
+The current source of truth is `models/model_metadata.json` and `models/metrics.json`. Its frozen 8-row synthetic test result is 0.5000 overall accuracy and raw macro-F1, 87.5% coverage, 12.5% abstention, and 57.14% accepted accuracy. The bootstrap has no legitimate examples, does not meet the 200-examples-per-label target, and is not production-ready.
 
 The result should be described as an internal Phase 1 benchmark, not proof of real-world generalization.
 
@@ -49,7 +53,7 @@ The revised preprocessing now avoids treating the Hinglish word "fir" as a polic
 
 It also adds stronger transparent markers for parcel-number/drug-detection evidence and coercive FIR/video/payment evidence.
 
-After retraining, the same split reaches 1.0000 accuracy and 1.0000 macro-F1.
+Historically, after marker enhancement, the same 16-row split reached 1.0000 accuracy and 1.0000 macro-F1. That superseded historical result is not comparable to the current calibrated artifact.
 
 ## Comparison With Published Hinglish Transformer Work
 
@@ -57,7 +61,7 @@ Rani et al. report HingRoBERTa at 74.41 percent accuracy and 71.49 percent F1 on
 
 That is a larger and more realistic classification benchmark than this Phase 1 synthetic split.
 
-FraudLens Bharat should not claim better general model performance from its 1.0000 internal score.
+FraudLens Bharat should not claim better general model performance from its historical 1.0000 internal score or its current synthetic bootstrap metrics.
 
 The fair comparison is:
 
@@ -65,8 +69,8 @@ The fair comparison is:
 |---|---|---|
 | Primary goal | Complaint category classification | End-to-end text triage prototype |
 | Dataset | I4C CyberGuard AI Hackathon data | 64-row synthetic seed dataset |
-| Best cited metric | 74.41 percent accuracy, 71.49 percent F1 | 1.0000 internal accuracy/F1 on 16-row synthetic test split |
-| Model type | Hinglish-adapted transformers | TF-IDF + Logistic Regression with transparent markers |
+| Best cited metric | 74.41 percent accuracy, 71.49 percent F1 | Historical marker-enhanced 1.0000 internal accuracy/F1 on 16-row synthetic test split; superseded |
+| Model type | Hinglish-adapted transformers | Current calibrated raw-normalized TF-IDF; historical markers superseded |
 | Explainability | Not the main contribution | Visible entities, risk signals, complaint draft |
 | Deployment artifact | Django REST/frontend tool | FastAPI, Streamlit, SQLite |
 | Best use in this project | Phase 2 benchmark target | Phase 1 baseline and workflow proof |
@@ -97,7 +101,7 @@ The fair claim is that Phase 1 creates graph-ready evidence, while Phase 2 shoul
 
 FraudLens Bharat Phase 1 is better than the initial manual baseline because it creates structured, explainable, reproducible triage output.
 
-It is better than the rule-only fallback on the current seed split because the hybrid model improves measured accuracy and macro-F1.
+The historical marker-enhanced model outperformed the rule-only fallback on its 16-row synthetic split. The current calibrated bootstrap reports 0.5000 overall accuracy/raw macro-F1, 87.5% coverage, 12.5% abstention, and 57.14% accepted accuracy on a separate frozen 8-row split; it is not comparable and is not production-ready.
 
 It is not yet better than mature transformer or graph systems on real-world external benchmarks.
 

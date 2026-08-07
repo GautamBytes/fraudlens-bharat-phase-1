@@ -4,27 +4,30 @@ FraudLens Bharat is a pure-software cyber-fraud triage prototype for Indian user
 
 The project is designed for my capstone project submission. It includes implementation code, dataset scaffolding, testing evidence, documentation, references, and demo cases aligned with the provided capstone format and rubric.
 
-## Current Phase 1 Evidence
+## Current Phase 2 Evaluation Evidence
 
-- Seed dataset: 64 synthetic, manually reviewed examples across 8 fraud classes
-- Rule-only fallback: 0.8125 accuracy and 0.7833 macro-F1 on the current 16-row synthetic test split
-- Hybrid baseline: 1.0000 accuracy and 1.0000 macro-F1 on the same synthetic test split
+- Dataset: 64 synthetic, manually reviewed bootstrap examples across 8 fraud classes; no `legitimate` rows are present
+- Selected runtime candidate: calibrated raw-normalized TF-IDF + Logistic Regression, fit and calibrated only on the frozen 48-row train split and thresholded on the 8-row validation split
+- Frozen 8-row synthetic test evidence is committed in `outputs/phase2/evaluation.json` and `outputs/phase2/summary.txt`; it compares rule-only, raw TF-IDF, marker TF-IDF ablation, and calibrated TF-IDF without using the test split for fitting or threshold selection
+- Rule-only evidence calls the canonical runtime fallback for every frozen row. Its runtime acceptance is `label != unknown`; it does not receive an evaluator-tuned threshold or calibration score.
+- The Phase 2 target is not met: the bootstrap is below 200 examples per label and lacks the `legitimate` label
+- Rule fallback: used only if calibrated artifacts are unavailable or corrupt, and abstains on weak generic keyword matches
 - Interfaces: FastAPI backend and Streamlit dashboard
-- Evidence outputs: metrics JSON, classification report, confusion matrix, demo cases, screenshots, and pitch deck
+- Evidence outputs: calibrated artifact metadata, metrics JSON, demo cases, screenshots, and pitch deck
 
-The 1.0000 score is an internal synthetic benchmark, not a production accuracy claim.
+These synthetic bootstrap results are not a production accuracy claim.
 
 ## Phase 1 Scope
 
 - Hinglish/Hindi/English scam text analysis
 - Eight fraud classes: KYC scam, digital arrest, fake job, investment scam, loan scam, courier scam, UPI refund scam, OTP/phishing scam
-- TF-IDF + Logistic Regression baseline classifier
-- Rule-based fallback classifier for robust demos
+- Calibrated TF-IDF + Logistic Regression classifier with an abstention threshold
+- Rule-based fallback only when model artifacts cannot be loaded
 - Entity extraction for phone numbers, UPI IDs, URLs, emails, money amounts, OTP-like codes, urgency phrases, and threat phrases
 - URL and identifier risk scoring
 - FastAPI backend
 - Streamlit dashboard
-- SQLite case history
+- Optional SQLite case history. API and compatibility callers default to off unless `FRAUDLENS_STORE_CASES=true` is configured; the dashboard always requires explicit consent.
 - Unit/API tests
 - Metrics and demo case outputs
 
@@ -32,13 +35,28 @@ OCR, transformer fine-tuning, graph analytics, and screenshot analysis are inten
 
 ## Setup
 
+FraudLens Bharat requires Python 3.10 or later.
+
+### Runtime installation
+
+Use the runtime requirements to run the API, dashboard, or training command:
+
 ```bash
 cd "/Users/gautammanch/capstone-project(phase-1)"
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
 pip install -r requirements.txt
-pip install -e .
+pip install -e . --no-deps
+```
+
+### Contributor and test installation
+
+Contributors should install the development requirements, which include the
+runtime dependencies and `pytest`:
+
+```bash
+pip install -r requirements-dev.txt
+pip install -e . --no-deps
 ```
 
 ## Train Baseline Model
@@ -53,8 +71,7 @@ This creates:
 - `models/vectorizer.joblib`
 - `models/label_encoder.joblib`
 - `models/metrics.json`
-- `outputs/metrics/classification_report.txt`
-- `outputs/metrics/confusion_matrix.png`
+- `models/model_metadata.json`
 
 ## Run API
 
@@ -68,17 +85,46 @@ Open the interactive API documentation at:
 http://127.0.0.1:8000/docs
 ```
 
+`POST /analyze` accepts an optional `store_case` boolean. Omitting it uses the
+safe API runtime default (`false` unless `FRAUDLENS_STORE_CASES=true`). The
+compatibility helper follows the same setting. Responses include prediction
+provenance, abstention status, and whether the case was actually stored.
+
+When storage is enabled, the full analysis record is retained only for the
+configured `FRAUDLENS_RETENTION_DAYS` period. Case-to-case entity links use
+secret-keyed opaque IDs and display masks; raw phone numbers, UPI IDs, email
+addresses, and URLs are never written to the entity-link table. During
+migration, legacy records with a valid creation timestamp receive the configured
+retention deadline and expired records are purged. Rows with malformed retention
+timestamps are deleted rather than retaining raw text indefinitely.
+
 ## Run Dashboard
 
 ```bash
 streamlit run src/fraudlens/dashboard.py
 ```
 
+The dashboard's “Store this analysis locally” checkbox is always off by default,
+even when the API/compatibility storage setting is enabled.
+
 ## Run Tests
 
 ```bash
 pytest
 ```
+
+## Reproduce Phase 2 Evaluation
+
+```bash
+python -m fraudlens.evaluation \
+  --dataset data/samples/phase2_dataset.csv \
+  --output outputs/phase2
+```
+
+This writes deterministic `evaluation.json` and a readable `summary.txt`.
+The report intentionally omits wall-clock timings, which are not stable enough
+for byte-for-byte reproducible evidence. It records that the 64-row synthetic
+bootstrap is missing `legitimate` and does not meet the 200-rows-per-label target.
 
 ## Demo Cases
 

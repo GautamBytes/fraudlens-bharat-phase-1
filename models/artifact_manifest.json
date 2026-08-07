@@ -1,0 +1,38 @@
+{
+  "artifacts": {
+    "baseline_classifier.joblib": {
+      "sha256": "f7ce80d5e78d763b7e8a19164b854ad762bb28a7a20923d4da5fb4e260b9f367"
+    },
+    "label_encoder.joblib": {
+      "sha256": "0b6b176ea72252a9c10ef9fbdddcfa1266ffa0e029227ccb93ace1ce83577ccd"
+    },
+    "metrics.json": {
+      "sha256": "f8b3530b3c14c0df73bb7d59cd6527e5711bc9f1830242e80025604e0af7290f"
+    },
+    "model_metadata.json": {
+      "sha256": "62f9f9a62addae696d07bb7d8b6bbc3a2ed33438a9580d9e65ff6a9c0a6ecb20"
+    },
+    "vectorizer.joblib": {
+      "sha256": "30c177ef7e19efbea9a89b35f82d4e699ad22efb3a3a872d7223c1df7dd4cbb3"
+    }
+  },
+  "dataset": {
+    "filename": "phase2_dataset.csv",
+    "rows": 64,
+    "sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816"
+  },
+  "model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
+  "pipeline_code_sha256": "cb78757b5ccd0599abf7e15375ba1b47809f6beff3d25f932684303497729dbd",
+  "pipeline_code_sources": [
+    "model_training.py",
+    "preprocessing.py"
+  ],
+  "runtime_versions": {
+    "joblib": "1.4.2",
+    "python": "3.11.15",
+    "sklearn": "1.5.2"
+  },
+  "schema_version": 2,
+  "training_configuration_sha256": "be839d256e7f969f0398e3bd2ab8c53e64310dd0843e25e28563da7ad7dfcee6",
+  "trust_anchor": "tracked-release-artifact-manifest"
+}

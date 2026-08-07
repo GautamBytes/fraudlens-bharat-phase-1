@@ -1,164 +1,170 @@
 {
   "dataset_rows": 64,
-  "train_rows": 48,
-  "test_rows": 16,
-  "accuracy": 1.0,
-  "macro_f1": 1.0,
-  "macro_precision": 1.0,
-  "macro_recall": 1.0,
-  "per_class": {
-    "courier_scam": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "digital_arrest": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "fake_job": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "investment_scam": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "kyc_scam": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "loan_scam": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "otp_phishing": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "upi_refund_scam": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 2.0
-    },
-    "accuracy": 1.0,
-    "macro avg": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 16.0
-    },
-    "weighted avg": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1-score": 1.0,
-      "support": 16.0
-    }
-  },
-  "labels": [
-    "courier_scam",
-    "digital_arrest",
-    "fake_job",
-    "investment_scam",
-    "kyc_scam",
-    "loan_scam",
-    "otp_phishing",
-    "upi_refund_scam"
+  "dataset_sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816",
+  "model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
+  "pipeline_code_sha256": "cb78757b5ccd0599abf7e15375ba1b47809f6beff3d25f932684303497729dbd",
+  "pipeline_code_sources": [
+    "model_training.py",
+    "preprocessing.py"
   ],
-  "confusion_matrix": [
-    [
-      2,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
+  "split_rows": {
+    "test": 8,
+    "train": 48,
+    "validation": 8
+  },
+  "test": {
+    "abstention_rate": 0.125,
+    "accepted_accuracy": 0.5714285714285714,
+    "classification_report": {
+      "accuracy": 0.5,
+      "courier_scam": {
+        "f1-score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 1.0
+      },
+      "digital_arrest": {
+        "f1-score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 1.0
+      },
+      "fake_job": {
+        "f1-score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 1.0
+      },
+      "investment_scam": {
+        "f1-score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 1.0
+      },
+      "kyc_scam": {
+        "f1-score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 1.0
+      },
+      "loan_scam": {
+        "f1-score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 1.0
+      },
+      "macro avg": {
+        "f1-score": 0.5,
+        "precision": 0.5,
+        "recall": 0.5,
+        "support": 8.0
+      },
+      "otp_phishing": {
+        "f1-score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 1.0
+      },
+      "upi_refund_scam": {
+        "f1-score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 1.0
+      },
+      "weighted avg": {
+        "f1-score": 0.5,
+        "precision": 0.5,
+        "recall": 0.5,
+        "support": 8.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
     ],
-    [
-      0,
-      2,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      2,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      2
-    ]
-  ]
+    "coverage": 0.875,
+    "macro_f1_all_predictions": 0.5,
+    "overall_accuracy_with_abstentions": 0.5,
+    "rows": 8
+  },
+  "threshold": 0.38542777,
+  "training_configuration_sha256": "be839d256e7f969f0398e3bd2ab8c53e64310dd0843e25e28563da7ad7dfcee6"
 }

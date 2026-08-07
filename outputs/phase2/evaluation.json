@@ -1,0 +1,2419 @@
+{
+  "classifiers": {
+    "calibrated_tfidf": {
+      "calibration": "sigmoid_cv_3_train_only",
+      "fit_split": "train",
+      "kind": "tfidf_logistic_regression",
+      "selection_status": "selected",
+      "split_rows": {
+        "test": 8,
+        "train": 48,
+        "validation": 8
+      },
+      "test": {
+        "abstention_rate": 0.125,
+        "accepted_accuracy": 0.57142857,
+        "accuracy": 0.5,
+        "confusion_matrix": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.875,
+        "expected_calibration_error": 0.37701561,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.5,
+        "macro_precision": 0.5,
+        "macro_recall": 0.5,
+        "per_class": {
+          "courier_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.5,
+          "macro_precision": 0.5,
+          "macro_recall": 0.5,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
+        "rows": 8,
+        "split": "test"
+      },
+      "text_representation": "raw_normalized_text",
+      "threshold": 0.38542777,
+      "threshold_selected_on": "validation",
+      "validation": {
+        "abstention_rate": 0.25,
+        "accepted_accuracy": 0.66666667,
+        "accuracy": 0.5,
+        "confusion_matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.75,
+        "expected_calibration_error": 0.22388599,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.4375,
+        "macro_precision": 0.41666667,
+        "macro_recall": 0.5,
+        "per_class": {
+          "courier_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 0.5,
+            "precision": 0.33333333,
+            "recall": 1.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.625,
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.5625,
+          "macro_precision": 0.54166667,
+          "macro_recall": 0.625,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.5,
+              "precision": 0.33333333,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
+        "rows": 8,
+        "split": "validation"
+      }
+    },
+    "marker_tfidf": {
+      "calibration": "none",
+      "fit_split": "train",
+      "kind": "tfidf_logistic_regression",
+      "selection_status": "ablation_not_selected",
+      "split_rows": {
+        "test": 8,
+        "train": 48,
+        "validation": 8
+      },
+      "test": {
+        "abstention_rate": 0.375,
+        "accepted_accuracy": 1.0,
+        "accuracy": 0.625,
+        "confusion_matrix": [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.625,
+        "expected_calibration_error": 0.64028375,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.625,
+        "macro_precision": 0.625,
+        "macro_recall": 0.625,
+        "per_class": {
+          "courier_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.875,
+          "confusion_matrix": [
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.83333333,
+          "macro_precision": 0.8125,
+          "macro_recall": 0.875,
+          "per_class": {
+            "courier_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
+        "rows": 8,
+        "split": "test"
+      },
+      "text_representation": "raw_normalized_text_plus_markers",
+      "threshold": 0.19901497,
+      "threshold_selected_on": "validation",
+      "validation": {
+        "abstention_rate": 0.25,
+        "accepted_accuracy": 1.0,
+        "accuracy": 0.75,
+        "confusion_matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.75,
+        "expected_calibration_error": 0.51582568,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.75,
+        "macro_precision": 0.75,
+        "macro_recall": 0.75,
+        "per_class": {
+          "courier_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.75,
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.66666667,
+          "macro_precision": 0.625,
+          "macro_recall": 0.75,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
+        "rows": 8,
+        "split": "validation"
+      }
+    },
+    "raw_tfidf": {
+      "calibration": "none",
+      "fit_split": "train",
+      "kind": "tfidf_logistic_regression",
+      "selection_status": "baseline_not_selected",
+      "split_rows": {
+        "test": 8,
+        "train": 48,
+        "validation": 8
+      },
+      "test": {
+        "abstention_rate": 0.0,
+        "accepted_accuracy": 0.375,
+        "accuracy": 0.375,
+        "confusion_matrix": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 1.0,
+        "expected_calibration_error": 0.2635183,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.33333333,
+        "macro_precision": 0.3125,
+        "macro_recall": 0.375,
+        "per_class": {
+          "courier_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 0.66666667,
+            "precision": 0.5,
+            "recall": 1.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.375,
+          "confusion_matrix": [
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.33333333,
+          "macro_precision": 0.3125,
+          "macro_recall": 0.375,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
+        "rows": 8,
+        "split": "test"
+      },
+      "text_representation": "raw_normalized_text",
+      "threshold": 0.14517428,
+      "threshold_selected_on": "validation",
+      "validation": {
+        "abstention_rate": 0.25,
+        "accepted_accuracy": 0.66666667,
+        "accuracy": 0.5,
+        "confusion_matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.75,
+        "expected_calibration_error": 0.46059766,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.4375,
+        "macro_precision": 0.41666667,
+        "macro_recall": 0.5,
+        "per_class": {
+          "courier_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 0.5,
+            "precision": 0.33333333,
+            "recall": 1.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.625,
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.5625,
+          "macro_precision": 0.54166667,
+          "macro_recall": 0.625,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.5,
+              "precision": 0.33333333,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
+        "rows": 8,
+        "split": "validation"
+      }
+    },
+    "rule_only": {
+      "calibration": "none; runtime rule confidence is not a calibrated probability",
+      "fit_split": "none; canonical runtime rules",
+      "kind": "canonical_runtime_keyword_rule",
+      "runtime_acceptance": "label != unknown",
+      "selection_status": "baseline_not_selected",
+      "split_rows": {
+        "test": 8,
+        "train": 48,
+        "validation": 8
+      },
+      "test": {
+        "abstention_rate": 0.75,
+        "accepted_accuracy": 1.0,
+        "accuracy": 0.25,
+        "calibration_note": "Not applicable: runtime rule confidence is not calibrated.",
+        "confusion_matrix": [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.25,
+        "expected_calibration_error": null,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.25,
+        "macro_precision": 0.25,
+        "macro_recall": 0.25,
+        "per_class": {
+          "courier_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": null,
+        "rows": 8,
+        "split": "test"
+      },
+      "text_representation": "runtime_normalized_text",
+      "threshold": null,
+      "threshold_selected_on": "not_applicable_runtime_rule",
+      "validation": {
+        "abstention_rate": 0.75,
+        "accepted_accuracy": 1.0,
+        "accuracy": 0.25,
+        "calibration_note": "Not applicable: runtime rule confidence is not calibrated.",
+        "confusion_matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "courier_scam",
+          "digital_arrest",
+          "fake_job",
+          "investment_scam",
+          "kyc_scam",
+          "loan_scam",
+          "otp_phishing",
+          "upi_refund_scam",
+          "unknown"
+        ],
+        "coverage": 0.25,
+        "expected_calibration_error": null,
+        "latency": {
+          "method": "not measured; wall-clock excluded from deterministic evidence",
+          "unit": "milliseconds_per_row",
+          "value": null
+        },
+        "macro_f1": 0.25,
+        "macro_precision": 0.25,
+        "macro_recall": 0.25,
+        "per_class": {
+          "courier_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "digital_arrest": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "fake_job": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "investment_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "kyc_scam": {
+            "f1": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "support": 1
+          },
+          "loan_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "otp_phishing": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          },
+          "upi_refund_scam": {
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "support": 1
+          }
+        },
+        "raw_prediction_metrics": null,
+        "rows": 8,
+        "split": "validation"
+      }
+    }
+  },
+  "dataset": {
+    "limitation": "Synthetic bootstrap only: legitimate is absent and no supported label has 200 rows.",
+    "missing_labels": [
+      "legitimate"
+    ],
+    "phase2_target_met": false,
+    "phase2_target_per_label": 200,
+    "present_labels": [
+      "courier_scam",
+      "digital_arrest",
+      "fake_job",
+      "investment_scam",
+      "kyc_scam",
+      "loan_scam",
+      "otp_phishing",
+      "upi_refund_scam"
+    ],
+    "rows": 64,
+    "sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816",
+    "split_rows": {
+      "test": 8,
+      "train": 48,
+      "validation": 8
+    }
+  },
+  "protocol": {
+    "latency": "Wall-clock timing is omitted so evidence bytes remain reproducible.",
+    "marker_tfidf": "ablation only; not selected for runtime use",
+    "random_seed": 42,
+    "test": "single untouched frozen evaluation",
+    "train": "fit vectorizers, models, and calibration only",
+    "validation": "select TF-IDF abstention thresholds only"
+  },
+  "schema_version": 1
+}
