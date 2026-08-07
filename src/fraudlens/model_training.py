@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import platform
 from pathlib import Path
 from typing import Dict, Iterable, Tuple
 
@@ -15,7 +16,18 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.preprocessing import LabelEncoder
 
-from fraudlens.config import ArtifactPaths, DATASET_PATH, DEFAULT_ARTIFACTS, artifact_paths
+from fraudlens.config import (
+    ARTIFACT_FILENAMES,
+    ARTIFACT_MANIFEST_VERSION,
+    ArtifactPaths,
+    DATASET_PATH,
+    DEFAULT_ARTIFACTS,
+    TRAINING_CONFIGURATION,
+    artifact_paths,
+    model_training_code_sha256,
+    release_model_version,
+    training_configuration_sha256,
+)
 from fraudlens.data_contract import PHASE2_TARGET_PER_LABEL, TRAINED_LABELS, load_phase2_dataset
 from fraudlens.preprocessing import normalize_text
 
@@ -35,6 +47,20 @@ def _dataset_sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _runtime_versions() -> Dict[str, str]:
+    import sklearn
+
+    return {
+        "python": platform.python_version(),
+        "sklearn": str(sklearn.__version__),
+        "joblib": str(joblib.__version__),
+    }
+
+
 def _split_frame(frame: pd.DataFrame, split: str) -> pd.DataFrame:
     result = frame.loc[frame["split"] == split].copy()
     if result.empty:
@@ -44,12 +70,8 @@ def _split_frame(frame: pd.DataFrame, split: str) -> pd.DataFrame:
 
 def _fit_deterministic_vectorizer(train_text: pd.Series) -> Tuple[TfidfVectorizer, object]:
     """Fix vocabulary insertion order so serialized artifacts are reproducible."""
-    options = {
-        "ngram_range": (1, 2),
-        "min_df": 1,
-        "max_features": 5000,
-        "sublinear_tf": True,
-    }
+    options = dict(TRAINING_CONFIGURATION["vectorizer"])
+    options["ngram_range"] = tuple(options["ngram_range"])
     prototype = TfidfVectorizer(**options)
     analyzer = prototype.build_analyzer()
     vocabulary_terms = sorted(
@@ -158,7 +180,9 @@ def train_baseline(
     test_probabilities = classifier.predict_proba(test_features)
 
     dataset_hash = _dataset_sha256(dataset_path)
-    model_version = "tfidf-calibrated-{}".format(dataset_hash[:12])
+    configuration_hash = training_configuration_sha256()
+    code_hash = model_training_code_sha256()
+    model_version = release_model_version(dataset_hash, configuration_hash, code_hash)
     present_labels = sorted(frame["label"].unique())
     missing_labels = sorted(TRAINED_LABELS - set(present_labels))
     target_met = all(
@@ -179,6 +203,7 @@ def train_baseline(
         "backend": backend,
         "model_version": model_version,
         "dataset_sha256": dataset_hash,
+        "dataset_filename": dataset_path.name,
         "dataset_rows": int(len(frame)),
         "split_rows": {name: int(len(split)) for name, split in splits.items()},
         "split_ids": split_ids,
@@ -193,6 +218,9 @@ def train_baseline(
         "text_representation": "raw_normalized_text",
         "marker_enhancement_selected": False,
         "threshold": threshold,
+        "training_configuration_sha256": configuration_hash,
+        "model_training_code_sha256": code_hash,
+        "runtime_versions": _runtime_versions(),
         "calibration": {
             "method": "sigmoid",
             "cv": 3,
@@ -211,6 +239,8 @@ def train_baseline(
         "split_rows": metadata["split_rows"],
         "model_version": model_version,
         "dataset_sha256": dataset_hash,
+        "training_configuration_sha256": configuration_hash,
+        "model_training_code_sha256": code_hash,
         "threshold": threshold,
         "test": test_evaluation,
     }
@@ -221,6 +251,34 @@ def train_baseline(
     joblib.dump(label_encoder, artifacts.label_encoder)
     artifacts.metadata.write_text(json.dumps(metadata, indent=2, sort_keys=True), encoding="utf-8")
     artifacts.metrics.write_text(json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8")
+    artifact_files = {
+        artifacts.model.name: artifacts.model,
+        artifacts.vectorizer.name: artifacts.vectorizer,
+        artifacts.label_encoder.name: artifacts.label_encoder,
+        artifacts.metadata.name: artifacts.metadata,
+        artifacts.metrics.name: artifacts.metrics,
+    }
+    if tuple(artifact_files) != ARTIFACT_FILENAMES:
+        raise ValueError("Artifact filenames do not match the trusted release layout")
+    # The manifest is the tracked release trust anchor. It deliberately hashes
+    # the five payload files but never itself, avoiding a circular hash.
+    manifest = {
+        "schema_version": ARTIFACT_MANIFEST_VERSION,
+        "trust_anchor": "tracked-release-artifact-manifest",
+        "artifacts": {
+            name: {"sha256": _file_sha256(path)} for name, path in artifact_files.items()
+        },
+        "dataset": {
+            "filename": dataset_path.name,
+            "sha256": dataset_hash,
+            "rows": int(len(frame)),
+        },
+        "model_version": model_version,
+        "training_configuration_sha256": configuration_hash,
+        "model_training_code_sha256": code_hash,
+        "runtime_versions": _runtime_versions(),
+    }
+    artifacts.manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
     return metrics
 
 

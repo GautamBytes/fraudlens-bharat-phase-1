@@ -11,7 +11,7 @@ from fraudlens.model_inference import predictor_registry as default_predictor_re
 from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.preprocessing import normalize_text
 from fraudlens.risk_scoring import score_risk
-from fraudlens.schemas import AnalysisResult, Entity
+from fraudlens.schemas import AnalysisResult, AnalyzeRequest, Entity
 from fraudlens.settings import Settings
 from fraudlens.url_risk import analyze_urls
 
@@ -152,7 +152,14 @@ class AnalysisService:
         self._id_generator = id_generator
 
     def analyze(self, analysis_input: AnalysisInput) -> AnalysisResult:
-        cleaned_text = normalize_text(analysis_input.text)
+        # Dashboard and compatibility callers do not pass through FastAPI, so
+        # the service owns this validation boundary as well.
+        validated_input = AnalyzeRequest.model_validate(
+            {"text": analysis_input.text, "user_notes": analysis_input.user_notes}
+        )
+        text = validated_input.text
+        user_notes = validated_input.user_notes
+        cleaned_text = normalize_text(text)
         entities = extract_entities(cleaned_text)
         urls = [entity.value for entity in entities if entity.type == "url"]
         url_signals = analyze_urls(urls)
@@ -169,14 +176,14 @@ class AnalysisService:
                 "prediction_source": prediction.source,
                 "prediction_model_version": prediction.model_version,
                 "prediction_abstained": prediction.abstained,
-                "user_notes": analysis_input.user_notes,
+                "user_notes": user_notes,
                 "stored": False,
             }
         )
         result = AnalysisResult(
             case_id=str(self._id_generator()),
             created_at=self._clock(),
-            original_text=analysis_input.text,
+            original_text=text,
             cleaned_text=cleaned_text,
             predicted_label=prediction.label,
             confidence=prediction.confidence,
@@ -185,7 +192,7 @@ class AnalysisService:
             entities=entities,
             risk_signals=risk_signals,
             explanation=explanation,
-            complaint_draft=build_complaint_draft(prediction.label, risk_level, entities, analysis_input.text),
+            complaint_draft=build_complaint_draft(prediction.label, risk_level, entities, text),
             metadata=metadata,
         )
         if analysis_input.store_case and self._store is not None:

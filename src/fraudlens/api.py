@@ -134,7 +134,13 @@ def create_app(
         return result
 
     @application.delete("/cases/{case_id}")
-    def delete_case(case_id: str, request: Request) -> dict:
+    def delete_case(
+        case_id: str,
+        request: Request,
+        confirm: bool = Query(default=False),
+    ) -> dict:
+        if not confirm:
+            raise HTTPException(status_code=400, detail="Explicit confirmation is required")
         try:
             deleted = request.app.state.case_store.delete(case_id)
         except Exception:

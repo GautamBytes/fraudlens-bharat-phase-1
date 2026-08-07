@@ -1,7 +1,8 @@
 {
   "dataset_rows": 64,
-  "dataset_sha256": "52a06466538f5e14a509c075b9bfd112cd0be2ef99df9b81ba1da5aa5783dfcc",
-  "model_version": "tfidf-calibrated-52a06466538f",
+  "dataset_sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816",
+  "model_training_code_sha256": "e5d8cba62891a6fce274778f810bfbd87b49c49110c411fd26d39694d0ef6167",
+  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-e5d8cba62891",
   "split_rows": {
     "test": 8,
     "train": 48,
@@ -160,5 +161,6 @@
     "overall_accuracy_with_abstentions": 0.5,
     "rows": 8
   },
-  "threshold": 0.38542777
+  "threshold": 0.38542777,
+  "training_configuration_sha256": "7ac6262ca9be61754a90e875a101dbc2e9eae5f38ca79e7cde5a3837e512cc16"
 }

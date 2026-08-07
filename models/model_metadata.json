@@ -7,8 +7,9 @@
     "threshold_selected_on": "validation",
     "training_only": true
   },
+  "dataset_filename": "phase2_dataset.csv",
   "dataset_rows": 64,
-  "dataset_sha256": "52a06466538f5e14a509c075b9bfd112cd0be2ef99df9b81ba1da5aa5783dfcc",
+  "dataset_sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816",
   "evaluation": {
     "frozen_test_split": true,
     "test": {
@@ -322,7 +323,8 @@
   "missing_labels": [
     "legitimate"
   ],
-  "model_version": "tfidf-calibrated-52a06466538f",
+  "model_training_code_sha256": "e5d8cba62891a6fce274778f810bfbd87b49c49110c411fd26d39694d0ef6167",
+  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-e5d8cba62891",
   "phase2_target_met": false,
   "phase2_target_per_label": 200,
   "present_labels": [
@@ -335,6 +337,11 @@
     "otp_phishing",
     "upi_refund_scam"
   ],
+  "runtime_versions": {
+    "joblib": "1.4.2",
+    "python": "3.11.14",
+    "sklearn": "1.5.2"
+  },
   "split_ids": {
     "test": [
       7,
@@ -414,5 +421,6 @@
   },
   "target_status": "not_met; legitimate absent and bootstrap has fewer than 200 rows per label",
   "text_representation": "raw_normalized_text",
-  "threshold": 0.38542777
+  "threshold": 0.38542777,
+  "training_configuration_sha256": "7ac6262ca9be61754a90e875a101dbc2e9eae5f38ca79e7cde5a3837e512cc16"
 }

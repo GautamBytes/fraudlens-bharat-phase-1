@@ -327,7 +327,7 @@ def test_analyze_message_uses_the_settings_default_when_storage_is_omitted(monke
 
 def test_create_app_rejects_an_unregistered_configured_backend(tmp_path):
     settings = Settings(
-        model_backend="muril",
+        model_backend="unsupported",
         database_path=Path(tmp_path) / "cases.sqlite3",
         hmac_secret="test-secret",
         retention_days=30,
@@ -345,9 +345,12 @@ def test_delete_case_returns_success_once_then_not_found():
     _, test_client = _client(store=store)
 
     with test_client:
-        deleted = test_client.delete("/cases/case-1")
-        missing = test_client.delete("/cases/case-1")
+        refused = test_client.delete("/cases/case-1")
+        deleted = test_client.delete("/cases/case-1", params={"confirm": "true"})
+        missing = test_client.delete("/cases/case-1", params={"confirm": "true"})
 
+    assert refused.status_code == 400
+    assert refused.json() == {"detail": "Explicit confirmation is required"}
     assert deleted.status_code == 200
     assert deleted.json() == {"deleted": True, "case_id": "case-1"}
     assert missing.status_code == 404
@@ -375,7 +378,7 @@ def test_delete_endpoints_hide_storage_error_details():
     _, test_client = _client(store=store)
 
     with test_client:
-        one = test_client.delete("/cases/case-1")
+        one = test_client.delete("/cases/case-1", params={"confirm": "true"})
         all_cases = test_client.delete("/cases", params={"confirm": "true"})
 
     assert one.status_code == 500

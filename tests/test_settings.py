@@ -31,21 +31,21 @@ def test_from_env_uses_secure_development_defaults(monkeypatch):
 
 
 def test_from_env_parses_explicit_runtime_values(monkeypatch, tmp_path):
-    monkeypatch.setenv("FRAUDLENS_MODEL_BACKEND", "muril")
+    monkeypatch.setenv("FRAUDLENS_MODEL_BACKEND", "tfidf")
     monkeypatch.setenv("FRAUDLENS_DB_PATH", str(tmp_path / "cases.sqlite3"))
     monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", "a-secure-local-testing-secret-with-32-bytes")
     monkeypatch.setenv("FRAUDLENS_RETENTION_DAYS", "90")
     monkeypatch.setenv("FRAUDLENS_STORE_CASES", "true")
-    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "staging")
+    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "test")
     monkeypatch.setenv("FRAUDLENS_ALLOWED_HOSTS", "api.example.in, localhost ,")
 
     settings = from_env()
 
-    assert settings.model_backend == "muril"
+    assert settings.model_backend == "tfidf"
     assert settings.database_path == Path(tmp_path / "cases.sqlite3")
     assert settings.retention_days == 90
     assert settings.store_cases_by_default is True
-    assert settings.environment == "staging"
+    assert settings.environment == "test"
     assert settings.allowed_hosts == ("api.example.in", "localhost")
 
 
@@ -53,6 +53,8 @@ def test_from_env_parses_explicit_runtime_values(monkeypatch, tmp_path):
     ("name", "value"),
     [
         ("FRAUDLENS_MODEL_BACKEND", "remote"),
+        ("FRAUDLENS_MODEL_BACKEND", "muril"),
+        ("FRAUDLENS_ENVIRONMENT", "staging"),
         ("FRAUDLENS_RETENTION_DAYS", "0"),
         ("FRAUDLENS_RETENTION_DAYS", "not-a-number"),
         ("FRAUDLENS_STORE_CASES", "sometimes"),
@@ -75,6 +77,27 @@ def test_from_env_requires_a_strong_hmac_secret_in_production(monkeypatch, secre
 
     with pytest.raises(ValueError):
         from_env()
+
+
+@pytest.mark.parametrize("hosts", [None, "", "*", "api.example.in,*.example.in"])
+def test_from_env_requires_explicit_non_wildcard_allowed_hosts_in_production(monkeypatch, hosts):
+    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "production")
+    monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", "n2QkV9wR_p6YtL0Bf8cD1mX7sJ4HqUaE3zG5oI")
+    if hosts is None:
+        monkeypatch.delenv("FRAUDLENS_ALLOWED_HOSTS", raising=False)
+    else:
+        monkeypatch.setenv("FRAUDLENS_ALLOWED_HOSTS", hosts)
+
+    with pytest.raises(ValueError, match="FRAUDLENS_ALLOWED_HOSTS"):
+        from_env()
+
+
+def test_from_env_accepts_explicit_allowed_hosts_in_production(monkeypatch):
+    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "production")
+    monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", "n2QkV9wR_p6YtL0Bf8cD1mX7sJ4HqUaE3zG5oI")
+    monkeypatch.setenv("FRAUDLENS_ALLOWED_HOSTS", "api.example.in, localhost")
+
+    assert from_env().allowed_hosts == ("api.example.in", "localhost")
 
 
 @pytest.mark.parametrize(
@@ -116,6 +139,7 @@ def test_from_env_accepts_a_token_urlsafe_hmac_secret_in_production(monkeypatch)
     monkeypatch.setattr(secrets, "token_urlsafe", lambda size: expected_secret)
     monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "production")
     monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", secrets.token_urlsafe(32))
+    monkeypatch.setenv("FRAUDLENS_ALLOWED_HOSTS", "api.example.in")
 
     settings = from_env()
 

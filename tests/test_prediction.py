@@ -127,6 +127,60 @@ def test_missing_or_corrupt_artifacts_use_abstaining_rule_fallback(tmp_path):
     assert prediction.model_version == "rule-fallback-v1"
 
 
+def test_tampered_artifacts_fall_back_without_deserializing_joblib(tmp_path, monkeypatch):
+    paths = artifact_paths(tmp_path)
+    train_baseline(
+        dataset_path=Path(__file__).resolve().parents[1] / "data" / "samples" / "phase2_dataset.csv",
+        artifact_dir=tmp_path,
+    )
+    paths.model.write_bytes(paths.model.read_bytes() + b"tampered")
+    monkeypatch.setattr(joblib, "load", lambda path: pytest.fail("joblib.load must not run"))
+
+    prediction = ModelPredictor(artifacts=paths).predict("ordinary message")
+
+    assert prediction.source == "rule_fallback"
+
+
+def test_tampered_manifest_falls_back_without_deserializing_joblib(tmp_path, monkeypatch):
+    paths = artifact_paths(tmp_path)
+    train_baseline(
+        dataset_path=Path(__file__).resolve().parents[1] / "data" / "samples" / "phase2_dataset.csv",
+        artifact_dir=tmp_path,
+    )
+    paths.manifest.write_text("{not json", encoding="utf-8")
+    monkeypatch.setattr(joblib, "load", lambda path: pytest.fail("joblib.load must not run"))
+
+    prediction = ModelPredictor(artifacts=paths).predict("ordinary message")
+
+    assert prediction.source == "rule_fallback"
+
+
+def test_verified_manifest_loads_the_trained_artifacts(tmp_path, monkeypatch):
+    paths = artifact_paths(tmp_path)
+    train_baseline(
+        dataset_path=Path(__file__).resolve().parents[1] / "data" / "samples" / "phase2_dataset.csv",
+        artifact_dir=tmp_path,
+    )
+    real_load = joblib.load
+    calls = []
+
+    def tracking_load(path):
+        calls.append(Path(path).name)
+        return real_load(path)
+
+    monkeypatch.setattr(joblib, "load", tracking_load)
+    prediction = ModelPredictor(artifacts=paths).predict("urgent account block kyc")
+
+    assert calls == ["baseline_classifier.joblib", "vectorizer.joblib", "label_encoder.joblib"]
+    assert prediction.source in {"tfidf_calibrated", "tfidf_calibrated_abstained"}
+
+
+def test_default_trusted_artifacts_load_in_the_current_runtime():
+    prediction = ModelPredictor().predict("urgent account block kyc")
+
+    assert prediction.source.startswith("tfidf_calibrated")
+
+
 def test_training_writes_honest_metadata_and_keeps_validation_and_test_out_of_vocabulary(tmp_path):
     project_root = Path(__file__).resolve().parents[1]
     dataset = pd.read_csv(project_root / "data" / "samples" / "phase2_dataset.csv")
@@ -184,6 +238,6 @@ def test_training_artifacts_are_byte_deterministic(tmp_path):
 
     first_paths = artifact_paths(first)
     second_paths = artifact_paths(second)
-    for name in ("model", "vectorizer", "label_encoder", "metrics", "metadata"):
+    for name in ("model", "vectorizer", "label_encoder", "metrics", "metadata", "manifest"):
         assert getattr(first_paths, name).read_bytes() == getattr(second_paths, name).read_bytes()
     assert joblib.load(first_paths.vectorizer)._stop_words_id == 0

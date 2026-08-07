@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from fraudlens.analysis_service import AnalysisInput, AnalysisService, DatabaseCaseStore, create_analysis_service
 from fraudlens.prediction import Prediction
@@ -61,7 +62,7 @@ def test_service_returns_authoritative_metadata_without_storing_by_default():
 
     assert result.case_id == "case-123"
     assert result.created_at == datetime(2026, 8, 7, 12, 0, 0)
-    assert result.original_text == "  Urgent KYC update  "
+    assert result.original_text == "Urgent KYC update"
     assert result.metadata == {
         "prediction_source": "tfidf_calibrated",
         "prediction_model_version": "tfidf-v1",
@@ -83,6 +84,39 @@ def test_service_persists_only_after_a_successful_save():
 
     assert result.metadata["stored"] is True
     assert store.saved == [result]
+
+
+@pytest.mark.parametrize(
+    "analysis_input",
+    [
+        AnalysisInput(text=" \t\n "),
+        AnalysisInput(text="x" * 20_001),
+        AnalysisInput(text=123),
+        AnalysisInput(text="urgent", user_notes="x" * 2_001),
+    ],
+)
+def test_service_rejects_invalid_direct_input_at_the_service_boundary(analysis_input):
+    service = _service(Prediction("unknown", 0.2, "rules", "v1", True))
+
+    with pytest.raises(ValidationError):
+        service.analyze(analysis_input)
+
+
+def test_service_trims_direct_input_but_preserves_authoritative_storage_and_metadata():
+    store = _RecordingStore()
+    result = _service(Prediction("unknown", 0.2, "rules", "v1", True), store).analyze(
+        AnalysisInput(
+            text="  urgent verification  ",
+            user_notes="  dashboard context  ",
+            store_case=True,
+            metadata={"stored": False, "origin": "dashboard"},
+        )
+    )
+
+    assert result.original_text == "urgent verification"
+    assert result.metadata["user_notes"] == "dashboard context"
+    assert result.metadata["stored"] is True
+    assert result.metadata["origin"] == "dashboard"
 
 
 def test_service_returns_a_generic_storage_warning_when_persistence_fails():
@@ -168,18 +202,6 @@ def test_create_analysis_service_selects_the_configured_tfidf_predictor(tmp_path
     result = service.analyze(AnalysisInput("Hello"))
 
     assert result.metadata["prediction_source"] == "tfidf-selected"
-
-
-def test_create_analysis_service_selects_an_injected_muril_predictor(tmp_path):
-    selected = _StubPredictor(Prediction("unknown", 0.2, "muril-selected", "v1", True))
-    service = create_analysis_service(
-        settings=_settings(tmp_path, model_backend="muril"),
-        predictor_registry=PredictorRegistry({"muril": selected}),
-    )
-
-    result = service.analyze(AnalysisInput("Hello"))
-
-    assert result.metadata["prediction_source"] == "muril-selected"
 
 
 def test_create_analysis_service_rejects_an_unregistered_configured_backend(tmp_path):

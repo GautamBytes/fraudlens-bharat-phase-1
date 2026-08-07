@@ -10,7 +10,8 @@ from fraudlens.config import DB_PATH
 
 _DEFAULT_ENVIRONMENT = "development"
 _LOCAL_DEMO_HMAC_SECRET = "local-demo-only-secret-not-for-production"
-_VALID_MODEL_BACKENDS = {"tfidf", "muril"}
+_VALID_ENVIRONMENTS = {"development", "test", "production"}
+_VALID_MODEL_BACKENDS = {"tfidf"}
 _MIN_PRODUCTION_HMAC_SECRET_LENGTH = 32
 _MIN_PRODUCTION_HMAC_SECRET_ENTROPY_BITS = 128
 _COMMON_SECRET_PLACEHOLDERS = {
@@ -62,9 +63,11 @@ class Settings:
     def from_env(cls, environ: Optional[Mapping[str, str]] = None) -> "Settings":
         values = os.environ if environ is None else environ
         environment = values.get("FRAUDLENS_ENVIRONMENT", _DEFAULT_ENVIRONMENT).strip().lower()
+        if environment not in _VALID_ENVIRONMENTS:
+            raise ValueError("FRAUDLENS_ENVIRONMENT must be one of: development, test, production")
         model_backend = values.get("FRAUDLENS_MODEL_BACKEND", "tfidf").strip().lower()
         if model_backend not in _VALID_MODEL_BACKENDS:
-            raise ValueError("FRAUDLENS_MODEL_BACKEND must be one of: tfidf, muril")
+            raise ValueError("FRAUDLENS_MODEL_BACKEND must be one of: tfidf")
 
         database_path = Path(values.get("FRAUDLENS_DB_PATH", str(DB_PATH))).expanduser()
         retention_days = _parse_positive_int(values.get("FRAUDLENS_RETENTION_DAYS", "30"), "FRAUDLENS_RETENTION_DAYS")
@@ -80,6 +83,10 @@ class Settings:
             if not _is_strong_production_secret(configured_secret):
                 raise ValueError(
                     "FRAUDLENS_HMAC_SECRET must be set to a non-default secret of at least 32 characters in production"
+                )
+            if not allowed_hosts or any("*" in host for host in allowed_hosts):
+                raise ValueError(
+                    "FRAUDLENS_ALLOWED_HOSTS must list explicit non-wildcard hosts in production"
                 )
             hmac_secret = configured_secret
         else:
