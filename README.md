@@ -26,7 +26,7 @@ These synthetic bootstrap results are not a production accuracy claim.
 - URL and identifier risk scoring
 - FastAPI backend
 - Streamlit dashboard
-- SQLite case history
+- Optional SQLite case history (off by default; each API request or dashboard analysis must opt in unless `FRAUDLENS_STORE_CASES=true` is configured)
 - Unit/API tests
 - Metrics and demo case outputs
 
@@ -69,11 +69,18 @@ Open the interactive API documentation at:
 http://127.0.0.1:8000/docs
 ```
 
+`POST /analyze` accepts an optional `store_case` boolean. Omitting it uses the
+safe runtime default (`false` unless `FRAUDLENS_STORE_CASES=true`). Responses
+include prediction provenance, abstention status, and whether the case was
+actually stored.
+
 ## Run Dashboard
 
 ```bash
 streamlit run src/fraudlens/dashboard.py
 ```
+
+The dashboard's “Store this analysis locally” checkbox is off by default.
 
 ## Run Tests
 

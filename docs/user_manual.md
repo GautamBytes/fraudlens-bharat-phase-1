@@ -8,8 +8,9 @@ FraudLens Bharat helps a user analyze suspicious scam messages and prepare a str
 
 1. Open the Streamlit dashboard.
 2. Paste the suspicious SMS/WhatsApp text into the message box.
-3. Click **Analyze Message**.
-4. Review the predicted fraud type, risk level, confidence score, extracted entities, and explanation.
+3. Leave **Store this analysis locally** unchecked unless you explicitly want a local SQLite history entry.
+4. Click **Analyze Message**.
+5. Review the predicted fraud type, risk level, confidence score, extracted entities, explanation, model version, abstention status, and storage status.
 
 ## Use Demo Messages
 
@@ -29,8 +30,8 @@ Click a demo button, then analyze the loaded message.
 - **Extracted entities**: Phone numbers, URLs, UPI IDs, emails, amounts, OTP-like codes, and suspicious phrases.
 - **Explanation**: Reasons behind the risk score.
 - **Complaint draft**: A structured summary that can help the user manually prepare a report.
+- **Storage status**: Confirms whether the analysis was saved. Storage is opt-in in the dashboard; a temporary storage failure leaves the analysis visible and reports that it was not stored.
 
 ## Safety Note
 
 Do not upload or store real private victim information in Phase 1. Replace real phone numbers, account numbers, UPI IDs, and names with dummy values before testing.
-

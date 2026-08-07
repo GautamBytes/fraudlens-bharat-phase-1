@@ -13,7 +13,7 @@ def score_risk(
     explanation: List[str] = []
 
     score = 0.0
-    if predicted_label != "unknown":
+    if predicted_label.casefold() not in {"unknown", "legitimate", "benign"}:
         model_score = min(max(confidence, 0.0), 1.0) * 35
         score += model_score
         signals.append(
@@ -69,4 +69,3 @@ def score_risk(
         explanation.append("No strong fraud signals were detected in the message.")
 
     return risk_level, score, signals, explanation
-

@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from fraudlens.api import analyze_message
+from fraudlens.analysis_service import AnalysisInput, create_analysis_service
 from fraudlens.database import list_cases
 
 
@@ -17,6 +17,11 @@ def _result_to_dict(result):
     if hasattr(result, "model_dump"):
         return result.model_dump(mode="json")
     return result.dict()
+
+
+@st.cache_resource
+def _analysis_service():
+    return create_analysis_service()
 
 
 st.set_page_config(page_title="FraudLens Bharat", page_icon="FL", layout="wide")
@@ -36,9 +41,12 @@ message = st.text_area(
     key="message_text",
     height=180,
 )
+store_case = st.checkbox("Store this analysis locally", value=False)
 
 if st.button("Analyze Message", type="primary"):
-    result = analyze_message(message)
+    result = _analysis_service().analyze(
+        AnalysisInput(text=message, store_case=store_case)
+    )
     result_data = _result_to_dict(result)
     st.session_state.last_result = result_data
 
@@ -49,6 +57,15 @@ if "last_result" in st.session_state:
     metric_cols[1].metric("Risk Level", result["risk_level"].upper())
     metric_cols[2].metric("Confidence", f"{result['confidence']:.2f}")
     metric_cols[3].metric("Risk Score", f"{result['risk_score']:.1f}/100")
+
+    metadata = result.get("metadata", {})
+    st.caption(
+        "Model: {} | Abstained: {} | Stored: {}".format(
+            metadata.get("prediction_model_version", "unknown"),
+            metadata.get("prediction_abstained", False),
+            metadata.get("stored", False),
+        )
+    )
 
     left, right = st.columns([1.1, 0.9])
     with left:
@@ -71,6 +88,8 @@ if "last_result" in st.session_state:
         signals = result.get("risk_signals", [])
         if signals:
             st.dataframe(pd.DataFrame(signals), use_container_width=True)
+        if metadata.get("storage_warning"):
+            st.warning(metadata["storage_warning"])
 
 st.divider()
 st.subheader("Recent Analysis History")
@@ -79,4 +98,3 @@ if recent_cases:
     st.dataframe(pd.DataFrame(recent_cases), use_container_width=True)
 else:
     st.info("No cases analyzed yet.")
-

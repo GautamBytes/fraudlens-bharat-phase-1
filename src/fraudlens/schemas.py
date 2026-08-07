@@ -9,6 +9,10 @@ class AnalyzeRequest(BaseModel):
 
     text: str = Field(..., min_length=1, max_length=20_000, description="Suspicious message or complaint text")
     user_notes: Optional[str] = Field(default=None, max_length=2_000, description="Optional user context")
+    store_case: Optional[bool] = Field(
+        default=None,
+        description="Whether to persist this case; omitted uses the runtime default",
+    )
 
     @field_validator("text", mode="before")
     @classmethod
