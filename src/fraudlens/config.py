@@ -1,19 +1,46 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
-DATASET_PATH = DATA_DIR / "samples" / "phase1_seed_dataset.csv"
+DATASET_PATH = DATA_DIR / "samples" / "phase2_dataset.csv"
 MODELS_DIR = PROJECT_ROOT / "models"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 METRICS_DIR = OUTPUTS_DIR / "metrics"
 DEMO_CASES_DIR = OUTPUTS_DIR / "demo_cases"
 DB_PATH = PROJECT_ROOT / "fraudlens_cases.sqlite3"
 
-MODEL_PATH = MODELS_DIR / "baseline_classifier.joblib"
-VECTORIZER_PATH = MODELS_DIR / "vectorizer.joblib"
-LABEL_ENCODER_PATH = MODELS_DIR / "label_encoder.joblib"
-METRICS_PATH = MODELS_DIR / "metrics.json"
+@dataclass(frozen=True)
+class ArtifactPaths:
+    """The compact, versioned artifacts required by the TF-IDF predictor."""
+
+    root: Path
+    model: Path
+    vectorizer: Path
+    label_encoder: Path
+    metrics: Path
+    metadata: Path
+
+
+def artifact_paths(root: Path = MODELS_DIR) -> ArtifactPaths:
+    root = Path(root)
+    return ArtifactPaths(
+        root=root,
+        model=root / "baseline_classifier.joblib",
+        vectorizer=root / "vectorizer.joblib",
+        label_encoder=root / "label_encoder.joblib",
+        metrics=root / "metrics.json",
+        metadata=root / "model_metadata.json",
+    )
+
+
+DEFAULT_ARTIFACTS = artifact_paths()
+MODEL_PATH = DEFAULT_ARTIFACTS.model
+VECTORIZER_PATH = DEFAULT_ARTIFACTS.vectorizer
+LABEL_ENCODER_PATH = DEFAULT_ARTIFACTS.label_encoder
+METRICS_PATH = DEFAULT_ARTIFACTS.metrics
+METADATA_PATH = DEFAULT_ARTIFACTS.metadata
 
 LABELS = [
     "kyc_scam",
@@ -82,4 +109,3 @@ THREAT_KEYWORDS = {
     "delete",
     "suspend",
 }
-

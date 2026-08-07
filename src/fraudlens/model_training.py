@@ -1,151 +1,236 @@
+"""Deterministic training for the calibrated Phase 2 TF-IDF predictor."""
+
+import argparse
+import hashlib
 import json
 from pathlib import Path
+from typing import Dict, Iterable, Tuple
 
+import joblib
+import numpy as np
 import pandas as pd
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.preprocessing import LabelEncoder
 
-from fraudlens.config import (
-    DATASET_PATH,
-    LABEL_ENCODER_PATH,
-    METRICS_DIR,
-    METRICS_PATH,
-    MODEL_PATH,
-    MODELS_DIR,
-    VECTORIZER_PATH,
-)
-from fraudlens.preprocessing import normalize_text, prepare_model_text
+from fraudlens.config import ArtifactPaths, DATASET_PATH, DEFAULT_ARTIFACTS, artifact_paths
+from fraudlens.data_contract import PHASE2_TARGET_PER_LABEL, TRAINED_LABELS, load_phase2_dataset
+from fraudlens.preprocessing import normalize_text
+
+
+SUPPORTED_BACKENDS = frozenset({"tfidf"})
+SPLITS = ("train", "validation", "test")
 
 
 def load_dataset(path: Path = DATASET_PATH) -> pd.DataFrame:
-    df = pd.read_csv(path)
-    required = {"id", "text", "label", "source_type", "language_mix", "notes"}
-    missing = required - set(df.columns)
-    if missing:
-        raise ValueError(f"Dataset missing columns: {sorted(missing)}")
-    df = df.dropna(subset=["text", "label"]).copy()
-    df["cleaned_text"] = df["text"].map(normalize_text)
-    df["model_text"] = df["text"].map(prepare_model_text)
-    return df
+    """Load the immutable Phase 2 contract and use raw normalized text only."""
+    frame = load_phase2_dataset(Path(path), minimum_per_label=0).copy()
+    frame["model_text"] = frame["text"].map(normalize_text)
+    return frame
 
 
-def _can_stratify(labels: pd.Series, test_size: float) -> bool:
-    counts = labels.value_counts()
-    if counts.min() < 2:
-        return False
-    estimated_test_rows = int(round(len(labels) * test_size))
-    return estimated_test_rows >= labels.nunique()
+def _dataset_sha256(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def train_baseline(dataset_path: Path = DATASET_PATH) -> dict:
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    METRICS_DIR.mkdir(parents=True, exist_ok=True)
+def _split_frame(frame: pd.DataFrame, split: str) -> pd.DataFrame:
+    result = frame.loc[frame["split"] == split].copy()
+    if result.empty:
+        raise ValueError("Phase 2 dataset has no {} rows".format(split))
+    return result
 
-    df = load_dataset(dataset_path)
-    label_encoder = LabelEncoder()
-    y = label_encoder.fit_transform(df["label"])
 
-    stratify = y if _can_stratify(df["label"], 0.25) else None
-    X_train, X_test, y_train, y_test = train_test_split(
-        df["model_text"],
-        y,
-        test_size=0.25,
-        random_state=42,
-        stratify=stratify,
+def _fit_deterministic_vectorizer(train_text: pd.Series) -> Tuple[TfidfVectorizer, object]:
+    """Fix vocabulary insertion order so serialized artifacts are reproducible."""
+    options = {
+        "ngram_range": (1, 2),
+        "min_df": 1,
+        "max_features": 5000,
+        "sublinear_tf": True,
+    }
+    prototype = TfidfVectorizer(**options)
+    analyzer = prototype.build_analyzer()
+    vocabulary_terms = sorted(
+        {token for text in train_text.tolist() for token in analyzer(text)}
     )
+    vocabulary = {term: index for index, term in enumerate(vocabulary_terms)}
+    vectorizer = TfidfVectorizer(**options, vocabulary=vocabulary)
+    return vectorizer, vectorizer.fit_transform(train_text)
 
-    vectorizer = TfidfVectorizer(
-        ngram_range=(1, 2),
-        min_df=1,
-        max_features=5000,
-        sublinear_tf=True,
+
+def _select_threshold(y_true: np.ndarray, probabilities: np.ndarray) -> float:
+    """Select on validation only, rewarding correct coverage and penalising errors."""
+    confidences = probabilities.max(axis=1)
+    predictions = probabilities.argmax(axis=1)
+    candidates = sorted({0.0, 1.0, *[float(value) for value in confidences]})
+    best: Tuple[float, float, float] = (-float("inf"), -float("inf"), -float("inf"))
+    selected = 1.0
+    for threshold in candidates:
+        accepted = confidences >= threshold
+        correct = int(np.logical_and(accepted, predictions == y_true).sum())
+        incorrect = int(np.logical_and(accepted, predictions != y_true).sum())
+        coverage = float(accepted.mean())
+        # A wrong alert is worse than a transparent abstention; ties favour coverage.
+        score = float(correct - incorrect) / len(y_true)
+        candidate = (score, coverage, -threshold)
+        if candidate > best:
+            best = candidate
+            selected = float(threshold)
+    return round(selected, 8)
+
+
+def _evaluation(
+    y_true: np.ndarray,
+    probabilities: np.ndarray,
+    threshold: float,
+    labels: Iterable[int],
+    label_names: Iterable[str],
+) -> Dict[str, object]:
+    predicted = probabilities.argmax(axis=1)
+    confidence = probabilities.max(axis=1)
+    accepted = confidence >= threshold
+    covered_true = y_true[accepted]
+    covered_predicted = predicted[accepted]
+    coverage = float(accepted.mean())
+    accepted_accuracy = (
+        float(accuracy_score(covered_true, covered_predicted)) if accepted.any() else None
     )
-    X_train_vec = vectorizer.fit_transform(X_train)
-    X_test_vec = vectorizer.transform(X_test)
-
-    classifier = LogisticRegression(max_iter=1000, class_weight="balanced", random_state=42)
-    classifier.fit(X_train_vec, y_train)
-    y_pred = classifier.predict(X_test_vec)
-
-    labels = list(range(len(label_encoder.classes_)))
-    target_names = list(label_encoder.classes_)
-    report_dict = classification_report(
-        y_test,
-        y_pred,
-        labels=labels,
-        target_names=target_names,
-        output_dict=True,
-        zero_division=0,
-    )
-    report_text = classification_report(
-        y_test,
-        y_pred,
-        labels=labels,
-        target_names=target_names,
-        zero_division=0,
-    )
-    matrix = confusion_matrix(y_test, y_pred, labels=labels)
-
-    import joblib
-
-    joblib.dump(classifier, MODEL_PATH)
-    joblib.dump(vectorizer, VECTORIZER_PATH)
-    joblib.dump(label_encoder, LABEL_ENCODER_PATH)
-
-    metrics = {
-        "dataset_rows": int(len(df)),
-        "train_rows": int(len(X_train)),
-        "test_rows": int(len(X_test)),
-        "accuracy": float(report_dict["accuracy"]),
-        "macro_f1": float(report_dict["macro avg"]["f1-score"]),
-        "macro_precision": float(report_dict["macro avg"]["precision"]),
-        "macro_recall": float(report_dict["macro avg"]["recall"]),
-        "per_class": report_dict,
-        "labels": target_names,
-        "confusion_matrix": matrix.tolist(),
+    return {
+        "rows": int(len(y_true)),
+        "coverage": coverage,
+        "abstention_rate": float(1.0 - coverage),
+        "accepted_accuracy": accepted_accuracy,
+        "overall_accuracy_with_abstentions": float(
+            np.logical_and(accepted, predicted == y_true).mean()
+        ),
+        "macro_f1_all_predictions": float(
+            f1_score(y_true, predicted, labels=list(labels), average="macro", zero_division=0)
+        ),
+        "classification_report": classification_report(
+            y_true,
+            predicted,
+            labels=list(labels),
+            target_names=list(label_names),
+            output_dict=True,
+            zero_division=0,
+        ),
+        "confusion_matrix": confusion_matrix(y_true, predicted, labels=list(labels)).tolist(),
     }
 
-    METRICS_PATH.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
-    (METRICS_DIR / "classification_report.txt").write_text(report_text, encoding="utf-8")
-    _write_confusion_matrix_png(matrix, target_names)
+
+def train_baseline(
+    dataset_path: Path = DATASET_PATH,
+    artifact_dir: Path = None,
+    backend: str = "tfidf",
+) -> Dict[str, object]:
+    """Train one calibrated classifier without crossing frozen Phase 2 splits."""
+    if backend not in SUPPORTED_BACKENDS:
+        raise ValueError("Unsupported backend: {}".format(backend))
+
+    dataset_path = Path(dataset_path)
+    artifacts: ArtifactPaths = artifact_paths(artifact_dir) if artifact_dir is not None else DEFAULT_ARTIFACTS
+    artifacts.root.mkdir(parents=True, exist_ok=True)
+    frame = load_dataset(dataset_path)
+    splits = {name: _split_frame(frame, name) for name in SPLITS}
+
+    train = splits["train"]
+    validation = splits["validation"]
+    test = splits["test"]
+    train_labels = sorted(train["label"].unique())
+    label_encoder = LabelEncoder().fit(train_labels)
+    y_train = label_encoder.transform(train["label"])
+    y_validation = label_encoder.transform(validation["label"])
+    y_test = label_encoder.transform(test["label"])
+
+    vectorizer, train_features = _fit_deterministic_vectorizer(train["model_text"])
+    validation_features = vectorizer.transform(validation["model_text"])
+    test_features = vectorizer.transform(test["model_text"])
+    classifier = CalibratedClassifierCV(
+        estimator=LogisticRegression(max_iter=1000, class_weight="balanced", random_state=42),
+        method="sigmoid",
+        cv=3,
+    )
+    classifier.fit(train_features, y_train)
+    validation_probabilities = classifier.predict_proba(validation_features)
+    threshold = _select_threshold(y_validation, validation_probabilities)
+    test_probabilities = classifier.predict_proba(test_features)
+
+    dataset_hash = _dataset_sha256(dataset_path)
+    model_version = "tfidf-calibrated-{}".format(dataset_hash[:12])
+    present_labels = sorted(frame["label"].unique())
+    missing_labels = sorted(TRAINED_LABELS - set(present_labels))
+    target_met = all(
+        int((frame["label"] == label).sum()) >= PHASE2_TARGET_PER_LABEL
+        for label in TRAINED_LABELS
+    )
+    label_ids = list(range(len(label_encoder.classes_)))
+    validation_evaluation = _evaluation(
+        y_validation, validation_probabilities, threshold, label_ids, label_encoder.classes_
+    )
+    test_evaluation = _evaluation(
+        y_test, test_probabilities, threshold, label_ids, label_encoder.classes_
+    )
+    split_ids = {
+        name: sorted(int(value) for value in split["id"].tolist()) for name, split in splits.items()
+    }
+    metadata: Dict[str, object] = {
+        "backend": backend,
+        "model_version": model_version,
+        "dataset_sha256": dataset_hash,
+        "dataset_rows": int(len(frame)),
+        "split_rows": {name: int(len(split)) for name, split in splits.items()},
+        "split_ids": split_ids,
+        "present_labels": present_labels,
+        "missing_labels": missing_labels,
+        "phase2_target_per_label": PHASE2_TARGET_PER_LABEL,
+        "phase2_target_met": target_met,
+        "target_status": (
+            "met" if target_met else
+            "not_met; legitimate absent and bootstrap has fewer than 200 rows per label"
+        ),
+        "text_representation": "raw_normalized_text",
+        "marker_enhancement_selected": False,
+        "threshold": threshold,
+        "calibration": {
+            "method": "sigmoid",
+            "cv": 3,
+            "training_only": True,
+            "threshold_selected_on": "validation",
+            "threshold_objective": "maximise correct-minus-incorrect coverage",
+        },
+        "evaluation": {
+            "frozen_test_split": True,
+            "validation": validation_evaluation,
+            "test": test_evaluation,
+        },
+    }
+    metrics: Dict[str, object] = {
+        "dataset_rows": int(len(frame)),
+        "split_rows": metadata["split_rows"],
+        "model_version": model_version,
+        "dataset_sha256": dataset_hash,
+        "threshold": threshold,
+        "test": test_evaluation,
+    }
+    joblib.dump(classifier, artifacts.model)
+    # sklearn caches id(stop_words) for mutation detection; an address is not reproducible.
+    vectorizer._stop_words_id = 0
+    joblib.dump(vectorizer, artifacts.vectorizer)
+    joblib.dump(label_encoder, artifacts.label_encoder)
+    artifacts.metadata.write_text(json.dumps(metadata, indent=2, sort_keys=True), encoding="utf-8")
+    artifacts.metrics.write_text(json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8")
     return metrics
 
 
-def _write_confusion_matrix_png(matrix, target_names: list[str]) -> None:
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    fig, ax = plt.subplots(figsize=(11, 8))
-    image = ax.imshow(matrix, interpolation="nearest", cmap="Blues")
-    fig.colorbar(image, ax=ax)
-    ax.set(
-        xticks=range(len(target_names)),
-        yticks=range(len(target_names)),
-        xticklabels=target_names,
-        yticklabels=target_names,
-        title="FraudLens Bharat Phase 1 Confusion Matrix",
-        ylabel="Actual",
-        xlabel="Predicted",
-    )
-    plt.setp(ax.get_xticklabels(), rotation=35, ha="right", rotation_mode="anchor")
-    threshold = matrix.max() / 2 if matrix.size else 0
-    for row_index in range(matrix.shape[0]):
-        for col_index in range(matrix.shape[1]):
-            color = "white" if matrix[row_index, col_index] > threshold else "black"
-            ax.text(col_index, row_index, int(matrix[row_index, col_index]), ha="center", va="center", color=color)
-    plt.tight_layout()
-    plt.savefig(METRICS_DIR / "confusion_matrix.png", dpi=180)
-    plt.close()
-
-
 def main() -> None:
-    metrics = train_baseline()
-    print(json.dumps({k: metrics[k] for k in ["dataset_rows", "accuracy", "macro_f1", "macro_precision", "macro_recall"]}, indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dataset", type=Path, default=DATASET_PATH)
+    parser.add_argument("--backend", default="tfidf")
+    args = parser.parse_args()
+    metrics = train_baseline(dataset_path=args.dataset, backend=args.backend)
+    print(json.dumps(metrics, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
