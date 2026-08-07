@@ -67,7 +67,7 @@ def _provenance_frame():
                 "pii_reviewed": True,
                 "reviewer": "Phase 1 manual review",
                 "allowed_labels": "|".join(sorted(TRAINED_LABELS - {"legitimate"})),
-                "sha256": "d6e45c9d4cebd4d8a6228833a810aecdd11207c15a1d41646b015e93fe7c3179",
+                "sha256": "3e8aa1ea2517383896684c05e6b9bb2315c98dc7704146bd80d56886308f54ef",
                 "notes": "Existing Phase 1 synthetic batch.",
             },
             {

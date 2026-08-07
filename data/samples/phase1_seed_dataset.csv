@@ -1,6 +1,6 @@
 id,text,label,source_type,language_mix,notes
 1,"Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.",kyc_scam,synthetic,english,"urgent KYC link"
-2,"Aapka wallet KYC pending hai plz verify now warna wallet freeze hoga. Call 9876501234 for update.",kyc_scam,synthetic,hinglish,"phone with threat"
+2,"Aapka wallet KYC pending hai plz verify now warna wallet freeze hoga. Call <PHONE_REDACTED> for update.",kyc_scam,synthetic,hinglish,"redacted phone placeholder with threat"
 3,"SBI user alert: complete kyc re-verification within 2 hrs to avoid debit card suspension.",kyc_scam,synthetic,english,"bank impersonation"
 4,"Ur Pay wallet kyc fail ho gya. Login karo http://pay-update.example aur aadhaar pan update kro.",kyc_scam,synthetic,hinglish,"fake wallet link"
 5,"Account hold notice: PAN KYC mismatch detected. Verify immediately to restore netbanking.",kyc_scam,synthetic,english,"account hold"
@@ -63,4 +63,3 @@ id,text,label,source_type,language_mix,notes
 62,"Telegram admin asks for 6 digit code to restore your account. Send immediately.",otp_phishing,synthetic,english,"account takeover"
 63,"UPI PIN confirm karo to cancel suspicious transaction. Code share krna mandatory.",otp_phishing,synthetic,hinglish,"UPI PIN"
 64,"Security alert: email login blocked. Reply with OTP and password to prove ownership.",otp_phishing,synthetic,english,"email takeover"
-

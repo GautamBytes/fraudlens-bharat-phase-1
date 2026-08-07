@@ -103,6 +103,45 @@ def test_migration_removes_expired_or_malformed_legacy_raw_rows(tmp_path):
     assert remaining == [("future", "2099-01-31T00:00:00+00:00")]
 
 
+def test_reducing_retention_clamps_existing_case_expiry(tmp_path):
+    database_path = tmp_path / "cases.sqlite3"
+    with sqlite3.connect(database_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE cases (
+                case_id TEXT PRIMARY KEY, created_at TEXT NOT NULL, original_text TEXT NOT NULL,
+                predicted_label TEXT NOT NULL, confidence REAL NOT NULL, risk_level TEXT NOT NULL,
+                risk_score REAL NOT NULL, result_json TEXT NOT NULL,
+                stored_raw_text INTEGER NOT NULL DEFAULT 1, expires_at TEXT, model_version TEXT
+            )
+            """
+        )
+        conn.execute(
+            "INSERT INTO cases VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                "future",
+                "2099-01-01T00:00:00+00:00",
+                "legacy raw",
+                "kyc_scam",
+                0.8,
+                "high",
+                70,
+                "{}",
+                1,
+                "2099-01-31T00:00:00+00:00",
+                None,
+            ),
+        )
+
+    _store(tmp_path, retention_days=7).initialize()
+
+    with sqlite3.connect(database_path) as conn:
+        expiry = conn.execute(
+            "SELECT expires_at FROM cases WHERE case_id = ?", ("future",)
+        ).fetchone()[0]
+    assert expiry == "2099-01-08T00:00:00+00:00"
+
+
 def test_saved_cases_persist_raw_result_only_in_case_record_and_masked_entities(tmp_path):
     store = _store(tmp_path)
     store.save(_result())

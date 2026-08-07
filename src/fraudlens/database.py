@@ -91,16 +91,23 @@ def _migrate_cases(conn: sqlite3.Connection, retention_days: int, now: datetime)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_case_entities_entity ON case_entities(entity_type, entity_id)")
 
     deleted_count = 0
-    for row in conn.execute("SELECT case_id, created_at FROM cases WHERE expires_at IS NULL"):
+    for row in conn.execute("SELECT case_id, created_at, expires_at FROM cases"):
         created_at = _parse_utc(row["created_at"])
         if created_at is None:
             cursor = conn.execute("DELETE FROM cases WHERE case_id = ?", (row["case_id"],))
             deleted_count += cursor.rowcount
             continue
-        conn.execute(
-            "UPDATE cases SET expires_at = ? WHERE case_id = ?",
-            (_utc_iso(created_at + timedelta(days=retention_days)), row["case_id"]),
-        )
+        maximum_expiry = created_at + timedelta(days=retention_days)
+        recorded_expiry = _parse_utc(row["expires_at"])
+        if row["expires_at"] is not None and recorded_expiry is None:
+            cursor = conn.execute("DELETE FROM cases WHERE case_id = ?", (row["case_id"],))
+            deleted_count += cursor.rowcount
+            continue
+        if recorded_expiry is None or recorded_expiry > maximum_expiry:
+            conn.execute(
+                "UPDATE cases SET expires_at = ? WHERE case_id = ?",
+                (_utc_iso(maximum_expiry), row["case_id"]),
+            )
     return deleted_count + _purge_expired(conn, now)
 
 
