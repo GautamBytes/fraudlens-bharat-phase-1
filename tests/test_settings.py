@@ -1,3 +1,4 @@
+import secrets
 from pathlib import Path
 
 import pytest
@@ -92,3 +93,30 @@ def test_from_env_rejects_low_entropy_and_placeholder_hmac_secrets_in_production
 
     with pytest.raises(ValueError):
         from_env()
+
+
+@pytest.mark.parametrize(
+    "secret",
+    [
+        "qwertyuiopasdfghjklzxcvbnm!@#$%^&*",
+        "MNBVCXZLKJHGFDSAPOIUYTREWQ!@#$%^&*",
+        "A1!b2@C3#d4$E5%f" * 8,
+    ],
+)
+def test_from_env_rejects_keyboard_walks_and_repeated_hmac_secret_blocks(monkeypatch, secret):
+    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "production")
+    monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", secret)
+
+    with pytest.raises(ValueError):
+        from_env()
+
+
+def test_from_env_accepts_a_token_urlsafe_hmac_secret_in_production(monkeypatch):
+    expected_secret = "n2QkV9wR_p6YtL0Bf8cD1mX7sJ4HqUaE3zG5oI"
+    monkeypatch.setattr(secrets, "token_urlsafe", lambda size: expected_secret)
+    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "production")
+    monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", secrets.token_urlsafe(32))
+
+    settings = from_env()
+
+    assert settings.hmac_secret == expected_secret

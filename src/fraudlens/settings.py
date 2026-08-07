@@ -39,6 +39,13 @@ _SEQUENTIAL_CHARACTER_SETS = (
     "0123456789"[::-1],
 )
 _SEQUENTIAL_RUN_LENGTH = 6
+_KEYBOARD_CHARACTER_SETS = (
+    "qwertyuiop",
+    "asdfghjkl",
+    "zxcvbnm",
+)
+_KEYBOARD_RUN_LENGTH = 4
+_REPEATED_BLOCK_MIN_LENGTH = 4
 
 
 @dataclass(frozen=True)
@@ -120,6 +127,8 @@ def _is_strong_production_secret(secret: Optional[str]) -> bool:
         normalized in _COMMON_SECRET_PLACEHOLDERS
         or any(marker in normalized for marker in _COMMON_SECRET_PLACEHOLDER_MARKERS)
         or _contains_sequential_run(normalized)
+        or _contains_keyboard_run(normalized)
+        or _contains_repeated_block(normalized)
     ):
         return False
     return _estimate_shannon_entropy_bits(secret) >= _MIN_PRODUCTION_HMAC_SECRET_ENTROPY_BITS
@@ -137,4 +146,23 @@ def _contains_sequential_run(value: str) -> bool:
         for start in range(len(character_set) - _SEQUENTIAL_RUN_LENGTH + 1):
             if character_set[start : start + _SEQUENTIAL_RUN_LENGTH] in value:
                 return True
+    return False
+
+
+def _contains_keyboard_run(value: str) -> bool:
+    for character_set in _KEYBOARD_CHARACTER_SETS:
+        for keyboard_run in (character_set, character_set[::-1]):
+            for start in range(len(keyboard_run) - _KEYBOARD_RUN_LENGTH + 1):
+                if keyboard_run[start : start + _KEYBOARD_RUN_LENGTH] in value:
+                    return True
+    return False
+
+
+def _contains_repeated_block(value: str) -> bool:
+    for block_length in range(_REPEATED_BLOCK_MIN_LENGTH, (len(value) // 2) + 1):
+        if len(value) % block_length:
+            continue
+        block = value[:block_length]
+        if block * (len(value) // block_length) == value:
+            return True
     return False
