@@ -24,6 +24,7 @@ def test_dependency_and_ci_security_baseline():
         assert dependency in development_requirements
     assert "-r requirements.txt" in development_requirements
     assert "--hash=sha256:" in lock
+    assert "greenlet==" in lock
     assert 'python_requires=">=3.10"' in setup
 
     for version in ('"3.10"', '"3.11"', '"3.12"'):
