@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11.15", "3.12"]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -30,7 +30,7 @@ jobs:
       - name: Compile Python sources
         run: python -m compileall -q src tests
       - name: Verify reproducible release artifacts
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.11.15'
         run: |
           artifact_tmp=$(mktemp -d)
           python -c "from pathlib import Path; from fraudlens.model_training import train_baseline; train_baseline(artifact_dir=Path('$artifact_tmp'))"
@@ -51,7 +51,7 @@ jobs:
           python -c "from fraudlens.data_contract import load_phase2_dataset;
           load_phase2_dataset('data/samples/phase2_dataset.csv', minimum_per_label=0)"
       - name: Verify deterministic evaluation evidence
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.11.15'
         run: |
           evaluation_tmp=$(mktemp -d)
           python -m fraudlens.evaluation --dataset data/samples/phase2_dataset.csv --output "$evaluation_tmp/first"

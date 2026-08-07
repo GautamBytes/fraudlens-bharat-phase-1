@@ -37,9 +37,10 @@ def test_dependency_and_ci_security_baseline():
     assert "greenlet==" in lock
     assert 'python_requires=">=3.10"' in setup
 
-    for version in ('"3.10"', '"3.11"', '"3.12"'):
+    for version in ('"3.10"', '"3.11.15"', '"3.12"'):
         assert version in workflow
     assert '"3.9"' not in workflow
+    assert '"3.11"' not in workflow
     assert "permissions:\n  contents: read" in workflow
     assert "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" in workflow
     assert "actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065" in workflow
@@ -52,7 +53,7 @@ def test_dependency_and_ci_security_baseline():
     test_step = workflow.index("- name: Run tests")
     assert artifact_gate < test_step
     artifact_gate_body = workflow[artifact_gate:test_step]
-    assert "if: matrix.python-version == '3.11'" in artifact_gate_body
+    assert "if: matrix.python-version == '3.11.15'" in artifact_gate_body
     assert "train_baseline(artifact_dir=Path(" in artifact_gate_body
     for artifact in (
         "baseline_classifier.joblib",
