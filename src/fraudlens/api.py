@@ -12,8 +12,9 @@ from fraudlens.analysis_service import (
     DatabaseCaseStore,
     build_complaint_draft,
     create_analysis_service,
+    resolve_predictor,
 )
-from fraudlens.prediction import Predictor
+from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.schemas import AnalysisResult, AnalyzeRequest
 from fraudlens.settings import Settings
 
@@ -22,11 +23,24 @@ def create_app(
     settings: Optional[Settings] = None,
     predictor: Optional[Predictor] = None,
     store: Optional[CaseStore] = None,
+    predictor_registry: Optional[PredictorRegistry] = None,
 ) -> FastAPI:
     """Build the API with explicit runtime dependencies where needed."""
 
     resolved_settings = settings or Settings.from_env()
-    resolved_store = store if store is not None else DatabaseCaseStore()
+    try:
+        resolved_predictor = resolve_predictor(
+            resolved_settings,
+            predictor=predictor,
+            predictor_registry=predictor_registry,
+        )
+    except ValueError:
+        raise ValueError("Application configuration is invalid") from None
+    resolved_store = (
+        store
+        if store is not None
+        else DatabaseCaseStore(resolved_settings.database_path)
+    )
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
@@ -36,7 +50,8 @@ def create_app(
         if initializer is not None:
             initializer()
         application.state.analysis_service = create_analysis_service(
-            predictor=predictor,
+            settings=resolved_settings,
+            predictor=resolved_predictor,
             store=resolved_store,
         )
         yield
@@ -104,12 +119,14 @@ def create_app(
 def analyze_message(
     text: str,
     user_notes: Optional[str] = None,
-    store_case: bool = False,
+    store_case: Optional[bool] = None,
 ) -> AnalysisResult:
     """Compatibility wrapper for non-HTTP callers."""
 
-    return create_analysis_service().analyze(
-        AnalysisInput(text=text, user_notes=user_notes, store_case=store_case)
+    settings = Settings.from_env()
+    resolved_store_case = settings.store_cases_by_default if store_case is None else store_case
+    return create_analysis_service(settings=settings).analyze(
+        AnalysisInput(text=text, user_notes=user_notes, store_case=resolved_store_case)
     )
 
 

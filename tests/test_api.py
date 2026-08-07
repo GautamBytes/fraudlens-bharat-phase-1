@@ -1,9 +1,12 @@
 import inspect
+from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from fraudlens import api
-from fraudlens.prediction import Prediction
+from fraudlens import config, database
+from fraudlens.prediction import Prediction, PredictorRegistry
 from fraudlens.settings import Settings
 
 
@@ -201,3 +204,72 @@ def test_allowed_hosts_are_enabled_only_when_configured():
 
 def test_api_uses_lifespan_instead_of_deprecated_startup_events():
     assert ".on_event(" not in inspect.getsource(api)
+
+
+def test_default_api_store_persists_only_to_the_configured_database_path(tmp_path):
+    configured_path = Path(tmp_path) / "configured.sqlite3"
+    settings = Settings(
+        model_backend="tfidf",
+        database_path=configured_path,
+        hmac_secret="test-secret",
+        retention_days=30,
+        store_cases_by_default=True,
+        environment="test",
+        allowed_hosts=(),
+    )
+    application = api.create_app(
+        settings=settings,
+        predictor=_StubPredictor(Prediction("kyc_scam", 0.91, "test", "test-v1", False)),
+    )
+
+    with TestClient(application) as test_client:
+        response = test_client.post("/analyze", json={"text": "urgent verification"})
+        listed = test_client.get("/cases")
+
+    case_id = response.json()["case_id"]
+    assert response.status_code == 200
+    assert response.json()["metadata"]["stored"] is True
+    assert configured_path.exists()
+    assert [case["case_id"] for case in listed.json()] == [case_id]
+    assert database.get_case(case_id, path=config.DB_PATH) is None
+
+
+def test_analyze_message_uses_the_settings_default_when_storage_is_omitted(monkeypatch, tmp_path):
+    settings = Settings(
+        model_backend="tfidf",
+        database_path=Path(tmp_path) / "compat.sqlite3",
+        hmac_secret="test-secret",
+        retention_days=30,
+        store_cases_by_default=True,
+        environment="test",
+        allowed_hosts=(),
+    )
+    captured = []
+
+    class _Service:
+        def analyze(self, analysis_input):
+            captured.append(analysis_input)
+            return "result"
+
+    monkeypatch.setattr(api.Settings, "from_env", lambda: settings)
+    monkeypatch.setattr(api, "create_analysis_service", lambda *, settings: _Service())
+
+    assert api.analyze_message("message") == "result"
+    assert captured[-1].store_case is True
+    assert api.analyze_message("message", store_case=False) == "result"
+    assert captured[-1].store_case is False
+
+
+def test_create_app_rejects_an_unregistered_configured_backend(tmp_path):
+    settings = Settings(
+        model_backend="muril",
+        database_path=Path(tmp_path) / "cases.sqlite3",
+        hmac_secret="test-secret",
+        retention_days=30,
+        store_cases_by_default=False,
+        environment="test",
+        allowed_hosts=(),
+    )
+
+    with pytest.raises(ValueError, match="Application configuration is invalid"):
+        api.create_app(settings=settings, predictor_registry=PredictorRegistry({}))

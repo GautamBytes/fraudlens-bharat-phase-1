@@ -1,21 +1,23 @@
 import json
 import sqlite3
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fraudlens.config import DB_PATH
 from fraudlens.schemas import AnalysisResult
 
 
-def _connect() -> sqlite3.Connection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+def _connect(path: Optional[Path] = None) -> sqlite3.Connection:
+    database_path = Path(path) if path is not None else DB_PATH
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(database_path)
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def init_db() -> None:
-    with _connect() as conn:
+def init_db(path: Optional[Path] = None) -> None:
+    with _connect(path) as conn:
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS cases (
@@ -39,10 +41,10 @@ def _model_dump(result: AnalysisResult) -> Dict[str, Any]:
     return json.loads(result.json())
 
 
-def save_case(result: AnalysisResult) -> None:
-    init_db()
+def save_case(result: AnalysisResult, path: Optional[Path] = None) -> None:
+    init_db(path)
     payload = _model_dump(result)
-    with _connect() as conn:
+    with _connect(path) as conn:
         conn.execute(
             """
             INSERT OR REPLACE INTO cases
@@ -63,9 +65,9 @@ def save_case(result: AnalysisResult) -> None:
         conn.commit()
 
 
-def list_cases(limit: int = 20) -> List[Dict[str, Any]]:
-    init_db()
-    with _connect() as conn:
+def list_cases(limit: int = 20, path: Optional[Path] = None) -> List[Dict[str, Any]]:
+    init_db(path)
+    with _connect(path) as conn:
         rows = conn.execute(
             """
             SELECT case_id, created_at, predicted_label, confidence, risk_level, risk_score
@@ -78,18 +80,17 @@ def list_cases(limit: int = 20) -> List[Dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
-def get_case(case_id: str) -> Optional[Dict[str, Any]]:
-    init_db()
-    with _connect() as conn:
+def get_case(case_id: str, path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+    init_db(path)
+    with _connect(path) as conn:
         row = conn.execute("SELECT result_json FROM cases WHERE case_id = ?", (case_id,)).fetchone()
     if row is None:
         return None
     return json.loads(row["result_json"])
 
 
-def clear_cases() -> None:
-    init_db()
-    with _connect() as conn:
+def clear_cases(path: Optional[Path] = None) -> None:
+    init_db(path)
+    with _connect(path) as conn:
         conn.execute("DELETE FROM cases")
         conn.commit()
-

@@ -1,6 +1,12 @@
 from datetime import datetime
+from pathlib import Path
 
+import pytest
+
+from fraudlens.analysis_service import AnalysisInput, create_analysis_service
 from fraudlens.prediction import Prediction
+from fraudlens.prediction import PredictorRegistry
+from fraudlens.settings import Settings
 
 
 class _StubPredictor:
@@ -102,3 +108,60 @@ def test_legitimate_prediction_does_not_create_classifier_fraud_risk():
     assert result.risk_level == "low"
     assert result.risk_score == 0
     assert not any(signal.name == "classifier_confidence" for signal in result.risk_signals)
+
+
+def test_legitimate_result_has_a_neutral_complaint_draft():
+    result = _service(
+        Prediction("legitimate", 0.99, "tfidf_calibrated", "tfidf-v1", False)
+    ).analyze(AnalysisInput(text="Thank you for your order."))
+
+    assert "Classification: legitimate" in result.complaint_draft
+    assert "no scam indicators from the classifier" in result.complaint_draft
+    assert "official channel" in result.complaint_draft
+    assert "Suspected fraud type" not in result.complaint_draft
+    assert "1930" not in result.complaint_draft
+    assert "NCRP" not in result.complaint_draft
+
+
+def _settings(tmp_path, model_backend="tfidf"):
+    return Settings(
+        model_backend=model_backend,
+        database_path=Path(tmp_path) / "cases.sqlite3",
+        hmac_secret="test-secret",
+        retention_days=30,
+        store_cases_by_default=False,
+        environment="test",
+        allowed_hosts=(),
+    )
+
+
+def test_create_analysis_service_selects_the_configured_tfidf_predictor(tmp_path):
+    selected = _StubPredictor(Prediction("unknown", 0.2, "tfidf-selected", "v1", True))
+    service = create_analysis_service(
+        settings=_settings(tmp_path),
+        predictor_registry=PredictorRegistry({"tfidf": selected}),
+    )
+
+    result = service.analyze(AnalysisInput("Hello"))
+
+    assert result.metadata["prediction_source"] == "tfidf-selected"
+
+
+def test_create_analysis_service_selects_an_injected_muril_predictor(tmp_path):
+    selected = _StubPredictor(Prediction("unknown", 0.2, "muril-selected", "v1", True))
+    service = create_analysis_service(
+        settings=_settings(tmp_path, model_backend="muril"),
+        predictor_registry=PredictorRegistry({"muril": selected}),
+    )
+
+    result = service.analyze(AnalysisInput("Hello"))
+
+    assert result.metadata["prediction_source"] == "muril-selected"
+
+
+def test_create_analysis_service_rejects_an_unregistered_configured_backend(tmp_path):
+    with pytest.raises(ValueError, match="Predictor configuration is unavailable"):
+        create_analysis_service(
+            settings=_settings(tmp_path, model_backend="muril"),
+            predictor_registry=PredictorRegistry({}),
+        )

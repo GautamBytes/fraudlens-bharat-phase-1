@@ -2,15 +2,17 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, Mapping, Optional, Protocol
 from uuid import uuid4
 
 from fraudlens.entity_extraction import extract_entities
-from fraudlens.model_inference import predictor as default_predictor
-from fraudlens.prediction import Predictor
+from fraudlens.model_inference import predictor_registry as default_predictor_registry
+from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.preprocessing import normalize_text
 from fraudlens.risk_scoring import score_risk
 from fraudlens.schemas import AnalysisResult, Entity
+from fraudlens.settings import Settings
 from fraudlens.url_risk import analyze_urls
 
 
@@ -30,25 +32,28 @@ class CaseStore(Protocol):
 class DatabaseCaseStore:
     """Small adapter around the existing database functions."""
 
+    def __init__(self, database_path: Path) -> None:
+        self._database_path = Path(database_path)
+
     def initialize(self) -> None:
         from fraudlens.database import init_db
 
-        init_db()
+        init_db(path=self._database_path)
 
     def save(self, result: AnalysisResult) -> None:
         from fraudlens.database import save_case
 
-        save_case(result)
+        save_case(result, path=self._database_path)
 
     def list_cases(self, limit: int) -> list[dict]:
         from fraudlens.database import list_cases
 
-        return list_cases(limit=limit)
+        return list_cases(limit=limit, path=self._database_path)
 
     def get_case(self, case_id: str) -> Optional[dict]:
         from fraudlens.database import get_case
 
-        return get_case(case_id)
+        return get_case(case_id, path=self._database_path)
 
 
 def build_complaint_draft(
@@ -57,6 +62,17 @@ def build_complaint_draft(
     entities: list[Entity],
     original_text: str,
 ) -> str:
+    if predicted_label.casefold() in {"legitimate", "benign"}:
+        return "\n".join(
+            [
+                "Classification: legitimate",
+                "Risk level: {}".format(risk_level),
+                "Classifier assessment: no scam indicators from the classifier.",
+                "Recommended action: verify through the organisation's official channel if uncertain.",
+                "Original message: {}".format(original_text),
+            ]
+        )
+
     entity_summary: Dict[str, list[str]] = {}
     for entity in entities:
         entity_summary.setdefault(entity.type, []).append(entity.value)
@@ -137,11 +153,32 @@ class AnalysisService:
         return result
 
 
+def resolve_predictor(
+    settings: Settings,
+    predictor: Optional[Predictor] = None,
+    predictor_registry: Optional[PredictorRegistry] = None,
+) -> Predictor:
+    if predictor is not None:
+        return predictor
+    registry = predictor_registry or default_predictor_registry
+    try:
+        return registry.get(settings.model_backend)
+    except ValueError:
+        raise ValueError("Predictor configuration is unavailable") from None
+
+
 def create_analysis_service(
+    settings: Optional[Settings] = None,
     predictor: Optional[Predictor] = None,
     store: Optional[CaseStore] = None,
+    predictor_registry: Optional[PredictorRegistry] = None,
 ) -> AnalysisService:
+    resolved_settings = settings or Settings.from_env()
     return AnalysisService(
-        predictor=predictor or default_predictor,
-        store=store if store is not None else DatabaseCaseStore(),
+        predictor=resolve_predictor(resolved_settings, predictor, predictor_registry),
+        store=(
+            store
+            if store is not None
+            else DatabaseCaseStore(resolved_settings.database_path)
+        ),
     )
