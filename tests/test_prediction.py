@@ -30,6 +30,11 @@ class _FixedEncoder:
         return ["legitimate" for _ in labels]
 
 
+class _BoundaryClassifier:
+    def predict_proba(self, texts):
+        return np.array([[0.385427771, 0.32, 0.294572229] for _ in texts])
+
+
 class _StubPredictor:
     def __init__(self, prediction):
         self.prediction = prediction
@@ -70,6 +75,21 @@ def test_high_confidence_legitimate_model_prediction_is_not_rewritten_by_rules()
     assert prediction.label == "legitimate"
     assert prediction.abstained is False
     assert prediction.source == "tfidf_calibrated"
+
+
+def test_model_compares_unrounded_probability_with_saved_threshold():
+    predictor = ModelPredictor()
+    predictor._loaded = True
+    predictor._classifier = _BoundaryClassifier()
+    predictor._vectorizer = _FixedVectorizer()
+    predictor._label_encoder = _FixedEncoder()
+    predictor._metadata = {"threshold": 0.38542777, "model_version": "test-v1"}
+
+    prediction = predictor.predict("Ordinary text near the boundary.")
+
+    assert prediction.label == "legitimate"
+    assert prediction.abstained is False
+    assert prediction.confidence == 0.3854
 
 
 def test_registry_selects_injected_predictor_and_rejects_unknown_backend():

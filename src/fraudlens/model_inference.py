@@ -78,10 +78,11 @@ class ModelPredictor(Predictor):
                 probabilities = self._classifier.predict_proba(vector)[0]
                 encoded_label = int(probabilities.argmax())
                 label = str(self._label_encoder.inverse_transform([encoded_label])[0])
-                confidence = round(float(max(probabilities)), 4)
+                raw_confidence = float(max(probabilities))
+                confidence = round(raw_confidence, 4)
                 threshold = float(self._metadata["threshold"])
                 model_version = str(self._metadata["model_version"])
-                if confidence < threshold:
+                if raw_confidence < threshold:
                     return Prediction(
                         label="unknown",
                         confidence=confidence,

@@ -2,7 +2,7 @@
 
 ## Model Name
 
-FraudLens Bharat Phase 1 Hybrid Baseline
+FraudLens Bharat calibrated TF-IDF bootstrap predictor
 
 ## Intended Use
 
@@ -20,11 +20,11 @@ It predicts a likely fraud category and feeds the result into entity extraction,
 
 ## Model Type
 
-The classifier uses TF-IDF features and Logistic Regression.
+The selected classifier uses raw-normalized TF-IDF features, Logistic Regression, and sigmoid calibration.
 
-The model text includes transparent domain markers generated from documented fraud indicators.
+It applies a threshold selected on the frozen validation split and abstains as `unknown` below that threshold.
 
-The API also includes a rule-only fallback when model files are unavailable.
+The API uses a rule-only fallback only when persisted artifacts are unavailable or corrupt; weak generic keyword matches abstain.
 
 ## Labels
 
@@ -37,30 +37,32 @@ The API also includes a rule-only fallback when model files are unavailable.
 - `upi_refund_scam`
 - `otp_phishing`
 
+`legitimate` remains a supported prediction-boundary label, but is absent from the current bootstrap and was not fabricated for training.
+
 ## Dataset
 
 | Item | Value |
 |---|---:|
-| Dataset file | `data/samples/phase1_seed_dataset.csv` |
+| Dataset file | `data/samples/phase2_dataset.csv` |
 | Rows | 64 |
 | Classes | 8 |
 | Rows per class | 8 |
-| Data source | Synthetic, educational seed examples |
+| Splits | 48 train / 8 validation / 8 frozen test |
+| Data source | Synthetic, educational bootstrap examples |
 | Real PII | Not required |
 
 ## Current Metrics
 
-| Model | Accuracy | Macro F1 | Test Rows |
-|---|---:|---:|---:|
-| Rule-only fallback | 0.8125 | 0.7833 | 16 |
-| Hybrid baseline | 1.0000 | 1.0000 | 16 |
+| Model | Overall accuracy | Raw macro F1 | Coverage | Abstention | Accepted accuracy | Frozen test rows |
+|---|---:|---:|---:|---:|---:|---:|
+| Calibrated raw-normalized TF-IDF | 0.5000 | 0.5000 | 87.5% | 12.5% | 57.14% | 8 |
 
-These are internal synthetic metrics. They do not prove real-world generalization.
+These are internal synthetic bootstrap metrics. The target is unmet: no legitimate examples are available and every label is well below the 200-example target. They do not prove real-world generalization or production readiness.
 
 ## Known Limitations
 
-- Dataset is small and synthetic.
-- Test support is only two examples per class.
+- Dataset is small, synthetic, and has no legitimate examples.
+- Frozen test support is one example per fraud class.
 - Real cyber-fraud messages may contain more noise, spelling variation, code-mixing, screenshots, and missing context.
 - The model does not inspect images, attachments, voice notes, or transactions.
 - The URL module is heuristic and not a trained phishing URL classifier.

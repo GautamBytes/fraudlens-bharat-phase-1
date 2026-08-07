@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 
+from fraudlens import api
 from fraudlens.api import app
+from fraudlens.prediction import Prediction
 
 
 client = TestClient(app)
@@ -74,3 +76,46 @@ def test_analyze_endpoint_rejects_overlong_user_notes():
     )
 
     assert response.status_code == 422
+
+
+class _StubPredictor:
+    def __init__(self, prediction):
+        self._prediction = prediction
+
+    def predict(self, text):
+        return self._prediction
+
+
+def test_analysis_metadata_preserves_calibrated_model_provenance(monkeypatch):
+    monkeypatch.setattr(
+        api,
+        "predictor",
+        _StubPredictor(
+            Prediction("kyc_scam", 0.91, "tfidf_calibrated", "tfidf-v1", False)
+        ),
+    )
+    monkeypatch.setattr(api, "save_case", lambda result: None)
+
+    result = api.analyze_message("An urgent KYC notice", user_notes="called sender")
+
+    assert result.metadata["prediction_source"] == "tfidf_calibrated"
+    assert result.metadata["prediction_model_version"] == "tfidf-v1"
+    assert result.metadata["prediction_abstained"] is False
+    assert result.metadata["user_notes"] == "called sender"
+
+
+def test_analysis_metadata_preserves_fallback_abstention(monkeypatch):
+    monkeypatch.setattr(
+        api,
+        "predictor",
+        _StubPredictor(
+            Prediction("unknown", 0.2, "rule_fallback", "rule-fallback-v1", True)
+        ),
+    )
+    monkeypatch.setattr(api, "save_case", lambda result: None)
+
+    result = api.analyze_message("Parcel delivered successfully. Thank you.")
+
+    assert result.metadata["prediction_source"] == "rule_fallback"
+    assert result.metadata["prediction_model_version"] == "rule-fallback-v1"
+    assert result.metadata["prediction_abstained"] is True

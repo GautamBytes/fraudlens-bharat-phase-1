@@ -6,19 +6,21 @@ This plan defines how to evaluate FraudLens Bharat without overstating the Phase
 
 It separates classification accuracy from extraction quality, risk usefulness, system behavior, and safety.
 
-## Current Phase 1 Dataset
+## Current Calibrated Bootstrap Dataset
 
 | Item | Value |
 |---|---:|
 | Total rows | 64 |
 | Train rows | 48 |
-| Test rows | 16 |
+| Validation rows | 8 |
+| Frozen test rows | 8 |
 | Fraud classes | 8 |
 | Rows per class | 8 |
-| Test rows per class | 2 |
-| Data type | Synthetic, manually reviewed seed examples |
+| Frozen test rows per fraud class | 1 |
+| Legitimate rows | 0 |
+| Data type | Synthetic, manually reviewed bootstrap examples |
 
-The dataset is intentionally small. Its purpose is to prove the pipeline and establish a measurable baseline.
+The dataset is intentionally small. Its purpose is to prove the pipeline and establish a measurable bootstrap, not production performance. The Phase 2 target is unmet: `legitimate` is absent and no label reaches 200 examples.
 
 ## Classification Metrics
 
@@ -28,19 +30,20 @@ Classification should be measured with:
 - Macro precision
 - Macro recall
 - Macro F1
+- Coverage and abstention rate
+- Accuracy among accepted predictions
 - Per-class precision, recall, and F1
 - Confusion matrix
 
 Macro F1 is the main Phase 1 classifier metric because every fraud class matters equally.
 
-## Current Classification Result
+## Current Calibrated Classification Result
 
-| Model | Accuracy | Macro Precision | Macro Recall | Macro F1 |
-|---|---:|---:|---:|---:|
-| Rule-only fallback | 0.8125 | 0.7917 | 0.8125 | 0.7833 |
-| Hybrid TF-IDF baseline | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| Model | Overall accuracy | Raw macro F1 | Coverage | Abstention | Accepted accuracy | Frozen test rows |
+|---|---:|---:|---:|---:|---:|---:|
+| Calibrated raw-normalized TF-IDF | 0.5000 | 0.5000 | 87.5% | 12.5% | 57.14% | 8 |
 
-The hybrid result is based on the current 16-row synthetic test split. It should be reported with this limitation every time.
+The classifier is fit and calibrated from training data only; the abstention threshold is selected on the frozen validation split. The table reports the untouched frozen test split. It is a synthetic bootstrap result, not a production claim.
 
 ## Extraction Metrics
 
@@ -104,7 +107,7 @@ Recommended system metrics:
 - `/analyze` returns a complete schema
 - `/cases` stores and lists analyzed cases
 - Dashboard loads demo messages
-- Baseline model training regenerates metrics and confusion matrix
+- Calibrated model training regenerates metrics and metadata
 - Test suite passes
 
 Phase 1 can report these as reproducibility metrics.
@@ -115,7 +118,7 @@ When new seed data is added:
 
 1. Keep class balance visible.
 2. Re-run `python -m fraudlens.model_training`.
-3. Compare macro-F1 with the prior baseline.
+3. Compare raw macro-F1, coverage, abstention, and accepted accuracy with the prior calibrated artifact.
 4. Inspect the confusion matrix, not only the headline score.
 5. Add regression tests for any recurring confusion.
 6. Avoid hiding weak results; document them as Phase 2 targets.
@@ -135,6 +138,6 @@ Recommended targets:
 
 ## Reporting Rule
 
-The main report should state: "The current Phase 1 result is an internal synthetic benchmark and not a claim of production accuracy."
+The main report should state: "The current calibrated result is an internal synthetic bootstrap benchmark, has no legitimate examples, and is not a claim of production accuracy."
 
 That sentence protects the project while still showing measurable progress.

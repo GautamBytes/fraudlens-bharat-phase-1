@@ -6,20 +6,22 @@ The project is designed for my capstone project submission. It includes implemen
 
 ## Current Phase 1 Evidence
 
-- Seed dataset: 64 synthetic, manually reviewed examples across 8 fraud classes
-- Rule-only fallback: 0.8125 accuracy and 0.7833 macro-F1 on the current 16-row synthetic test split
-- Hybrid baseline: 1.0000 accuracy and 1.0000 macro-F1 on the same synthetic test split
+- Dataset: 64 synthetic, manually reviewed bootstrap examples across 8 fraud classes; no `legitimate` rows are present
+- Selected model: calibrated raw-normalized TF-IDF + Logistic Regression, trained only on the frozen 48-row train split and thresholded on the 8-row validation split
+- Frozen 8-row synthetic test: 0.5000 overall accuracy and 0.5000 raw macro-F1; 87.5% coverage, 12.5% abstention, and 57.14% accepted accuracy
+- The Phase 2 target is not met: the bootstrap is below 200 examples per label and lacks the `legitimate` label
+- Rule fallback: used only if calibrated artifacts are unavailable or corrupt, and abstains on weak generic keyword matches
 - Interfaces: FastAPI backend and Streamlit dashboard
-- Evidence outputs: metrics JSON, classification report, confusion matrix, demo cases, screenshots, and pitch deck
+- Evidence outputs: calibrated artifact metadata, metrics JSON, demo cases, screenshots, and pitch deck
 
-The 1.0000 score is an internal synthetic benchmark, not a production accuracy claim.
+These synthetic bootstrap results are not a production accuracy claim.
 
 ## Phase 1 Scope
 
 - Hinglish/Hindi/English scam text analysis
 - Eight fraud classes: KYC scam, digital arrest, fake job, investment scam, loan scam, courier scam, UPI refund scam, OTP/phishing scam
-- TF-IDF + Logistic Regression baseline classifier
-- Rule-based fallback classifier for robust demos
+- Calibrated TF-IDF + Logistic Regression classifier with an abstention threshold
+- Rule-based fallback only when model artifacts cannot be loaded
 - Entity extraction for phone numbers, UPI IDs, URLs, emails, money amounts, OTP-like codes, urgency phrases, and threat phrases
 - URL and identifier risk scoring
 - FastAPI backend
@@ -53,8 +55,7 @@ This creates:
 - `models/vectorizer.joblib`
 - `models/label_encoder.joblib`
 - `models/metrics.json`
-- `outputs/metrics/classification_report.txt`
-- `outputs/metrics/confusion_matrix.png`
+- `models/model_metadata.json`
 
 ## Run API
 

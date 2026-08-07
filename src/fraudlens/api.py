@@ -74,7 +74,12 @@ def analyze_message(text: str, user_notes: Optional[str] = None) -> AnalysisResu
         risk_signals=risk_signals,
         explanation=explanation,
         complaint_draft=complaint_draft,
-        metadata={"prediction_source": prediction.source, "user_notes": user_notes},
+        metadata={
+            "prediction_source": prediction.source,
+            "prediction_model_version": prediction.model_version,
+            "prediction_abstained": prediction.abstained,
+            "user_notes": user_notes,
+        },
     )
     save_case(result)
     return result
