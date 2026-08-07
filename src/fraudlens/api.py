@@ -39,7 +39,11 @@ def create_app(
     resolved_store = (
         store
         if store is not None
-        else DatabaseCaseStore(resolved_settings.database_path)
+        else DatabaseCaseStore(
+            resolved_settings.database_path,
+            hmac_secret=resolved_settings.hmac_secret,
+            retention_days=resolved_settings.retention_days,
+        )
     )
 
     @asynccontextmanager
@@ -48,7 +52,10 @@ def create_app(
         application.state.case_store = resolved_store
         initializer = getattr(resolved_store, "initialize", None)
         if initializer is not None:
-            initializer()
+            try:
+                initializer()
+            except Exception:
+                raise RuntimeError("Case storage initialization failed") from None
         application.state.analysis_service = create_analysis_service(
             settings=resolved_settings,
             predictor=resolved_predictor,

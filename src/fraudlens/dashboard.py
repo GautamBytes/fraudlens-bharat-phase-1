@@ -22,7 +22,11 @@ def _result_to_dict(result):
 @st.cache_resource
 def _analysis_dependencies():
     settings = Settings.from_env()
-    case_store = DatabaseCaseStore(settings.database_path)
+    case_store = DatabaseCaseStore(
+        settings.database_path,
+        hmac_secret=settings.hmac_secret,
+        retention_days=settings.retention_days,
+    )
     return create_analysis_service(settings=settings, store=case_store), case_store
 
 

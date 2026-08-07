@@ -21,7 +21,9 @@ def test_dashboard_history_uses_the_same_configured_store_as_analysis():
     source = (SOURCE_ROOT / "dashboard.py").read_text(encoding="utf-8")
 
     assert "settings = Settings.from_env()" in source
-    assert "DatabaseCaseStore(settings.database_path)" in source
+    assert "DatabaseCaseStore(" in source
+    assert "hmac_secret=settings.hmac_secret" in source
+    assert "retention_days=settings.retention_days" in source
     assert "create_analysis_service(settings=settings, store=case_store)" in source
     assert "case_store.list_cases(limit=10)" in source
 

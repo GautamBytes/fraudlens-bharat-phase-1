@@ -30,30 +30,60 @@ class CaseStore(Protocol):
 
 
 class DatabaseCaseStore:
-    """Small adapter around the existing database functions."""
+    """Configured case persistence adapter with privacy-safe entity links."""
 
-    def __init__(self, database_path: Path) -> None:
+    def __init__(
+        self,
+        database_path: Path,
+        hmac_secret: str = "local-demo-only-secret-not-for-production",
+        retention_days: int = 30,
+    ) -> None:
         self._database_path = Path(database_path)
+        self._hmac_secret = hmac_secret
+        self._retention_days = retention_days
 
     def initialize(self) -> None:
         from fraudlens.database import init_db
 
-        init_db(path=self._database_path)
+        from fraudlens.database import purge_expired
+
+        init_db(path=self._database_path, retention_days=self._retention_days)
+        purge_expired(path=self._database_path, retention_days=self._retention_days)
 
     def save(self, result: AnalysisResult) -> None:
         from fraudlens.database import save_case
 
-        save_case(result, path=self._database_path)
+        save_case(
+            result,
+            path=self._database_path,
+            hmac_secret=self._hmac_secret,
+            retention_days=self._retention_days,
+        )
 
     def list_cases(self, limit: int) -> list[dict]:
         from fraudlens.database import list_cases
 
-        return list_cases(limit=limit, path=self._database_path)
+        return list_cases(limit=limit, path=self._database_path, retention_days=self._retention_days)
 
     def get_case(self, case_id: str) -> Optional[dict]:
         from fraudlens.database import get_case
 
-        return get_case(case_id, path=self._database_path)
+        return get_case(case_id, path=self._database_path, retention_days=self._retention_days)
+
+    def delete(self, case_id: str) -> bool:
+        from fraudlens.database import delete_case
+
+        return delete_case(case_id, path=self._database_path, retention_days=self._retention_days)
+
+    def clear(self) -> int:
+        from fraudlens.database import clear_cases
+
+        return clear_cases(path=self._database_path, retention_days=self._retention_days)
+
+    def purge_expired(self, now: Optional[datetime] = None) -> int:
+        from fraudlens.database import purge_expired
+
+        return purge_expired(path=self._database_path, now=now, retention_days=self._retention_days)
 
 
 def build_complaint_draft(
@@ -179,6 +209,10 @@ def create_analysis_service(
         store=(
             store
             if store is not None
-            else DatabaseCaseStore(resolved_settings.database_path)
+            else DatabaseCaseStore(
+                resolved_settings.database_path,
+                hmac_secret=resolved_settings.hmac_secret,
+                retention_days=resolved_settings.retention_days,
+            )
         ),
     )

@@ -74,6 +74,13 @@ safe API runtime default (`false` unless `FRAUDLENS_STORE_CASES=true`). The
 compatibility helper follows the same setting. Responses include prediction
 provenance, abstention status, and whether the case was actually stored.
 
+When storage is enabled, the full analysis record is retained only for the
+configured `FRAUDLENS_RETENTION_DAYS` period. Case-to-case entity links use
+secret-keyed opaque IDs and display masks; raw phone numbers, UPI IDs, email
+addresses, and URLs are never written to the entity-link table. Existing local
+case records remain readable after migration and are not assigned a synthetic
+expiry date.
+
 ## Run Dashboard
 
 ```bash
