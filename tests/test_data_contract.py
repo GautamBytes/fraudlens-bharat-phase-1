@@ -11,7 +11,11 @@ from fraudlens.data_contract import (
     load_phase2_dataset,
     validate_phase2_dataset,
 )
-from fraudlens.phase2_migration import build_phase2_dataset, migrate_phase1_seed_dataset
+from fraudlens import phase2_migration
+from fraudlens.phase2_migration import (
+    derive_phase1_group_split_mapping,
+    migrate_phase1_seed_dataset,
+)
 
 
 def _valid_rows():
@@ -287,8 +291,8 @@ def test_phase1_family_and_split_mapping_is_independent_of_input_order():
     project_root = Path(__file__).resolve().parents[1]
     source = pd.read_csv(project_root / "data" / "samples" / "phase1_seed_dataset.csv")
 
-    original = build_phase2_dataset(source)
-    shuffled = build_phase2_dataset(source.sample(frac=1, random_state=7))
+    original = derive_phase1_group_split_mapping(source)
+    shuffled = derive_phase1_group_split_mapping(source.sample(frac=1, random_state=7))
     original_mapping = original.set_index("id")[["template_group", "split"]].sort_index()
     shuffled_mapping = shuffled.set_index("id")[["template_group", "split"]].sort_index()
 
@@ -296,3 +300,19 @@ def test_phase1_family_and_split_mapping_is_independent_of_input_order():
     assert original_mapping.loc[49, "template_group"] == original_mapping.loc[50, "template_group"]
     assert original.groupby("template_group")["split"].nunique().eq(1).all()
     assert original.groupby("template_group").size().max() > 1
+    per_label_splits = original.groupby("label")["split"].agg(set)
+    assert per_label_splits.map(lambda splits: splits == {"train", "validation", "test"}).all()
+    per_label_counts = original.groupby(["label", "split"]).size()
+    assert (per_label_counts >= 1).all()
+    assert (per_label_counts.xs("train", level="split") >= 5).all()
+
+
+def test_group_split_helper_cannot_stamp_arbitrary_phase1_provenance_claims():
+    project_root = Path(__file__).resolve().parents[1]
+    source = pd.read_csv(project_root / "data" / "samples" / "phase1_seed_dataset.csv")
+
+    grouped = derive_phase1_group_split_mapping(source.iloc[:1])
+
+    assert "provenance_id" not in grouped.columns
+    assert "reviewer" not in grouped.columns
+    assert not hasattr(phase2_migration, "build_phase2_dataset")
