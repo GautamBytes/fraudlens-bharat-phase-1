@@ -16,6 +16,7 @@ Create a labelled text dataset for cyber-fraud triage in Hinglish, Hindi, and En
 | `courier_scam` | Fake courier/customs/FedEx/DHL/parcel crime messages | parcel blocked, customs, drugs, passport, courier verification |
 | `upi_refund_scam` | Fake cashback/refund/payment receive requests that trick users into entering UPI PIN | refund, cashback, receive money, collect request, enter UPI PIN |
 | `otp_phishing` | OTP/password/login credential stealing or account takeover attempts | OTP, password, login, PIN, CVV, verification code |
+| `legitimate` | Benign, non-fraud communication that does not ask for credentials, payment, or urgent action | routine account notice, opt-in service update, normal transaction confirmation |
 
 ## Labeling Rules
 
@@ -25,6 +26,13 @@ Create a labelled text dataset for cyber-fraud triage in Hinglish, Hindi, and En
 - If it uses police/customs/court threats, use `digital_arrest` or `courier_scam` depending on the main story.
 - Do not include real victim names, real phone numbers, real UPI IDs, or private screenshots in Phase 1.
 - Synthetic examples should include realistic Hinglish, short forms, misspellings, urgency, and imperfect grammar.
+- Use `legitimate` only when the message is positively benign. If available evidence is insufficient to determine whether a message is benign or fraudulent, mark it `unknown` during intake and exclude it from the trained dataset until reviewed; `unknown` is not a trained label.
+
+## Phase 2 Provenance Rules
+
+- Every Phase 2 row must reference a `provenance_id` recorded in `data/provenance/phase2_sources.csv`.
+- Record the true source type and licence. Do not describe project-authored synthetic data as external, collected, or victim-reported data.
+- Set `pii_reviewed` to `true` only after the stated reviewer has checked the row for private or identifying information. Rows without that confirmation are not eligible for the dataset.
 
 ## Quality Checklist
 
@@ -32,4 +40,3 @@ Create a labelled text dataset for cyber-fraud triage in Hinglish, Hindi, and En
 - The text contains enough evidence for a classifier to learn from it.
 - The example does not expose private data.
 - Hinglish examples should not sound overly formal.
-

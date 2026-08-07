@@ -1,0 +1,2 @@
+provenance_id,source_name,source_type,collection_method,license,pii_review_status,reviewer,notes
+phase1-seed-synthetic,Phase 1 seed dataset,synthetic,Project-authored synthetic examples,project-generated,reviewed,Phase 1 manual review,"Existing 64-row Phase 1 synthetic batch; no external source, victim report, or legitimate example is claimed."
