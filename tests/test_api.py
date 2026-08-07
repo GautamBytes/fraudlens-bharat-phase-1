@@ -24,3 +24,53 @@ def test_analyze_endpoint_returns_complete_result():
     assert isinstance(payload["entities"], list)
     assert payload["explanation"]
 
+
+def test_analyze_endpoint_trims_request_text_and_user_notes():
+    response = client.post(
+        "/analyze",
+        json={"text": "  urgent account verification  ", "user_notes": "  called the sender  "},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["original_text"] == "urgent account verification"
+    assert response.json()["metadata"]["user_notes"] == "called the sender"
+
+
+def test_analyze_endpoint_rejects_whitespace_only_text():
+    response = client.post("/analyze", json={"text": " \t\n "})
+
+    assert response.status_code == 422
+
+
+def test_analyze_endpoint_rejects_overlong_text():
+    response = client.post("/analyze", json={"text": "x" * 20_001})
+
+    assert response.status_code == 422
+
+
+def test_analyze_endpoint_rejects_unknown_fields():
+    response = client.post(
+        "/analyze",
+        json={"text": "urgent verification", "unexpected": "not accepted"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_analyze_endpoint_converts_whitespace_only_user_notes_to_none():
+    response = client.post(
+        "/analyze",
+        json={"text": "urgent verification", "user_notes": " \n\t "},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["metadata"]["user_notes"] is None
+
+
+def test_analyze_endpoint_rejects_overlong_user_notes():
+    response = client.post(
+        "/analyze",
+        json={"text": "urgent verification", "user_notes": "x" * 2_001},
+    )
+
+    assert response.status_code == 422
