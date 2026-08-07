@@ -181,34 +181,19 @@ def _rule_metrics(
     true_labels = [labels[index] for index in y_true.tolist()]
     predicted_labels = [prediction[0] for prediction in runtime_predictions]
     accepted = np.asarray([label != "unknown" for label in predicted_labels], dtype=bool)
-    precision, recall, f1, support = precision_recall_fscore_support(
-        true_labels, predicted_labels, labels=list(labels), zero_division=0
-    )
-    per_class = {
-        label: {
-            "precision": _number(precision[index]),
-            "recall": _number(recall[index]),
-            "f1": _number(f1[index]),
-            "support": int(support[index]),
-        }
-        for index, label in enumerate(labels)
-    }
     coverage = _number(accepted.mean())
     accepted_accuracy = (
         _number(accuracy_score(np.asarray(true_labels)[accepted], np.asarray(predicted_labels)[accepted]))
         if accepted.any() else None
     )
-    confusion_labels = list(labels) + ["unknown"]
+    final_metrics = _classification_metrics(
+        true_labels, predicted_labels, labels, list(labels) + ["unknown"]
+    )
     return {
         "split": split,
         "rows": int(len(y_true)),
-        "accuracy": _number(accuracy_score(true_labels, predicted_labels)),
-        "macro_precision": _number(float(np.mean(precision))),
-        "macro_recall": _number(float(np.mean(recall))),
-        "macro_f1": _number(float(np.mean(f1))),
-        "per_class": per_class,
-        "confusion_matrix_labels": confusion_labels,
-        "confusion_matrix": confusion_matrix(true_labels, predicted_labels, labels=confusion_labels).tolist(),
+        **final_metrics,
+        "raw_prediction_metrics": None,
         "expected_calibration_error": None,
         "calibration_note": "Not applicable: runtime rule confidence is not calibrated.",
         "coverage": coverage,
@@ -231,18 +216,18 @@ def _metrics(
     accepted = confidence >= threshold
     if evidence is not None:
         accepted = np.logical_and(accepted, evidence)
-    precision, recall, f1, support = precision_recall_fscore_support(
-        y_true, predicted, labels=list(range(len(labels))), zero_division=0
+    true_labels = [labels[index] for index in y_true.tolist()]
+    raw_predicted_labels = [labels[index] for index in predicted.tolist()]
+    final_predicted_labels = [
+        label if is_accepted else "unknown"
+        for label, is_accepted in zip(raw_predicted_labels, accepted.tolist())
+    ]
+    final_metrics = _classification_metrics(
+        true_labels, final_predicted_labels, labels, list(labels) + ["unknown"]
     )
-    per_class = {
-        label: {
-            "precision": _number(precision[index]),
-            "recall": _number(recall[index]),
-            "f1": _number(f1[index]),
-            "support": int(support[index]),
-        }
-        for index, label in enumerate(labels)
-    }
+    raw_prediction_metrics = _classification_metrics(
+        true_labels, raw_predicted_labels, labels, list(labels)
+    )
     coverage = _number(accepted.mean())
     accepted_accuracy = (
         _number(accuracy_score(y_true[accepted], predicted[accepted])) if accepted.any() else None
@@ -250,18 +235,43 @@ def _metrics(
     return {
         "split": split,
         "rows": int(len(y_true)),
-        "accuracy": _number(accuracy_score(y_true, predicted)),
-        "macro_precision": _number(float(np.mean(precision))),
-        "macro_recall": _number(float(np.mean(recall))),
-        "macro_f1": _number(float(np.mean(f1))),
-        "per_class": per_class,
-        "confusion_matrix_labels": list(labels),
-        "confusion_matrix": confusion_matrix(y_true, predicted, labels=list(range(len(labels)))).tolist(),
+        **final_metrics,
+        "raw_prediction_metrics": raw_prediction_metrics,
         "expected_calibration_error": _expected_calibration_error(y_true, predicted, confidence),
         "coverage": coverage,
         "abstention_rate": _number(1.0 - coverage),
         "accepted_accuracy": accepted_accuracy,
         "latency": _latency_note(),
+    }
+
+
+def _classification_metrics(
+    true_labels: Sequence[str],
+    predicted_labels: Sequence[str],
+    trained_labels: Sequence[str],
+    confusion_labels: Sequence[str],
+) -> Dict[str, Any]:
+    precision, recall, f1, support = precision_recall_fscore_support(
+        true_labels, predicted_labels, labels=list(trained_labels), zero_division=0
+    )
+    return {
+        "accuracy": _number(accuracy_score(true_labels, predicted_labels)),
+        "macro_precision": _number(float(np.mean(precision))),
+        "macro_recall": _number(float(np.mean(recall))),
+        "macro_f1": _number(float(np.mean(f1))),
+        "per_class": {
+            label: {
+                "precision": _number(precision[index]),
+                "recall": _number(recall[index]),
+                "f1": _number(f1[index]),
+                "support": int(support[index]),
+            }
+            for index, label in enumerate(trained_labels)
+        },
+        "confusion_matrix_labels": list(confusion_labels),
+        "confusion_matrix": confusion_matrix(
+            true_labels, predicted_labels, labels=list(confusion_labels)
+        ).tolist(),
     }
 
 
@@ -352,7 +362,7 @@ def _summary(document: Mapping[str, Any]) -> str:
         "missing_labels: {}".format(", ".join(dataset["missing_labels"]) or "none"),
         "phase2_target_met: {}".format(str(dataset["phase2_target_met"]).lower()),
         "",
-        "Test split results (raw predicted-label metrics; abstentions reported separately):",
+        "Final abstention-aware test results (rejected predictions are unknown):",
     ]
     for name in CLASSIFIER_NAMES:
         metrics = document["classifiers"][name]["test"]
@@ -366,7 +376,8 @@ def _summary(document: Mapping[str, Any]) -> str:
         )
     lines.extend([
         "",
-        "Rule-only uses canonical runtime acceptance (label != unknown); unknown counts as an overall error.",
+        "TF-IDF raw argmax diagnostics remain in evaluation.json under raw_prediction_metrics.",
+        "Rule-only uses canonical runtime acceptance (label != unknown); all unknowns count as overall errors.",
         "Limitation: {}".format(dataset["limitation"]),
         "",
     ])

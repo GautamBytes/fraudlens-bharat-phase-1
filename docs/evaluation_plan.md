@@ -55,17 +55,20 @@ marker-enhanced variant is an ablation and is not selected for runtime use.
 Metrics below are copied from the deterministic evidence output, not
 extrapolated beyond this synthetic bootstrap.
 
-| Model | Overall accuracy | Raw macro F1 | Coverage | Abstention | Accepted accuracy | Frozen test rows |
+| Model | Final accuracy | Final macro F1 | Coverage | Abstention | Accepted accuracy | Frozen test rows |
 |---|---:|---:|---:|---:|---:|---:|
 | Rule-only runtime fallback | 0.2500 | 0.2500 | 25.0% | 75.0% | 100.00% | 8 |
 | Raw-normalized TF-IDF | 0.3750 | 0.3333 | 100.0% | 0.0% | 37.50% | 8 |
-| Marker TF-IDF (ablation; not selected) | 0.8750 | 0.8333 | 62.5% | 37.5% | 100.00% | 8 |
+| Marker TF-IDF (ablation; not selected) | 0.6250 | 0.6250 | 62.5% | 37.5% | 100.00% | 8 |
 | Calibrated raw-normalized TF-IDF | 0.5000 | 0.5000 | 87.5% | 12.5% | 57.14% | 8 |
 
-The report also includes per-class metrics, confusion matrices, ECE where
-applicable, split row counts, and a deterministic latency note. Rule confusion
-matrices include an explicit `unknown` column and row, so abstentions are not
-credited as an arbitrary fraud label. Wall-clock measurements are excluded
+Headline accuracy, macro metrics, per-class metrics, and confusion matrices use
+the final prediction: every rejected TF-IDF result is `unknown`, just like a
+runtime-rule abstention. Underlying TF-IDF argmax diagnostics remain separately
+available as `raw_prediction_metrics`; they are not mixed into the comparable
+headline values. The report also includes ECE where applicable, split row
+counts, and a deterministic latency note. Every final confusion matrix includes
+an explicit `unknown` column and row. Wall-clock measurements are excluded
 because they would make the committed evidence non-reproducible. This is a
 synthetic bootstrap result, not a production claim or a 9-class result.
 

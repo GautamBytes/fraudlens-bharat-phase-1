@@ -40,20 +40,34 @@ def test_evaluation_reports_the_four_comparable_classifiers(tmp_path):
             assert classifier["threshold"] is None
             assert classifier["threshold_selected_on"] == "not_applicable_runtime_rule"
             assert classifier["test"]["expected_calibration_error"] is None
-            assert classifier["test"]["confusion_matrix_labels"][-1] == "unknown"
+            assert classifier["test"]["raw_prediction_metrics"] is None
         else:
             assert classifier["threshold_selected_on"] == "validation"
             assert 0.0 <= classifier["test"]["expected_calibration_error"] <= 1.0
+            assert classifier["test"]["raw_prediction_metrics"]["confusion_matrix_labels"] == sorted(
+                classifier["test"]["per_class"]
+            )
         assert classifier["split_rows"] == {"train": 48, "validation": 8, "test": 8}
         assert classifier["test"]["rows"] == 8
         assert classifier["test"]["split"] == "test"
         assert 0.0 <= classifier["test"]["coverage"] <= 1.0
         assert classifier["test"]["abstention_rate"] == 1.0 - classifier["test"]["coverage"]
         assert classifier["test"]["latency"]["method"]
-        expected_labels = sorted(classifier["test"]["per_class"])
-        if name == "rule_only":
-            expected_labels.append("unknown")
+        expected_labels = sorted(classifier["test"]["per_class"]) + ["unknown"]
         assert classifier["test"]["confusion_matrix_labels"] == expected_labels
+        unknown_predictions = sum(row[-1] for row in classifier["test"]["confusion_matrix"])
+        assert unknown_predictions == round(
+            classifier["test"]["rows"] * classifier["test"]["abstention_rate"]
+        )
+        assert classifier["test"]["accuracy"] == round(
+            classifier["test"]["coverage"] * classifier["test"]["accepted_accuracy"], 8
+        )
+
+    marker_test = report["classifiers"]["marker_tfidf"]["test"]
+    assert marker_test["accuracy"] == 0.625
+    assert marker_test["macro_f1"] == 0.625
+    assert marker_test["raw_prediction_metrics"]["accuracy"] == 0.875
+    assert marker_test["raw_prediction_metrics"]["macro_f1"] == 0.83333333
 
 
 def test_evaluation_fits_tfidf_on_train_text_only_and_does_not_emit_holdout_text(tmp_path, monkeypatch):
@@ -154,7 +168,8 @@ def test_evaluation_cli_writes_the_document_and_readable_summary(tmp_path):
         text=True,
     )
 
-    assert "Test split results" in result.stdout
+    assert "Final abstention-aware test results" in result.stdout
+    assert "raw argmax diagnostics remain in evaluation.json" in result.stdout
     assert (tmp_path / "phase2" / "evaluation.json").is_file()
     assert (tmp_path / "phase2" / "summary.txt").is_file()
 
@@ -162,12 +177,14 @@ def test_evaluation_cli_writes_the_document_and_readable_summary(tmp_path):
 def test_ci_workflow_runs_supported_versions_and_the_reproducibility_check():
     workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
 
-    assert "3.9" in workflow
+    assert "3.10" in workflow
     assert "3.11" in workflow
     assert "3.12" in workflow
     assert "contents: read" in workflow
-    assert "actions/checkout@v4" in workflow
-    assert "actions/setup-python@v5" in workflow
+    assert "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" in workflow
+    assert "actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065" in workflow
+    assert "persist-credentials: false" in workflow
+    assert "python -m pip install --require-hashes -r requirements.lock" in workflow
     assert "python -m compileall -q src tests" in workflow
     assert "python -m pytest" in workflow
     assert "fraudlens.evaluation" in workflow

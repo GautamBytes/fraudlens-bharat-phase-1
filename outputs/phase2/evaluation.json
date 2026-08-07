@@ -23,6 +23,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -33,29 +34,11 @@
             0,
             0,
             0,
-            0
-          ],
-          [
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
             0,
             0
           ],
           [
             0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
             0,
             1,
             0,
@@ -69,9 +52,21 @@
             0,
             0,
             0,
+            1,
             0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
             0,
             1,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0
           ],
@@ -80,12 +75,14 @@
             0,
             0,
             0,
+            0,
             1,
             0,
             0,
             0
           ],
           [
+            0,
             0,
             0,
             0,
@@ -94,6 +91,28 @@
             0,
             0,
             1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
           ]
         ],
         "confusion_matrix_labels": [
@@ -104,7 +123,8 @@
           "kyc_scam",
           "loan_scam",
           "otp_phishing",
-          "upi_refund_scam"
+          "upi_refund_scam",
+          "unknown"
         ],
         "coverage": 0.875,
         "expected_calibration_error": 0.37701561,
@@ -166,6 +186,154 @@
             "support": 1
           }
         },
+        "raw_prediction_metrics": {
+          "accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.5,
+          "macro_precision": 0.5,
+          "macro_recall": 0.5,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
         "rows": 8,
         "split": "test"
       },
@@ -175,7 +343,7 @@
       "validation": {
         "abstention_rate": 0.25,
         "accepted_accuracy": 0.66666667,
-        "accuracy": 0.625,
+        "accuracy": 0.5,
         "confusion_matrix": [
           [
             0,
@@ -185,69 +353,11 @@
             1,
             0,
             0,
-            0
-          ],
-          [
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0
           ],
           [
             0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
             0,
             0,
             0,
@@ -256,6 +366,83 @@
             0,
             0,
             1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
           ]
         ],
         "confusion_matrix_labels": [
@@ -266,7 +453,8 @@
           "kyc_scam",
           "loan_scam",
           "otp_phishing",
-          "upi_refund_scam"
+          "upi_refund_scam",
+          "unknown"
         ],
         "coverage": 0.75,
         "expected_calibration_error": 0.22388599,
@@ -275,9 +463,9 @@
           "unit": "milliseconds_per_row",
           "value": null
         },
-        "macro_f1": 0.5625,
-        "macro_precision": 0.54166667,
-        "macro_recall": 0.625,
+        "macro_f1": 0.4375,
+        "macro_precision": 0.41666667,
+        "macro_recall": 0.5,
         "per_class": {
           "courier_scam": {
             "f1": 0.0,
@@ -286,9 +474,9 @@
             "support": 1
           },
           "digital_arrest": {
-            "f1": 1.0,
-            "precision": 1.0,
-            "recall": 1.0,
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
             "support": 1
           },
           "fake_job": {
@@ -328,6 +516,154 @@
             "support": 1
           }
         },
+        "raw_prediction_metrics": {
+          "accuracy": 0.625,
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.5625,
+          "macro_precision": 0.54166667,
+          "macro_recall": 0.625,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.5,
+              "precision": 0.33333333,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
         "rows": 8,
         "split": "validation"
       }
@@ -345,7 +681,7 @@
       "test": {
         "abstention_rate": 0.375,
         "accepted_accuracy": 1.0,
-        "accuracy": 0.875,
+        "accuracy": 0.625,
         "confusion_matrix": [
           [
             1,
@@ -355,9 +691,22 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
             0,
             1,
             0,
@@ -369,55 +718,6 @@
           ],
           [
             0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
             0,
             0,
             0,
@@ -426,6 +726,61 @@
             0,
             0,
             1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
           ]
         ],
         "confusion_matrix_labels": [
@@ -436,7 +791,8 @@
           "kyc_scam",
           "loan_scam",
           "otp_phishing",
-          "upi_refund_scam"
+          "upi_refund_scam",
+          "unknown"
         ],
         "coverage": 0.625,
         "expected_calibration_error": 0.64028375,
@@ -445,9 +801,9 @@
           "unit": "milliseconds_per_row",
           "value": null
         },
-        "macro_f1": 0.83333333,
-        "macro_precision": 0.8125,
-        "macro_recall": 0.875,
+        "macro_f1": 0.625,
+        "macro_precision": 0.625,
+        "macro_recall": 0.625,
         "per_class": {
           "courier_scam": {
             "f1": 1.0,
@@ -468,15 +824,15 @@
             "support": 1
           },
           "investment_scam": {
-            "f1": 1.0,
-            "precision": 1.0,
-            "recall": 1.0,
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
             "support": 1
           },
           "kyc_scam": {
-            "f1": 0.66666667,
-            "precision": 0.5,
-            "recall": 1.0,
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
             "support": 1
           },
           "loan_scam": {
@@ -498,6 +854,154 @@
             "support": 1
           }
         },
+        "raw_prediction_metrics": {
+          "accuracy": 0.875,
+          "confusion_matrix": [
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.83333333,
+          "macro_precision": 0.8125,
+          "macro_recall": 0.875,
+          "per_class": {
+            "courier_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
         "rows": 8,
         "split": "test"
       },
@@ -514,10 +1018,11 @@
             0,
             0,
             0,
-            1,
             0,
             0,
-            0
+            0,
+            0,
+            1
           ],
           [
             0,
@@ -527,59 +1032,11 @@
             0,
             0,
             0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
             0,
             0
           ],
           [
             0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0
-          ],
-          [
             0,
             0,
             0,
@@ -588,6 +1045,72 @@
             0,
             0,
             1
+          ],
+          [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
           ]
         ],
         "confusion_matrix_labels": [
@@ -598,7 +1121,8 @@
           "kyc_scam",
           "loan_scam",
           "otp_phishing",
-          "upi_refund_scam"
+          "upi_refund_scam",
+          "unknown"
         ],
         "coverage": 0.75,
         "expected_calibration_error": 0.51582568,
@@ -607,8 +1131,8 @@
           "unit": "milliseconds_per_row",
           "value": null
         },
-        "macro_f1": 0.66666667,
-        "macro_precision": 0.625,
+        "macro_f1": 0.75,
+        "macro_precision": 0.75,
         "macro_recall": 0.75,
         "per_class": {
           "courier_scam": {
@@ -630,14 +1154,14 @@
             "support": 1
           },
           "investment_scam": {
-            "f1": 0.66666667,
-            "precision": 0.5,
+            "f1": 1.0,
+            "precision": 1.0,
             "recall": 1.0,
             "support": 1
           },
           "kyc_scam": {
-            "f1": 0.66666667,
-            "precision": 0.5,
+            "f1": 1.0,
+            "precision": 1.0,
             "recall": 1.0,
             "support": 1
           },
@@ -658,6 +1182,154 @@
             "precision": 1.0,
             "recall": 1.0,
             "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.75,
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.66666667,
+          "macro_precision": 0.625,
+          "macro_recall": 0.75,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
           }
         },
         "rows": 8,
@@ -687,6 +1359,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -697,29 +1370,11 @@
             0,
             0,
             0,
-            0
-          ],
-          [
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
             0,
             0
           ],
           [
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1
-          ],
-          [
             0,
             1,
             0,
@@ -735,7 +1390,30 @@
             0,
             0,
             0,
+            0,
+            0,
             1,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
             0,
             0
           ],
@@ -747,6 +1425,7 @@
             1,
             0,
             0,
+            0,
             0
           ],
           [
@@ -757,7 +1436,19 @@
             0,
             0,
             0,
-            1
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
           ]
         ],
         "confusion_matrix_labels": [
@@ -768,7 +1459,8 @@
           "kyc_scam",
           "loan_scam",
           "otp_phishing",
-          "upi_refund_scam"
+          "upi_refund_scam",
+          "unknown"
         ],
         "coverage": 1.0,
         "expected_calibration_error": 0.2635183,
@@ -830,6 +1522,154 @@
             "support": 1
           }
         },
+        "raw_prediction_metrics": {
+          "accuracy": 0.375,
+          "confusion_matrix": [
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.33333333,
+          "macro_precision": 0.3125,
+          "macro_recall": 0.375,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 0.66666667,
+              "precision": 0.5,
+              "recall": 1.0,
+              "support": 1
+            }
+          }
+        },
         "rows": 8,
         "split": "test"
       },
@@ -839,7 +1679,7 @@
       "validation": {
         "abstention_rate": 0.25,
         "accepted_accuracy": 0.66666667,
-        "accuracy": 0.625,
+        "accuracy": 0.5,
         "confusion_matrix": [
           [
             0,
@@ -849,19 +1689,11 @@
             1,
             0,
             0,
-            0
-          ],
-          [
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
             0,
             0
           ],
           [
+            0,
             1,
             0,
             0,
@@ -873,45 +1705,6 @@
           ],
           [
             0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0
-          ],
-          [
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0
-          ],
-          [
             0,
             0,
             0,
@@ -920,6 +1713,72 @@
             0,
             0,
             1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
           ]
         ],
         "confusion_matrix_labels": [
@@ -930,7 +1789,8 @@
           "kyc_scam",
           "loan_scam",
           "otp_phishing",
-          "upi_refund_scam"
+          "upi_refund_scam",
+          "unknown"
         ],
         "coverage": 0.75,
         "expected_calibration_error": 0.46059766,
@@ -939,9 +1799,9 @@
           "unit": "milliseconds_per_row",
           "value": null
         },
-        "macro_f1": 0.5625,
-        "macro_precision": 0.54166667,
-        "macro_recall": 0.625,
+        "macro_f1": 0.4375,
+        "macro_precision": 0.41666667,
+        "macro_recall": 0.5,
         "per_class": {
           "courier_scam": {
             "f1": 0.0,
@@ -962,9 +1822,9 @@
             "support": 1
           },
           "investment_scam": {
-            "f1": 1.0,
-            "precision": 1.0,
-            "recall": 1.0,
+            "f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
             "support": 1
           },
           "kyc_scam": {
@@ -990,6 +1850,154 @@
             "precision": 1.0,
             "recall": 1.0,
             "support": 1
+          }
+        },
+        "raw_prediction_metrics": {
+          "accuracy": 0.625,
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "confusion_matrix_labels": [
+            "courier_scam",
+            "digital_arrest",
+            "fake_job",
+            "investment_scam",
+            "kyc_scam",
+            "loan_scam",
+            "otp_phishing",
+            "upi_refund_scam"
+          ],
+          "macro_f1": 0.5625,
+          "macro_precision": 0.54166667,
+          "macro_recall": 0.625,
+          "per_class": {
+            "courier_scam": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "digital_arrest": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "fake_job": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "investment_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "kyc_scam": {
+              "f1": 0.5,
+              "precision": 0.33333333,
+              "recall": 1.0,
+              "support": 1
+            },
+            "loan_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            },
+            "otp_phishing": {
+              "f1": 0.0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "support": 1
+            },
+            "upi_refund_scam": {
+              "f1": 1.0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "support": 1
+            }
           }
         },
         "rows": 8,
@@ -1184,6 +2192,7 @@
             "support": 1
           }
         },
+        "raw_prediction_metrics": null,
         "rows": 8,
         "split": "test"
       },
@@ -1367,6 +2376,7 @@
             "support": 1
           }
         },
+        "raw_prediction_metrics": null,
         "rows": 8,
         "split": "validation"
       }
@@ -1390,7 +2400,7 @@
       "upi_refund_scam"
     ],
     "rows": 64,
-    "sha256": "52a06466538f5e14a509c075b9bfd112cd0be2ef99df9b81ba1da5aa5783dfcc",
+    "sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816",
     "split_rows": {
       "test": 8,
       "train": 48,
