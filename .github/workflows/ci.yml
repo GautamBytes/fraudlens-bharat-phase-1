@@ -25,9 +25,25 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --require-hashes -r requirements.lock
+          python -m pip install --no-index --no-deps -r requirements-dev.txt
           python -m pip install -e . --no-deps
       - name: Compile Python sources
         run: python -m compileall -q src tests
+      - name: Verify reproducible release artifacts
+        if: matrix.python-version == '3.11'
+        run: |
+          artifact_tmp=$(mktemp -d)
+          python -c "from pathlib import Path; from fraudlens.model_training import train_baseline; train_baseline(artifact_dir=Path('$artifact_tmp'))"
+          for artifact in \
+            baseline_classifier.joblib \
+            vectorizer.joblib \
+            label_encoder.joblib \
+            metrics.json \
+            model_metadata.json \
+            artifact_manifest.json
+          do
+            cmp "$artifact_tmp/$artifact" "models/$artifact"
+          done
       - name: Run tests
         run: python -m pytest
       - name: Validate dataset and provenance contract

@@ -37,13 +37,26 @@ OCR, transformer fine-tuning, graph analytics, and screenshot analysis are inten
 
 FraudLens Bharat requires Python 3.10 or later.
 
+### Runtime installation
+
+Use the runtime requirements to run the API, dashboard, or training command:
+
 ```bash
 cd "/Users/gautammanch/capstone-project(phase-1)"
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
 pip install -r requirements.txt
-pip install -e .
+pip install -e . --no-deps
+```
+
+### Contributor and test installation
+
+Contributors should install the development requirements, which include the
+runtime dependencies and `pytest`:
+
+```bash
+pip install -r requirements-dev.txt
+pip install -e . --no-deps
 ```
 
 ## Train Baseline Model

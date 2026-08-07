@@ -4,6 +4,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_installation_docs_separate_runtime_and_contributor_dependencies():
+    for relative_path in ("README.md", "docs/installation_guide.md"):
+        documentation = (ROOT / relative_path).read_text(encoding="utf-8")
+
+        assert "Runtime installation" in documentation
+        assert "Contributor and test installation" in documentation
+        assert "pip install -r requirements.txt" in documentation
+        assert "pip install -r requirements-dev.txt" in documentation
+
+
 def test_dependency_and_ci_security_baseline():
     requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
     development_requirements = (ROOT / "requirements-dev.txt").read_text(
@@ -35,4 +45,21 @@ def test_dependency_and_ci_security_baseline():
     assert "actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065" in workflow
     assert "persist-credentials: false" in workflow
     assert "--require-hashes -r requirements.lock" in workflow
+    assert "--no-index --no-deps -r requirements-dev.txt" in workflow
     assert "-e . --no-deps" in workflow
+
+    artifact_gate = workflow.index("- name: Verify reproducible release artifacts")
+    test_step = workflow.index("- name: Run tests")
+    assert artifact_gate < test_step
+    artifact_gate_body = workflow[artifact_gate:test_step]
+    assert "if: matrix.python-version == '3.11'" in artifact_gate_body
+    assert "train_baseline(artifact_dir=Path(" in artifact_gate_body
+    for artifact in (
+        "baseline_classifier.joblib",
+        "vectorizer.joblib",
+        "label_encoder.joblib",
+        "metrics.json",
+        "model_metadata.json",
+        "artifact_manifest.json",
+    ):
+        assert artifact in artifact_gate_body
