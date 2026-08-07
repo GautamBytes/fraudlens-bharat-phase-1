@@ -31,8 +31,10 @@ Create a labelled text dataset for cyber-fraud triage in Hinglish, Hindi, and En
 ## Phase 2 Provenance Rules
 
 - Every Phase 2 row must reference a `provenance_id` recorded in `data/provenance/phase2_sources.csv`.
-- Record the true source type and licence. Do not describe project-authored synthetic data as external, collected, or victim-reported data.
+- The provenance record is authoritative for a row's source type, licence, reviewer, PII-review status, and allowed label scope. A row must match all of those values exactly.
+- Record the true source type and licence. Do not describe project-authored synthetic data as external, collected, or victim-reported data. The Phase 1 seed record explicitly excludes `legitimate`.
 - Set `pii_reviewed` to `true` only after the stated reviewer has checked the row for private or identifying information. Rows without that confirmation are not eligible for the dataset.
+- The Phase 1 migration accepts only byte-identical copies of the seed whose SHA-256 is recorded in the provenance register. Its template families are deterministic content-and-note mechanisms, so related variants remain in one split.
 
 ## Quality Checklist
 
