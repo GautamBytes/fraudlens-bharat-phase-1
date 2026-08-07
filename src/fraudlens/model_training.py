@@ -22,9 +22,10 @@ from fraudlens.config import (
     ArtifactPaths,
     DATASET_PATH,
     DEFAULT_ARTIFACTS,
+    PIPELINE_CODE_SOURCES,
     TRAINING_CONFIGURATION,
     artifact_paths,
-    model_training_code_sha256,
+    pipeline_code_sha256,
     release_model_version,
     training_configuration_sha256,
 )
@@ -181,8 +182,8 @@ def train_baseline(
 
     dataset_hash = _dataset_sha256(dataset_path)
     configuration_hash = training_configuration_sha256()
-    code_hash = model_training_code_sha256()
-    model_version = release_model_version(dataset_hash, configuration_hash, code_hash)
+    pipeline_hash = pipeline_code_sha256()
+    model_version = release_model_version(dataset_hash, configuration_hash, pipeline_hash)
     present_labels = sorted(frame["label"].unique())
     missing_labels = sorted(TRAINED_LABELS - set(present_labels))
     target_met = all(
@@ -219,7 +220,8 @@ def train_baseline(
         "marker_enhancement_selected": False,
         "threshold": threshold,
         "training_configuration_sha256": configuration_hash,
-        "model_training_code_sha256": code_hash,
+        "pipeline_code_sha256": pipeline_hash,
+        "pipeline_code_sources": list(PIPELINE_CODE_SOURCES),
         "runtime_versions": _runtime_versions(),
         "calibration": {
             "method": "sigmoid",
@@ -240,7 +242,8 @@ def train_baseline(
         "model_version": model_version,
         "dataset_sha256": dataset_hash,
         "training_configuration_sha256": configuration_hash,
-        "model_training_code_sha256": code_hash,
+        "pipeline_code_sha256": pipeline_hash,
+        "pipeline_code_sources": list(PIPELINE_CODE_SOURCES),
         "threshold": threshold,
         "test": test_evaluation,
     }
@@ -275,7 +278,8 @@ def train_baseline(
         },
         "model_version": model_version,
         "training_configuration_sha256": configuration_hash,
-        "model_training_code_sha256": code_hash,
+        "pipeline_code_sha256": pipeline_hash,
+        "pipeline_code_sources": list(PIPELINE_CODE_SOURCES),
         "runtime_versions": _runtime_versions(),
     }
     artifacts.manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")

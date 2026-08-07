@@ -1,3 +1,4 @@
+import io
 import json
 from pathlib import Path
 
@@ -6,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from fraudlens import config, model_inference
 from fraudlens.config import artifact_paths
 from fraudlens.model_inference import ModelPredictor, rule_based_predict
 from fraudlens.model_training import train_baseline
@@ -155,6 +157,33 @@ def test_tampered_manifest_falls_back_without_deserializing_joblib(tmp_path, mon
     assert prediction.source == "rule_fallback"
 
 
+def test_pipeline_code_hash_changes_when_preprocessing_source_changes(tmp_path):
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    for source_dir in (first, second):
+        (source_dir / "model_training.py").write_bytes(b"same trainer")
+    (first / "preprocessing.py").write_bytes(b"normalize v1")
+    (second / "preprocessing.py").write_bytes(b"normalize v2")
+
+    assert config.pipeline_code_sha256(first) != config.pipeline_code_sha256(second)
+
+
+def test_changed_pipeline_source_falls_back_without_deserializing_joblib(tmp_path, monkeypatch):
+    paths = artifact_paths(tmp_path)
+    train_baseline(
+        dataset_path=Path(__file__).resolve().parents[1] / "data" / "samples" / "phase2_dataset.csv",
+        artifact_dir=tmp_path,
+    )
+    monkeypatch.setattr(model_inference, "pipeline_code_sha256", lambda: "0" * 64)
+    monkeypatch.setattr(joblib, "load", lambda path: pytest.fail("joblib.load must not run"))
+
+    prediction = ModelPredictor(artifacts=paths).predict("ordinary message")
+
+    assert prediction.source == "rule_fallback"
+
+
 def test_verified_manifest_loads_the_trained_artifacts(tmp_path, monkeypatch):
     paths = artifact_paths(tmp_path)
     train_baseline(
@@ -162,16 +191,25 @@ def test_verified_manifest_loads_the_trained_artifacts(tmp_path, monkeypatch):
         artifact_dir=tmp_path,
     )
     real_load = joblib.load
-    calls = []
+    original_bytes = [
+        paths.model.read_bytes(),
+        paths.vectorizer.read_bytes(),
+        paths.label_encoder.read_bytes(),
+    ]
+    loaded_bytes = []
 
-    def tracking_load(path):
-        calls.append(Path(path).name)
-        return real_load(path)
+    def tracking_load(stream):
+        assert isinstance(stream, io.BytesIO)
+        loaded_bytes.append(stream.getvalue())
+        if len(loaded_bytes) == 1:
+            for path in (paths.model, paths.vectorizer, paths.label_encoder):
+                path.write_bytes(b"swapped after verification")
+        return real_load(stream)
 
     monkeypatch.setattr(joblib, "load", tracking_load)
     prediction = ModelPredictor(artifacts=paths).predict("urgent account block kyc")
 
-    assert calls == ["baseline_classifier.joblib", "vectorizer.joblib", "label_encoder.joblib"]
+    assert loaded_bytes == original_bytes
     assert prediction.source in {"tfidf_calibrated", "tfidf_calibrated_abstained"}
 
 

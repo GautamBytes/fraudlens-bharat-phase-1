@@ -323,10 +323,14 @@
   "missing_labels": [
     "legitimate"
   ],
-  "model_training_code_sha256": "e5d8cba62891a6fce274778f810bfbd87b49c49110c411fd26d39694d0ef6167",
-  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-e5d8cba62891",
+  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-ef98634efe9e",
   "phase2_target_met": false,
   "phase2_target_per_label": 200,
+  "pipeline_code_sha256": "ef98634efe9e60b35ae85650438ce7450e4288cf1d908d62f169ae1b6121cf5c",
+  "pipeline_code_sources": [
+    "model_training.py",
+    "preprocessing.py"
+  ],
   "present_labels": [
     "courier_scam",
     "digital_arrest",

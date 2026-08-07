@@ -7,10 +7,10 @@
       "sha256": "0b6b176ea72252a9c10ef9fbdddcfa1266ffa0e029227ccb93ace1ce83577ccd"
     },
     "metrics.json": {
-      "sha256": "10246d4caefa1db1796dd6e094551f10a3ce5e84909e76e0819f260a9062bef6"
+      "sha256": "805d432ef6d057da38de02b2b3d2020b45d641b7e4917bc78ffcb106e703199c"
     },
     "model_metadata.json": {
-      "sha256": "2db403eee52b930dedfa53bf49b1518576e128fc8dcafe25a4c73804e28b101d"
+      "sha256": "b331f6d56fda4fc0bcbe7646849203ba2e23e89df161a0a9df15e272b16437a1"
     },
     "vectorizer.joblib": {
       "sha256": "30c177ef7e19efbea9a89b35f82d4e699ad22efb3a3a872d7223c1df7dd4cbb3"
@@ -21,14 +21,18 @@
     "rows": 64,
     "sha256": "d761cc086d6df94545d0badb8e5aa950a1b1c76d377749200c4f0041d6c79816"
   },
-  "model_training_code_sha256": "e5d8cba62891a6fce274778f810bfbd87b49c49110c411fd26d39694d0ef6167",
-  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-e5d8cba62891",
+  "model_version": "tfidf-calibrated-d761cc086d6d-7ac6262ca9be-ef98634efe9e",
+  "pipeline_code_sha256": "ef98634efe9e60b35ae85650438ce7450e4288cf1d908d62f169ae1b6121cf5c",
+  "pipeline_code_sources": [
+    "model_training.py",
+    "preprocessing.py"
+  ],
   "runtime_versions": {
     "joblib": "1.4.2",
     "python": "3.11.14",
     "sklearn": "1.5.2"
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "training_configuration_sha256": "7ac6262ca9be61754a90e875a101dbc2e9eae5f38ca79e7cde5a3837e512cc16",
   "trust_anchor": "tracked-release-artifact-manifest"
 }

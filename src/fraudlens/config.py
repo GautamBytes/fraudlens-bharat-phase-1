@@ -2,7 +2,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -72,13 +72,17 @@ TRAINING_CONFIGURATION: Mapping[str, Any] = {
         "objective": "maximise correct-minus-incorrect coverage",
     },
 }
-ARTIFACT_MANIFEST_VERSION = 1
+ARTIFACT_MANIFEST_VERSION = 2
 ARTIFACT_FILENAMES = (
     "baseline_classifier.joblib",
     "vectorizer.joblib",
     "label_encoder.joblib",
     "model_metadata.json",
     "metrics.json",
+)
+PIPELINE_CODE_SOURCES = (
+    "model_training.py",
+    "preprocessing.py",
 )
 
 
@@ -92,14 +96,27 @@ def training_configuration_sha256() -> str:
     return canonical_sha256(TRAINING_CONFIGURATION)
 
 
-def model_training_code_sha256() -> str:
-    """Bind trusted artifacts to this exact trainer source, never to a pickle alone."""
-    return hashlib.sha256((Path(__file__).parent / "model_training.py").read_bytes()).hexdigest()
+def pipeline_code_sha256(source_dir: Optional[Path] = None) -> str:
+    """Hash labeled training and feature-pipeline source bytes deterministically."""
+    root = Path(source_dir) if source_dir is not None else Path(__file__).parent
+    digest = hashlib.sha256(b"fraudlens-pipeline-code-v1\0")
+    for filename in PIPELINE_CODE_SOURCES:
+        label = filename.encode("utf-8")
+        source = (root / filename).read_bytes()
+        digest.update(len(label).to_bytes(8, "big"))
+        digest.update(label)
+        digest.update(len(source).to_bytes(8, "big"))
+        digest.update(source)
+    return digest.hexdigest()
 
 
-def release_model_version(dataset_sha256: str, configuration_sha256: str, code_sha256: str) -> str:
+def release_model_version(
+    dataset_sha256: str,
+    configuration_sha256: str,
+    pipeline_sha256: str,
+) -> str:
     return "tfidf-calibrated-{}-{}-{}".format(
-        dataset_sha256[:12], configuration_sha256[:12], code_sha256[:12]
+        dataset_sha256[:12], configuration_sha256[:12], pipeline_sha256[:12]
     )
 
 LABELS = [

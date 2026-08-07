@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 import hashlib
+import io
+import json
 from pathlib import Path
 from typing import Any, Dict, Mapping, Tuple
 
@@ -12,7 +13,8 @@ from fraudlens.config import (
     ARTIFACT_MANIFEST_VERSION,
     ArtifactPaths,
     DEFAULT_ARTIFACTS,
-    model_training_code_sha256,
+    PIPELINE_CODE_SOURCES,
+    pipeline_code_sha256,
     release_model_version,
     training_configuration_sha256,
 )
@@ -38,8 +40,8 @@ RULE_KEYWORDS: Dict[str, tuple] = {
 RULE_FALLBACK_VERSION = "rule-fallback-v1"
 
 
-def _file_sha256(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def _bytes_sha256(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
 
 
 def _strict_object(value: Any, keys: set[str], name: str) -> Mapping[str, Any]:
@@ -48,7 +50,7 @@ def _strict_object(value: Any, keys: set[str], name: str) -> Mapping[str, Any]:
     return value
 
 
-def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
+def _verified_artifacts(artifacts: ArtifactPaths) -> Tuple[Dict[str, Any], Dict[str, bytes]]:
     """Validate the release trust anchor before any pickle/joblib deserialization."""
     paths = {
         artifacts.model.name: artifacts.model,
@@ -62,6 +64,8 @@ def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
     if not all(path.exists() for path in paths.values()):
         raise ValueError("missing trusted artifact")
 
+    artifact_bytes = {name: path.read_bytes() for name, path in paths.items()}
+
     manifest = _strict_object(
         json.loads(artifacts.manifest.read_text(encoding="utf-8")),
         {
@@ -71,7 +75,8 @@ def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
             "dataset",
             "model_version",
             "training_configuration_sha256",
-            "model_training_code_sha256",
+            "pipeline_code_sha256",
+            "pipeline_code_sources",
             "runtime_versions",
         },
         "artifact manifest",
@@ -83,9 +88,9 @@ def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
     ):
         raise ValueError("invalid artifact manifest header")
     manifest_artifacts = _strict_object(manifest["artifacts"], set(ARTIFACT_FILENAMES), "artifact hashes")
-    for name, path in paths.items():
+    for name, payload in artifact_bytes.items():
         digest = _strict_object(manifest_artifacts[name], {"sha256"}, "artifact hash")["sha256"]
-        if not isinstance(digest, str) or len(digest) != 64 or digest != _file_sha256(path):
+        if not isinstance(digest, str) or len(digest) != 64 or digest != _bytes_sha256(payload):
             raise ValueError("artifact integrity check failed")
 
     dataset = _strict_object(manifest["dataset"], {"filename", "sha256", "rows"}, "dataset metadata")
@@ -99,21 +104,23 @@ def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
         raise ValueError("invalid dataset metadata")
     if manifest["training_configuration_sha256"] != training_configuration_sha256():
         raise ValueError("training configuration has changed")
-    if manifest["model_training_code_sha256"] != model_training_code_sha256():
-        raise ValueError("training code has changed")
+    if manifest["pipeline_code_sources"] != list(PIPELINE_CODE_SOURCES):
+        raise ValueError("pipeline source set has changed")
+    if manifest["pipeline_code_sha256"] != pipeline_code_sha256():
+        raise ValueError("pipeline code has changed")
     runtime_versions = _strict_object(
         manifest["runtime_versions"], {"python", "sklearn", "joblib"}, "runtime provenance"
     )
     if not all(isinstance(value, str) and value for value in runtime_versions.values()):
         raise ValueError("invalid runtime provenance")
     expected_version = release_model_version(
-        dataset["sha256"], manifest["training_configuration_sha256"], manifest["model_training_code_sha256"]
+        dataset["sha256"], manifest["training_configuration_sha256"], manifest["pipeline_code_sha256"]
     )
     if manifest["model_version"] != expected_version:
         raise ValueError("model version does not bind provenance")
 
-    metadata = json.loads(artifacts.metadata.read_text(encoding="utf-8"))
-    metrics = json.loads(artifacts.metrics.read_text(encoding="utf-8"))
+    metadata = json.loads(artifact_bytes[artifacts.metadata.name].decode("utf-8"))
+    metrics = json.loads(artifact_bytes[artifacts.metrics.name].decode("utf-8"))
     if not isinstance(metadata, dict) or not isinstance(metrics, dict):
         raise ValueError("invalid artifact metadata")
     for values in (metadata, metrics):
@@ -121,7 +128,8 @@ def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
             values.get("model_version") != expected_version
             or values.get("dataset_sha256") != dataset["sha256"]
             or values.get("training_configuration_sha256") != manifest["training_configuration_sha256"]
-            or values.get("model_training_code_sha256") != manifest["model_training_code_sha256"]
+            or values.get("pipeline_code_sha256") != manifest["pipeline_code_sha256"]
+            or values.get("pipeline_code_sources") != manifest["pipeline_code_sources"]
         ):
             raise ValueError("artifact provenance mismatch")
     if (
@@ -133,7 +141,7 @@ def _verified_metadata(artifacts: ArtifactPaths) -> Dict[str, Any]:
     threshold = metadata.get("threshold")
     if not isinstance(threshold, (int, float)) or not 0.0 <= float(threshold) <= 1.0:
         raise ValueError("invalid calibrated model metadata")
-    return metadata
+    return metadata, artifact_bytes
 
 
 class ModelPredictor(Predictor):
@@ -154,10 +162,12 @@ class ModelPredictor(Predictor):
         try:
             import joblib
 
-            metadata = _verified_metadata(self._artifacts)
-            self._classifier = joblib.load(self._artifacts.model)
-            self._vectorizer = joblib.load(self._artifacts.vectorizer)
-            self._label_encoder = joblib.load(self._artifacts.label_encoder)
+            metadata, artifact_bytes = _verified_artifacts(self._artifacts)
+            self._classifier = joblib.load(io.BytesIO(artifact_bytes[self._artifacts.model.name]))
+            self._vectorizer = joblib.load(io.BytesIO(artifact_bytes[self._artifacts.vectorizer.name]))
+            self._label_encoder = joblib.load(
+                io.BytesIO(artifact_bytes[self._artifacts.label_encoder.name])
+            )
             self._metadata = metadata
         except Exception:
             self._classifier = None
