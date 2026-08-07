@@ -74,3 +74,21 @@ def test_from_env_requires_a_strong_hmac_secret_in_production(monkeypatch, secre
 
     with pytest.raises(ValueError):
         from_env()
+
+
+@pytest.mark.parametrize(
+    "secret",
+    [
+        "a" * 31 + "b",
+        "abcdefghijklmnopqrstuvwxyz0123456789",
+        "local-demo-only-secret-not-for-production",
+        "change-me-to-a-real-production-secret",
+        "replace-me-with-a-real-production-secret-value",
+    ],
+)
+def test_from_env_rejects_low_entropy_and_placeholder_hmac_secrets_in_production(monkeypatch, secret):
+    monkeypatch.setenv("FRAUDLENS_ENVIRONMENT", "production")
+    monkeypatch.setenv("FRAUDLENS_HMAC_SECRET", secret)
+
+    with pytest.raises(ValueError):
+        from_env()

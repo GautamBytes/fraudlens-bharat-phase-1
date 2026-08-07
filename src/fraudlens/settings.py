@@ -1,5 +1,7 @@
 import os
+from collections import Counter
 from dataclasses import dataclass
+from math import log2
 from pathlib import Path
 from typing import Mapping, Optional, Tuple
 
@@ -10,6 +12,33 @@ _DEFAULT_ENVIRONMENT = "development"
 _LOCAL_DEMO_HMAC_SECRET = "local-demo-only-secret-not-for-production"
 _VALID_MODEL_BACKENDS = {"tfidf", "muril"}
 _MIN_PRODUCTION_HMAC_SECRET_LENGTH = 32
+_MIN_PRODUCTION_HMAC_SECRET_ENTROPY_BITS = 128
+_COMMON_SECRET_PLACEHOLDERS = {
+    _LOCAL_DEMO_HMAC_SECRET,
+    "change-me",
+    "change-me-to-a-real-production-secret",
+    "replace-me",
+    "replace-with-a-secure-secret",
+    "your-secret-here",
+    "your-32-character-secret-here",
+    "development-secret",
+    "production-secret",
+}
+_COMMON_SECRET_PLACEHOLDER_MARKERS = (
+    "change-me",
+    "replace-me",
+    "your-secret",
+    "default-secret",
+    "example-secret",
+    "placeholder",
+)
+_SEQUENTIAL_CHARACTER_SETS = (
+    "abcdefghijklmnopqrstuvwxyz",
+    "abcdefghijklmnopqrstuvwxyz"[::-1],
+    "0123456789",
+    "0123456789"[::-1],
+)
+_SEQUENTIAL_RUN_LENGTH = 6
 
 
 @dataclass(frozen=True)
@@ -86,6 +115,26 @@ def _parse_bool(value: str, name: str) -> bool:
 def _is_strong_production_secret(secret: Optional[str]) -> bool:
     if not secret or len(secret) < _MIN_PRODUCTION_HMAC_SECRET_LENGTH:
         return False
-    if secret == _LOCAL_DEMO_HMAC_SECRET:
+    normalized = secret.casefold()
+    if (
+        normalized in _COMMON_SECRET_PLACEHOLDERS
+        or any(marker in normalized for marker in _COMMON_SECRET_PLACEHOLDER_MARKERS)
+        or _contains_sequential_run(normalized)
+    ):
         return False
-    return len(set(secret)) > 1
+    return _estimate_shannon_entropy_bits(secret) >= _MIN_PRODUCTION_HMAC_SECRET_ENTROPY_BITS
+
+
+def _estimate_shannon_entropy_bits(value: str) -> float:
+    length = len(value)
+    return -sum(
+        (count / length) * log2(count / length) for count in Counter(value).values()
+    ) * length
+
+
+def _contains_sequential_run(value: str) -> bool:
+    for character_set in _SEQUENTIAL_CHARACTER_SETS:
+        for start in range(len(character_set) - _SEQUENTIAL_RUN_LENGTH + 1):
+            if character_set[start : start + _SEQUENTIAL_RUN_LENGTH] in value:
+                return True
+    return False
