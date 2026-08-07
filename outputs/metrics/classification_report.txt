@@ -1,3 +1,5 @@
+HISTORICAL Phase 1 marker-enhanced 16-row report. Superseded; not comparable to the current calibrated artifact. Current source of truth: models/model_metadata.json and models/metrics.json.
+
                  precision    recall  f1-score   support
 
    courier_scam       1.00      1.00      1.00         2
