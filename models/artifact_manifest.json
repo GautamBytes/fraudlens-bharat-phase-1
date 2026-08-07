@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "baseline_classifier.joblib": {
-      "sha256": "3b327ba2b12770e82c746011f6af718a61829997f892acdb0a78b3a38b0c5577"
+      "sha256": "32cc461d60a7dee54c71f569b3688c9b6f6046e2f49f3c4f54207ab34b26a7f0"
     },
     "label_encoder.joblib": {
       "sha256": "0b6b176ea72252a9c10ef9fbdddcfa1266ffa0e029227ccb93ace1ce83577ccd"
@@ -10,7 +10,7 @@
       "sha256": "805d432ef6d057da38de02b2b3d2020b45d641b7e4917bc78ffcb106e703199c"
     },
     "model_metadata.json": {
-      "sha256": "b331f6d56fda4fc0bcbe7646849203ba2e23e89df161a0a9df15e272b16437a1"
+      "sha256": "f4d9a234c7b086125191fefe93ff6a9fa0d61d3be223828f46c06a42825cd458"
     },
     "vectorizer.joblib": {
       "sha256": "30c177ef7e19efbea9a89b35f82d4e699ad22efb3a3a872d7223c1df7dd4cbb3"
@@ -29,7 +29,7 @@
   ],
   "runtime_versions": {
     "joblib": "1.4.2",
-    "python": "3.11.14",
+    "python": "3.11.15",
     "sklearn": "1.5.2"
   },
   "schema_version": 2,
