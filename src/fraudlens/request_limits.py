@@ -30,7 +30,7 @@ class RequestBodyLimitMiddleware:
             return
 
         for name, value in scope.get("headers", []):
-            if name == b"content-length" and value.isdigit() and int(value) > max_bytes:
+            if name == b"content-length" and _decimal_exceeds(value, max_bytes):
                 await self._reject(scope, receive, send)
                 return
 
@@ -77,3 +77,13 @@ def _single_message_receiver(message):
         return message
 
     return receive_once
+
+
+def _decimal_exceeds(value: bytes, limit: int) -> bool:
+    if not value.isdigit():
+        return False
+    normalized = value.lstrip(b"0") or b"0"
+    encoded_limit = str(limit).encode("ascii")
+    return len(normalized) > len(encoded_limit) or (
+        len(normalized) == len(encoded_limit) and normalized > encoded_limit
+    )

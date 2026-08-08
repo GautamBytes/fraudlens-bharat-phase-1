@@ -148,7 +148,10 @@ def init_db(path: Optional[Path] = None, retention_days: int = _DEFAULT_RETENTIO
 def check_database(path: Optional[Path] = None) -> None:
     """Verify that the initialized case store is reachable and complete."""
 
-    with _connect(path) as conn:
+    database_path = Path(path) if path is not None else DB_PATH
+    database_uri = "{}?mode=ro".format(database_path.resolve().as_uri())
+    with sqlite3.connect(database_uri, uri=True) as conn:
+        conn.row_factory = sqlite3.Row
         conn.execute("SELECT 1").fetchone()
         tables = {
             row["name"]
