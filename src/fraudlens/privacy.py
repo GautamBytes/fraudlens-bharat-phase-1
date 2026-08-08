@@ -35,9 +35,9 @@ def _normalize_url(value: str) -> str:
     if parsed.scheme.casefold() not in {"http", "https"} or not parsed.hostname:
         raise ValueError("URL entity must include a valid HTTP host")
     hostname = parsed.hostname.casefold()
-    netloc = hostname
+    netloc = "[{}]".format(hostname) if ":" in hostname else hostname
     if parsed.port is not None:
-        netloc = "{}:{}".format(hostname, parsed.port)
+        netloc = "{}:{}".format(netloc, parsed.port)
     return urlunsplit((parsed.scheme.casefold(), netloc, parsed.path or "", parsed.query, ""))
 
 

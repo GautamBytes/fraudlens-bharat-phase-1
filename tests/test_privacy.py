@@ -29,6 +29,16 @@ def test_domain_and_case_normalization_is_stable():
     )
 
 
+def test_ipv6_url_normalization_preserves_brackets_and_port():
+    assert normalize_entity_value(
+        "url", "HTTPS://[2001:DB8::1]:8443/reset#private-fragment"
+    ) == "https://[2001:db8::1]:8443/reset"
+
+
+def test_ipv6_url_mask_returns_the_full_hostname():
+    assert mask_entity("url", "https://[2001:db8::1]/reset") == "2001:db8::1"
+
+
 @pytest.mark.parametrize(
     ("entity_type", "value", "expected"),
     [

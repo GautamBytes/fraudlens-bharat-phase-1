@@ -1,6 +1,7 @@
 """Privacy-safe, immutable entity graph domain records."""
 
 from dataclasses import dataclass
+from ipaddress import ip_address
 import math
 import re
 from typing import Iterable
@@ -263,6 +264,11 @@ def _is_masked(entity_type: str, masked_value: str) -> bool:
 
 
 def _is_safe_hostname(value: str) -> bool:
+    try:
+        ip_address(value)
+        return True
+    except ValueError:
+        pass
     if len(value) > 253 or not any(character.isalpha() for character in value):
         return False
     labels = value.split(".")

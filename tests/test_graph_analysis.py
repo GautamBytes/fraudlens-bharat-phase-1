@@ -5,6 +5,7 @@ import random
 import pytest
 
 from fraudlens.graph_analysis import EntityLink, build_entity_graph
+from fraudlens.privacy import mask_entity
 
 
 def _link(
@@ -199,6 +200,35 @@ def test_url_masks_allow_conventional_hostnames_from_mask_entity():
     )
 
     assert result.entity_nodes[0].masked_value == "kyc-login.example"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://192.0.2.1/reset",
+        "https://[2001:db8::1]/reset",
+    ],
+)
+def test_url_masks_allow_ip_literals_emitted_by_mask_entity(url):
+    masked_value = mask_entity("url", url)
+    result = build_entity_graph(
+        [
+            _link(
+                case_id="case-1",
+                entity_type="url",
+                entity_id="url_{}".format("e" * 64),
+                masked_value=masked_value,
+            ),
+            _link(
+                case_id="case-2",
+                entity_type="url",
+                entity_id="url_{}".format("e" * 64),
+                masked_value=masked_value,
+            ),
+        ]
+    )
+
+    assert result.entity_nodes[0].masked_value == masked_value
 
 
 def test_edges_are_deterministically_truncated_at_the_default_cap():
