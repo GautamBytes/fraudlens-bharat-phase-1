@@ -264,6 +264,8 @@ def _is_masked(entity_type: str, masked_value: str) -> bool:
 
 
 def _is_safe_hostname(value: str) -> bool:
+    if "%" in value:
+        return False
     try:
         ip_address(value)
         return True

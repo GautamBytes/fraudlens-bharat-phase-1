@@ -141,6 +141,8 @@ def _safe_masked_value(entity_type: str, masked_value: str) -> str:
     if entity_type in {"upi_id", "email"} and _LOCAL_MASK_RE.fullmatch(masked_value):
         return masked_value
     if entity_type == "url":
+        if len(masked_value) > 253 or "%" in masked_value:
+            return "Masked identifier"
         try:
             ip_address(masked_value)
             return masked_value

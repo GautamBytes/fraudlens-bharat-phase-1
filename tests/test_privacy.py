@@ -40,6 +40,22 @@ def test_ipv6_url_mask_returns_the_full_hostname():
 
 
 @pytest.mark.parametrize(
+    "url",
+    [
+        "https://[fe80::1%RAW_SENTINEL]/reset",
+        "https://[fe80::1%25RAW_SENTINEL]/reset",
+    ],
+)
+def test_scoped_ipv6_urls_are_rejected_before_normalizing_masking_or_identifying(url):
+    with pytest.raises(ValueError, match="valid HTTP host"):
+        normalize_entity_value("url", url)
+    with pytest.raises(ValueError, match="valid HTTP host"):
+        mask_entity("url", url)
+    with pytest.raises(ValueError, match="valid HTTP host"):
+        stable_entity_id("url", url, "secret")
+
+
+@pytest.mark.parametrize(
     ("entity_type", "value", "expected"),
     [
         ("phone", "9876543210", "******3210"),

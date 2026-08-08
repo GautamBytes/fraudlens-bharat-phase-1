@@ -130,7 +130,16 @@ def test_graph_view_keeps_valid_url_masks(masked_value):
     assert masked_value in build_graph_view(replace(result, entity_nodes=(url_node,))).dot
 
 
-@pytest.mark.parametrize("raw_value", ["9876543210", "dead:beef", "raw-secret.example/path"])
+@pytest.mark.parametrize(
+    "raw_value",
+    [
+        "9876543210",
+        "dead:beef",
+        "raw-secret.example/path",
+        "fe80::1%RAW_SENTINEL",
+        ".".join(character * 63 for character in "abcd"),
+    ],
+)
 def test_graph_view_hides_invalid_url_masks(raw_value):
     from fraudlens.graph_dashboard import build_graph_view
 

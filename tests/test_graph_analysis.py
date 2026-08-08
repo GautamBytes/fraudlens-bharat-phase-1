@@ -231,6 +231,19 @@ def test_url_masks_allow_ip_literals_emitted_by_mask_entity(url):
     assert result.entity_nodes[0].masked_value == masked_value
 
 
+def test_url_masks_reject_scoped_ipv6_literals():
+    with pytest.raises(ValueError, match="masked_value"):
+        build_entity_graph(
+            [
+                _link(
+                    entity_type="url",
+                    entity_id="url_{}".format("e" * 64),
+                    masked_value="fe80::1%RAW_SENTINEL",
+                )
+            ]
+        )
+
+
 def test_edges_are_deterministically_truncated_at_the_default_cap():
     links = []
     for index in range(1_002):
