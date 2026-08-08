@@ -4,7 +4,11 @@
 
 This review explains why FraudLens Bharat is framed as a cyber-fraud triage system, not only a text classifier.
 
-Phase 1 connects six research areas: Indian cybercrime reporting, digital payment security, Hinglish complaint classification, phishing URL analysis, explainable AI, and future graph analytics.
+Phase 1 connects six research areas: Indian cybercrime reporting, digital payment security, Hinglish complaint classification, phishing URL analysis, explainable AI, and graph-based fraud research.
+
+The current implementation includes screenshot OCR and basic privacy-safe graph
+analytics beyond that Phase 1 snapshot. Transformer comparison and GNN research
+remain future work.
 
 ## Indian Cyber-Fraud Reporting Context
 
@@ -58,9 +62,14 @@ Graph Neural Networks are widely studied for financial fraud because fraud often
 
 Cheng et al. reviewed over 100 studies on GNNs for financial fraud detection and described their strength in modeling relational patterns [10].
 
-FraudLens Bharat does not implement graph analytics in Phase 1. The entity extraction output creates a path toward Phase 2 graph work.
+The historical Phase 1 implementation stopped at entity extraction. The current
+basic graph links repeated phone, UPI, email, and URL identifiers across
+explicitly stored, unexpired cases using masked labels and opaque HMAC-backed
+identifiers.
 
-The natural Phase 2 graph would connect repeated UPI IDs, phone numbers, URLs, emails, complaint categories, timestamps, and risk outcomes.
+This observational view does not change classification or risk and does not
+perform production fraud-network detection or use a GNN. More advanced graph
+modeling remains a research direction rather than a current capability.
 
 ## Explainability And Trust
 

@@ -150,11 +150,17 @@ When new seed data is added:
 5. Add regression tests for any recurring confusion.
 6. Avoid hiding weak results; document them as Phase 2 targets.
 
-## Phase 2 Evaluation Targets
+## Current Capability And Phase 2 Evaluation Targets
 
 Phase 2 should use a larger mixed-language dataset and add external validation if possible.
 
-Recommended targets:
+The current implementation includes screenshot OCR and basic privacy-safe graph
+analytics over explicitly stored, unexpired cases. These implemented capabilities
+still require stronger evaluation; the graph does not perform production
+fraud-network detection or use a GNN. Transformer comparison and GNN research
+remain future work.
+
+Recommended evaluation targets:
 
 - At least 200 examples per class before claiming robust classifier quality
 - OCR extraction accuracy for screenshot inputs
