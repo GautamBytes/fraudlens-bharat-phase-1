@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Mapping, Optional, Protocol
 from uuid import uuid4
 
 from fraudlens.entity_extraction import extract_entities
+from fraudlens.graph_analysis import EntityGraphResult, build_entity_graph
 from fraudlens.model_inference import predictor_registry as default_predictor_registry
 from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.preprocessing import normalize_text
@@ -42,6 +43,11 @@ class CaseStore(Protocol):
 
     def clear(self) -> int:
         """Delete all stored cases and return the affected count."""
+
+    def entity_graph(
+        self, minimum_case_count: int = 2, case_limit: int = 100, max_edges: int = 1_000
+    ) -> EntityGraphResult:
+        """Return the retained privacy-safe entity relationship graph."""
 
 
 class DatabaseCaseStore:
@@ -94,6 +100,30 @@ class DatabaseCaseStore:
         from fraudlens.database import clear_cases
 
         return clear_cases(path=self._database_path, retention_days=self._retention_days)
+
+    def entity_graph(
+        self, minimum_case_count: int = 2, case_limit: int = 100, max_edges: int = 1_000
+    ) -> EntityGraphResult:
+        # Validate graph-domain limits before opening storage, then let the
+        # graph module perform the actual construction from storage-safe links.
+        build_entity_graph(
+            (), minimum_case_count=minimum_case_count, max_edges=max_edges
+        )
+        from fraudlens.database import list_entity_links
+
+        links, source_truncated = list_entity_links(
+            path=self._database_path,
+            retention_days=self._retention_days,
+            minimum_case_count=minimum_case_count,
+            case_limit=case_limit,
+            edge_limit=max_edges + 1,
+        )
+        return build_entity_graph(
+            links,
+            minimum_case_count=minimum_case_count,
+            max_edges=max_edges,
+            source_truncated=source_truncated,
+        )
 
     def purge_expired(self, now: Optional[datetime] = None) -> int:
         from fraudlens.database import purge_expired

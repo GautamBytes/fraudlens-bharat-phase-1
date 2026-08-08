@@ -1,5 +1,11 @@
 # COVER PAGE
 
+> **Current-scope note (2026-08-08):** This report preserves a Phase 1 snapshot.
+> Statements below that describe OCR or graph analytics as absent or future work
+> belong to that historical snapshot. OCR and basic privacy-safe graph analytics
+> now exist. Transformer fine-tuning and GNNs remain out of scope. `README.md`
+> is the current status source.
+
 **Project Title:** FraudLens Bharat: AI-Based Hinglish Cyber-Fraud Detection and Complaint Triage System  
 **Student Name:** Gautam Manchandani  
 **Student ID:** 2023EBCS209  

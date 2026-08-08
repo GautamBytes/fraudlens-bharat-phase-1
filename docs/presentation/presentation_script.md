@@ -1,5 +1,11 @@
 # FraudLens Bharat Phase 1 - Pitch Script
 
+> **Current-scope note (2026-08-08):** This script preserves a Phase 1 snapshot.
+> Statements below that describe OCR or graph analytics as absent or future work
+> belong to that historical snapshot. OCR and basic privacy-safe graph analytics
+> now exist. Transformer fine-tuning and GNNs remain out of scope. `README.md`
+> is the current status source.
+
 Target duration: 8-10 minutes. Keep the tone practical: this is a progress-review pitch for a 6-month capstone, not a final product launch.
 
 ## Slide 1 - Title

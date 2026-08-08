@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fraudlens.config import DB_PATH
+from fraudlens.graph_analysis import EntityLink
 from fraudlens.privacy import mask_entity, stable_entity_id
 from fraudlens.schemas import AnalysisResult
 
@@ -97,6 +98,12 @@ def _migrate_cases(conn: sqlite3.Connection, retention_days: int, now: datetime)
             cursor = conn.execute("DELETE FROM cases WHERE case_id = ?", (row["case_id"],))
             deleted_count += cursor.rowcount
             continue
+        canonical_created_at = _utc_iso(created_at)
+        if row["created_at"] != canonical_created_at:
+            conn.execute(
+                "UPDATE cases SET created_at = ? WHERE case_id = ?",
+                (canonical_created_at, row["case_id"]),
+            )
         maximum_expiry = created_at + timedelta(days=retention_days)
         recorded_expiry = _parse_utc(row["expires_at"])
         if row["expires_at"] is not None and recorded_expiry is None:
@@ -244,6 +251,122 @@ def list_cases(
             (limit,),
         ).fetchall()
     return [dict(row) for row in rows]
+
+
+def _validate_entity_link_bounds(
+    retention_days: int,
+    minimum_case_count: int,
+    case_limit: int,
+    edge_limit: int,
+) -> None:
+    if isinstance(retention_days, bool) or not isinstance(retention_days, int) or retention_days <= 0:
+        raise ValueError("retention_days must be a positive integer")
+    if (
+        isinstance(minimum_case_count, bool)
+        or not isinstance(minimum_case_count, int)
+        or not 2 <= minimum_case_count <= 20
+    ):
+        raise ValueError("minimum_case_count must be an integer between 2 and 20")
+    if isinstance(case_limit, bool) or not isinstance(case_limit, int) or not 1 <= case_limit <= 100:
+        raise ValueError("case_limit must be an integer between 1 and 100")
+    if isinstance(edge_limit, bool) or not isinstance(edge_limit, int) or not 1 <= edge_limit <= 1_001:
+        raise ValueError("edge_limit must be an integer between 1 and 1,001")
+
+
+def list_entity_links(
+    path: Optional[Path] = None,
+    retention_days: int = _DEFAULT_RETENTION_DAYS,
+    minimum_case_count: int = 2,
+    case_limit: int = 100,
+    edge_limit: int = 1_001,
+) -> tuple[list[EntityLink], bool]:
+    """Return retained, repeated entity links and whether the source was bounded.
+
+    The CTE first selects the latest retained cases, then computes distinct-case
+    repetition across that complete bounded set before limiting graph edges.
+    """
+
+    _validate_entity_link_bounds(retention_days, minimum_case_count, case_limit, edge_limit)
+    purge_expired(path=path, retention_days=retention_days)
+    with _connect(path) as conn:
+        rows = conn.execute(
+            """
+            WITH candidate_cases AS (
+                SELECT case_id, created_at, predicted_label, risk_level, risk_score
+                FROM cases
+                ORDER BY created_at DESC, case_id ASC
+                LIMIT ?
+            ),
+            recent_cases AS (
+                SELECT case_id, created_at, predicted_label, risk_level, risk_score
+                FROM candidate_cases
+                ORDER BY created_at DESC, case_id ASC
+                LIMIT ?
+            ),
+            qualifying_entities AS (
+                SELECT entity_type, entity_id
+                FROM case_entities
+                WHERE case_id IN (SELECT case_id FROM recent_cases)
+                GROUP BY entity_type, entity_id
+                HAVING COUNT(DISTINCT case_id) >= ?
+            ),
+            qualifying_links AS (
+                SELECT
+                    recent_cases.case_id,
+                    recent_cases.created_at,
+                    recent_cases.predicted_label,
+                    recent_cases.risk_level,
+                    recent_cases.risk_score,
+                    case_entities.entity_type,
+                    case_entities.entity_id,
+                    case_entities.masked_value
+                FROM recent_cases
+                INNER JOIN case_entities ON case_entities.case_id = recent_cases.case_id
+                INNER JOIN qualifying_entities
+                    ON qualifying_entities.entity_type = case_entities.entity_type
+                    AND qualifying_entities.entity_id = case_entities.entity_id
+            ),
+            case_limit_status AS (
+                SELECT COUNT(*) > ? AS case_truncated
+                FROM candidate_cases
+            )
+            SELECT
+                qualifying_links.case_id,
+                qualifying_links.created_at,
+                qualifying_links.predicted_label,
+                qualifying_links.risk_level,
+                qualifying_links.risk_score,
+                qualifying_links.entity_type,
+                qualifying_links.entity_id,
+                qualifying_links.masked_value,
+                case_limit_status.case_truncated
+            FROM case_limit_status
+            LEFT JOIN qualifying_links ON 1 = 1
+            ORDER BY
+                qualifying_links.created_at DESC,
+                qualifying_links.case_id ASC,
+                qualifying_links.entity_type ASC,
+                qualifying_links.entity_id ASC
+            LIMIT ?
+            """,
+            (case_limit + 1, case_limit, minimum_case_count, case_limit, edge_limit),
+        ).fetchall()
+    links = [
+        EntityLink(
+            case_id=row["case_id"],
+            created_at=row["created_at"],
+            predicted_label=row["predicted_label"],
+            risk_level=row["risk_level"],
+            risk_score=row["risk_score"],
+            entity_type=row["entity_type"],
+            entity_id=row["entity_id"],
+            masked_value=row["masked_value"],
+        )
+        for row in rows
+        if row["case_id"] is not None
+    ]
+    case_truncated = bool(rows and rows[0]["case_truncated"])
+    return links, case_truncated or len(links) == edge_limit
 
 
 def get_case(

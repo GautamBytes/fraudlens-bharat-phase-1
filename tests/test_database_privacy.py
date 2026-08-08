@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from fraudlens.analysis_service import DatabaseCaseStore
+from fraudlens.database import list_entity_links
 from fraudlens.schemas import AnalysisResult, Entity
 
 
@@ -272,3 +273,183 @@ def test_purge_expired_uses_an_inclusive_utc_boundary_and_deletes_malformed_expi
 
     assert store.purge_expired(datetime(2099, 1, 2, 12, 0, tzinfo=timezone.utc)) == 2
     assert store.list_cases(10) == []
+
+
+def test_entity_graph_returns_only_retained_consented_rows_and_safe_link_fields(tmp_path):
+    store = _store(tmp_path)
+    first = _result("case-1", datetime(2099, 1, 1, tzinfo=timezone.utc))
+    second = _result("case-2", datetime(2099, 1, 2, tzinfo=timezone.utc))
+    expired = _result("expired", datetime(2099, 1, 3, tzinfo=timezone.utc))
+    store.save(first)
+    store.save(second)
+    store.save(expired)
+    database_path = tmp_path / "cases.sqlite3"
+    with sqlite3.connect(database_path) as conn:
+        conn.execute("UPDATE cases SET result_json = ? WHERE case_id = ?", ('{"raw":"leak-me"}', "case-1"))
+        conn.execute("UPDATE cases SET expires_at = ? WHERE case_id = ?", ("not-a-date", "expired"))
+
+    links, truncated = list_entity_links(path=database_path)
+
+    assert truncated is False
+    assert {link.case_id for link in links} == {"case-1", "case-2"}
+    assert set(links[0].__dataclass_fields__) == {
+        "case_id",
+        "created_at",
+        "predicted_label",
+        "risk_level",
+        "risk_score",
+        "entity_type",
+        "entity_id",
+        "masked_value",
+    }
+    serialized_links = repr(links)
+    assert "leak-me" not in serialized_links
+    assert first.original_text not in serialized_links
+    assert "unit-test-secret" not in serialized_links
+    with sqlite3.connect(database_path) as conn:
+        assert conn.execute("SELECT case_id FROM cases ORDER BY case_id").fetchall() == [
+            ("case-1",),
+            ("case-2",),
+        ]
+
+
+def test_entity_graph_deletion_and_clear_remove_retained_links(tmp_path):
+    store = _store(tmp_path)
+    first = _result("case-1", datetime(2099, 1, 1, tzinfo=timezone.utc))
+    second = _result("case-2", datetime(2099, 1, 2, tzinfo=timezone.utc))
+    first.predicted_label = second.predicted_label = "kyc_scam"
+    store.save(first)
+    store.save(second)
+
+    assert store.entity_graph().summary.edge_count == 8
+    assert store.delete("case-1") is True
+    assert store.entity_graph().summary.edge_count == 0
+    assert store.clear() == 1
+    assert store.entity_graph().summary.edge_count == 0
+
+
+def test_entity_graph_survives_repeat_database_initialization_and_migration(tmp_path):
+    store = _store(tmp_path)
+    first = _result("case-1", datetime(2099, 1, 1, tzinfo=timezone.utc))
+    second = _result("case-2", datetime(2099, 1, 2, tzinfo=timezone.utc))
+    first.predicted_label = second.predicted_label = "kyc_scam"
+    store.save(first)
+    store.save(second)
+
+    store.initialize()
+    store.initialize()
+
+    assert store.entity_graph().summary.edge_count == 8
+
+
+def test_entity_links_use_full_recent_case_set_for_repetition_before_edge_limit(tmp_path):
+    store = _store(tmp_path)
+    for index in range(101):
+        store.save(_result("case-{:03d}".format(index), datetime(2099, 1, 1, tzinfo=timezone.utc)))
+
+    links, truncated = list_entity_links(
+        path=tmp_path / "cases.sqlite3",
+        minimum_case_count=2,
+        case_limit=100,
+        edge_limit=2,
+    )
+
+    assert truncated is True
+    assert [link.case_id for link in links] == ["case-000", "case-000"]
+    assert {link.entity_type for link in links} == {"email", "phone"}
+
+
+def test_entity_link_case_selection_is_bounded_and_deterministic_by_case_id(tmp_path):
+    store = _store(tmp_path)
+    for index in range(101):
+        result = _result("case-{:03d}".format(index), datetime(2099, 1, 1, tzinfo=timezone.utc))
+        result.entities = [Entity(type="phone", value="9876543210")]
+        store.save(result)
+
+    links, truncated = list_entity_links(
+        path=tmp_path / "cases.sqlite3", case_limit=100, edge_limit=101
+    )
+
+    assert truncated is True
+    assert [link.case_id for link in links] == ["case-{:03d}".format(index) for index in range(100)]
+
+
+def test_entity_link_case_boundary_preserves_microsecond_ordering(tmp_path):
+    store = _store(tmp_path)
+    clearly_newer = datetime(2099, 1, 2, tzinfo=timezone.utc)
+    for index in range(99):
+        result = _result("recent-{:03d}".format(index), clearly_newer)
+        result.entities = [Entity(type="phone", value="9876543210")]
+        store.save(result)
+    boundary = datetime(2099, 1, 1, 12, 0, tzinfo=timezone.utc)
+    older = _result("a-older", boundary)
+    newer = _result("z-newer", boundary + timedelta(microseconds=1))
+    older.entities = newer.entities = [Entity(type="phone", value="9876543210")]
+    store.save(older)
+    store.save(newer)
+
+    links, truncated = list_entity_links(
+        path=tmp_path / "cases.sqlite3", case_limit=100, edge_limit=101
+    )
+
+    retained_case_ids = {link.case_id for link in links}
+    assert truncated is True
+    assert "z-newer" in retained_case_ids
+    assert "a-older" not in retained_case_ids
+
+
+def test_entity_link_case_selection_orders_legacy_offsets_by_utc_instant(tmp_path):
+    store = _store(tmp_path)
+    for case_id in ("newest", "middle", "oldest"):
+        result = _result(case_id, datetime(2099, 1, 1, tzinfo=timezone.utc))
+        result.entities = [Entity(type="phone", value="9876543210")]
+        store.save(result)
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        conn.executemany(
+            "UPDATE cases SET created_at = ? WHERE case_id = ?",
+            [
+                ("2099-01-01T00:30:00+00:00", "newest"),
+                ("2099-01-01T00:15:00+00:00", "middle"),
+                ("2099-01-01T01:00:00+01:00", "oldest"),
+            ],
+        )
+
+    links, truncated = list_entity_links(
+        path=tmp_path / "cases.sqlite3", case_limit=2, edge_limit=3
+    )
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        stored_created_at = dict(conn.execute("SELECT case_id, created_at FROM cases"))
+
+    assert truncated is True
+    assert [link.case_id for link in links] == ["newest", "middle"]
+    assert stored_created_at == {
+        "middle": "2099-01-01T00:15:00+00:00",
+        "newest": "2099-01-01T00:30:00+00:00",
+        "oldest": "2099-01-01T00:00:00+00:00",
+    }
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"retention_days": 0},
+        {"retention_days": "30"},
+        {"retention_days": True},
+        {"minimum_case_count": 1},
+        {"minimum_case_count": "2"},
+        {"minimum_case_count": True},
+        {"case_limit": 101},
+        {"case_limit": "100"},
+        {"case_limit": True},
+        {"edge_limit": 1002},
+        {"edge_limit": "1001"},
+        {"edge_limit": True},
+    ],
+)
+def test_entity_link_invalid_bounds_fail_before_sql(tmp_path, monkeypatch, kwargs):
+    import fraudlens.database as database
+
+    monkeypatch.setattr(database, "_connect", lambda *args, **kw: pytest.fail("SQL was reached"))
+
+    with pytest.raises(ValueError):
+        list_entity_links(path=tmp_path / "cases.sqlite3", **kwargs)

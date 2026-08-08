@@ -6,6 +6,15 @@ This document explains how FraudLens Bharat should be compared with initial base
 
 The key rule is fairness: do not compare a small synthetic Phase 1 split directly against large real-world transformer benchmarks as if the datasets were the same.
 
+## Current Scope Context
+
+The comparisons below preserve Phase 1 baselines, but the current implementation
+includes screenshot OCR and basic privacy-safe graph analytics. The graph links
+repeated phone, UPI, email, and URL identifiers only across explicitly stored,
+unexpired cases. It is observational, does not change classification or risk,
+and does not perform production fraud-network detection or use a GNN.
+Transformer comparison and GNN research remain future work.
+
 ## Comparison Questions
 
 1. Is the Phase 1 prototype better than the initial manual/no-system state?
@@ -93,9 +102,13 @@ FraudLens Bharat Phase 1 does not train a URL classifier. It applies auditable h
 
 Graph fraud models are stronger when fraud is visible through relationships: repeated accounts, devices, UPI IDs, phone numbers, URLs, and transactions [10].
 
-Phase 1 only extracts identifiers from one message at a time. It does not yet model relationships across cases.
+The historical Phase 1 snapshot extracted identifiers from one message at a
+time. The current basic graph now links repeated phone, UPI, email, and URL
+identifiers across retained, consented cases using masked labels and opaque
+HMAC-backed identifiers.
 
-The fair claim is that Phase 1 creates graph-ready evidence, while Phase 2 should connect repeated identifiers into a fraud network.
+The fair claim is limited to privacy-safe relationship visualization. This is
+not a production fraud-network detector, a graph-learning system, or a GNN.
 
 ## Final Positioning
 

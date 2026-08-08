@@ -16,6 +16,7 @@ from fraudlens.analysis_service import (
     resolve_predictor,
 )
 from fraudlens.image_analysis import ImageAnalysisInput, ImageAnalysisService
+from fraudlens.graph_analysis import EntityGraphResult
 from fraudlens.ocr import (
     ImageTooLargeError,
     InvalidImageError,
@@ -206,6 +207,21 @@ def create_app(
         except Exception:
             raise HTTPException(status_code=500, detail="Internal server error") from None
         return {"deleted_count": deleted_count}
+
+    @application.get("/graph")
+    def entity_graph(
+        request: Request,
+        minimum_case_count: int = Query(default=2, ge=2, le=20),
+        case_limit: int = Query(default=100, ge=1, le=100),
+    ) -> EntityGraphResult:
+        try:
+            return request.app.state.case_store.entity_graph(
+                minimum_case_count=minimum_case_count,
+                case_limit=case_limit,
+                max_edges=1_000,
+            )
+        except Exception:
+            raise HTTPException(status_code=500, detail="Internal server error") from None
 
     @application.get("/cases/{case_id}")
     def case_detail(case_id: str, request: Request) -> dict:
