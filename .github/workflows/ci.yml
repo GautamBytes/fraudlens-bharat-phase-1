@@ -108,8 +108,7 @@ jobs:
           python3 -c "import json; payload=json.load(open('/tmp/analyze.json')); assert payload['metadata']['stored'] is False; assert payload['predicted_label']"
           test "$(docker exec fraudlens-ci id -u)" = 10001
           test "$(docker inspect --format '{{.Config.User}}' fraudlens-ci)" = 10001:10001
-          docker exec fraudlens-ci python -m pip check
-          docker exec fraudlens-ci python -c "import importlib.util; assert importlib.util.find_spec('pytest') is None"
+          docker exec fraudlens-ci python -c "import importlib.util; assert all(importlib.util.find_spec(name) is None for name in ('pip', 'setuptools', 'pytest'))"
           docker exec fraudlens-ci tesseract --list-langs > /tmp/tesseract-languages.txt
           grep --fixed-strings --line-regexp eng /tmp/tesseract-languages.txt
           grep --fixed-strings --line-regexp hin /tmp/tesseract-languages.txt

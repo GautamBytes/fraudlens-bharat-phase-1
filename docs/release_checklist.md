@@ -26,8 +26,9 @@ uvx pip-audit -r requirements-runtime.lock
 docker build --tag fraudlens-bharat:release .
 ```
 
-Verify the image runs as UID 10001, `python -m pip check` succeeds, pytest is
-absent, and `tesseract --list-langs` contains both `eng` and `hin`. Require the
+Verify the build-time `python -m pip check` succeeds, the image runs as UID
+10001, runtime package managers and pytest are absent, and
+`tesseract --list-langs` contains both `eng` and `hin`. Require the
 GitHub Actions Python 3.10/3.11.15/3.12 matrix and `container-smoke` job to be
 green. That job also verifies readiness, the committed model, Compose policy,
 and log redaction.

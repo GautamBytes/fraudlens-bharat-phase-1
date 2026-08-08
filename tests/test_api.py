@@ -200,6 +200,21 @@ def test_analyze_endpoint_rejects_overlong_text():
         assert response.status_code == 422
 
 
+def test_analyze_endpoint_rejects_oversized_chunked_json_before_parsing():
+    _, test_client = _client()
+    chunks = iter([b'{"text":"', b"x" * (64 * 1024), b'"}'])
+
+    with test_client:
+        response = test_client.post(
+            "/analyze",
+            content=chunks,
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": "Request body is too large"}
+
+
 def test_analyze_endpoint_rejects_unknown_fields():
     _, test_client = _client()
     with test_client:

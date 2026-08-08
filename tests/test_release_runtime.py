@@ -78,6 +78,25 @@ def test_release_identity_is_consistent():
         }
 
 
+def test_production_disables_interactive_api_schema_endpoints():
+    settings = Settings(
+        model_backend="tfidf",
+        database_path=None,
+        hmac_secret="n2QkV9wR_p6YtL0Bf8cD1mX7sJ4HqUaE3zG5oI",
+        retention_days=30,
+        store_cases_by_default=False,
+        environment="production",
+        allowed_hosts=("testserver",),
+    )
+    application = create_app(settings=settings, predictor=_Predictor(), store=_ReadyStore())
+
+    with TestClient(application) as client:
+        assert client.get("/openapi.json").status_code == 404
+        assert client.get("/docs").status_code == 404
+        assert client.get("/redoc").status_code == 404
+        assert client.get("/health").status_code == 200
+
+
 def test_readiness_checks_storage_and_returns_version():
     store = _ReadyStore()
     with _client(store) as client:

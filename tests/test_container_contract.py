@@ -10,6 +10,9 @@ def test_docker_runtime_is_non_root_locked_and_has_ocr_languages():
     assert dockerfile.startswith("# syntax=docker/dockerfile:1.7@sha256:")
     assert "python:3.11.15-slim-bookworm@sha256:" in dockerfile
     assert "pip install --only-binary=:all: --require-hashes -r requirements-runtime.lock" in dockerfile
+    assert "python -m pip check" in dockerfile
+    assert dockerfile.count("python -m pip uninstall --yes pip") == 2
+    assert dockerfile.count("python -m pip uninstall --yes setuptools wheel") == 2
     assert "tesseract-ocr-eng" in dockerfile
     assert "tesseract-ocr-hin" in dockerfile
     assert "USER 10001:10001" in dockerfile
@@ -17,6 +20,8 @@ def test_docker_runtime_is_non_root_locked_and_has_ocr_languages():
     assert "http://127.0.0.1:8000/ready" in dockerfile
     assert 'CMD ["uvicorn", "fraudlens.api:app"' in dockerfile
     assert "--no-access-log" in dockerfile
+    assert "--limit-concurrency" in dockerfile
+    assert "--timeout-keep-alive" in dockerfile
     assert "FRAUDLENS_HMAC_SECRET" not in dockerfile
     assert "--reload" not in dockerfile
 
@@ -61,6 +66,14 @@ def test_example_environment_contains_no_secret_value():
 
     assert values["FRAUDLENS_HMAC_SECRET"] == ""
     assert values["FRAUDLENS_ALLOWED_HOSTS"] == "localhost,127.0.0.1"
+
+
+def test_local_environment_files_are_git_ignored_but_the_blank_example_is_kept():
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+
+    assert ".env" in gitignore
+    assert ".env.*" in gitignore
+    assert "!.env.example" in gitignore
 
 
 def test_ci_builds_and_smokes_the_hardened_container():

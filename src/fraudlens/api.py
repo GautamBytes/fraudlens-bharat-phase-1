@@ -30,6 +30,7 @@ from fraudlens.ocr import (
 from fraudlens import __version__
 from fraudlens.observability import configure_request_logging, write_request_log
 from fraudlens.prediction import Predictor, PredictorRegistry
+from fraudlens.request_limits import ANALYZE_BODY_MAX_BYTES, RequestBodyLimitMiddleware
 from fraudlens.schemas import AnalysisResult, AnalyzeRequest
 from fraudlens.settings import Settings
 
@@ -101,17 +102,25 @@ def create_app(
         )
         yield
 
+    expose_schema = resolved_settings.environment != "production"
     application = FastAPI(
         title="FraudLens Bharat API",
         description="Privacy-conscious cyber-fraud triage API for Hinglish, Hindi, and English messages.",
         version=__version__,
         lifespan=lifespan,
+        docs_url="/docs" if expose_schema else None,
+        redoc_url="/redoc" if expose_schema else None,
+        openapi_url="/openapi.json" if expose_schema else None,
     )
     if resolved_settings.allowed_hosts:
         application.add_middleware(
             TrustedHostMiddleware,
             allowed_hosts=list(resolved_settings.allowed_hosts),
         )
+    application.add_middleware(
+        RequestBodyLimitMiddleware,
+        path_limits={"/analyze": ANALYZE_BODY_MAX_BYTES},
+    )
 
     @application.middleware("http")
     async def observe_and_secure_api_response(request: Request, call_next):
