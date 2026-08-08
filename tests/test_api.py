@@ -1,3 +1,4 @@
+import asyncio
 import inspect
 import sqlite3
 from pathlib import Path
@@ -9,6 +10,7 @@ from fastapi.testclient import TestClient
 from fraudlens import api
 from fraudlens import config, database
 from fraudlens.ocr import (
+    ImageTooLargeError,
     InvalidImageError,
     NoTextDetectedError,
     OcrError,
@@ -302,6 +304,29 @@ def test_analyze_image_stops_when_an_unknown_length_stream_exceeds_the_limit():
     assert ocr_service.calls == []
 
 
+def test_limited_image_stream_retains_only_max_plus_one_and_stops_iteration():
+    requested_slices = []
+    requested_next_chunk = False
+
+    class _TrackingChunk(bytes):
+        def __getitem__(self, key):
+            if isinstance(key, slice):
+                requested_slices.append(key)
+            return super().__getitem__(key)
+
+    async def producer():
+        nonlocal requested_next_chunk
+        yield _TrackingChunk(b"123456789")
+        requested_next_chunk = True
+        raise AssertionError("stream iteration continued after the size limit")
+
+    with pytest.raises(ImageTooLargeError):
+        asyncio.run(api._read_limited_image_stream(producer(), max_bytes=4))
+
+    assert requested_slices == [slice(None, 5, None)]
+    assert requested_next_chunk is False
+
+
 @pytest.mark.parametrize(
     ("headers", "expected_detail"),
     [
@@ -390,12 +415,35 @@ def test_analyze_image_maps_operational_failures_without_leaking_details(
     assert "private" not in response.text
 
 
-def test_analyze_image_reads_the_raw_request_stream_without_body_or_multipart_helpers():
-    source = inspect.getsource(api.create_app)
+def test_analyze_image_dispatches_workflow_to_threadpool_and_preserves_error_mapping(
+    monkeypatch,
+):
+    dispatched = []
 
-    assert "request.stream()" in source
-    assert "request.body()" not in source
-    assert "UploadFile" not in source
+    async def recording_threadpool(function, *args, **kwargs):
+        dispatched.append((function, args, kwargs))
+        return function(*args, **kwargs)
+
+    monkeypatch.setattr(api, "run_in_threadpool", recording_threadpool)
+    application, test_client = _client(
+        ocr_service=_OcrService(error=OcrTimeoutError("private timeout details"))
+    )
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"image",
+            headers={"content-type": "image/png"},
+        )
+
+    assert response.status_code == 504
+    assert response.json() == {"detail": "OCR service timed out"}
+    assert len(dispatched) == 1
+    function, args, kwargs = dispatched[0]
+    assert function.__self__ is application.state.image_analysis_service
+    assert function.__name__ == "analyze"
+    assert args[0].image_bytes == b"image"
+    assert kwargs == {}
 
 
 def test_cases_limit_and_security_headers_are_constrained():

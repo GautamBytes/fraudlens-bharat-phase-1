@@ -1,10 +1,11 @@
 """HTTP application boundary for FraudLens Bharat."""
 
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import AsyncIterable, Optional
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.concurrency import run_in_threadpool
 
 from fraudlens.analysis_service import (
     AnalysisInput,
@@ -27,6 +28,20 @@ from fraudlens.ocr import (
 from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.schemas import AnalysisResult, AnalyzeRequest
 from fraudlens.settings import Settings
+
+
+async def _read_limited_image_stream(
+    stream: AsyncIterable[bytes],
+    max_bytes: int,
+) -> bytes:
+    image_bytes = bytearray()
+    async for chunk in stream:
+        remaining = max_bytes + 1 - len(image_bytes)
+        if remaining > 0:
+            image_bytes.extend(chunk[:remaining])
+        if len(image_bytes) > max_bytes or len(chunk) > remaining:
+            raise ImageTooLargeError("Image encoded size exceeds the configured limit")
+    return bytes(image_bytes)
 
 
 def create_app(
@@ -147,21 +162,15 @@ def create_app(
             if parsed_content_length > max_bytes:
                 raise HTTPException(status_code=413, detail="Image upload is too large")
 
-        image_bytes = bytearray()
         try:
-            async for chunk in request.stream():
-                remaining = max_bytes + 1 - len(image_bytes)
-                if remaining > 0:
-                    image_bytes.extend(chunk[:remaining])
-                if len(image_bytes) > max_bytes or len(chunk) > remaining:
-                    raise ImageTooLargeError("Image encoded size exceeds the configured limit")
-
+            image_bytes = await _read_limited_image_stream(request.stream(), max_bytes)
             resolved_store_case = store_case
             if resolved_store_case is None:
                 resolved_store_case = request.app.state.settings.store_cases_by_default
-            return request.app.state.image_analysis_service.analyze(
+            return await run_in_threadpool(
+                request.app.state.image_analysis_service.analyze,
                 ImageAnalysisInput(
-                    image_bytes=bytes(image_bytes),
+                    image_bytes=image_bytes,
                     media_type=media_type,
                     user_notes=user_notes,
                     store_case=resolved_store_case,
