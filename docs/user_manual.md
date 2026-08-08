@@ -74,6 +74,33 @@ process details, file paths, or image-parser diagnostics:
 - **Complaint draft**: A structured summary that can help the user manually prepare a report.
 - **Storage status**: Confirms whether the analysis was saved. Storage is opt-in in the dashboard; a temporary storage failure leaves the analysis visible and reports that it was not stored.
 
+## Inspect the Entity Graph
+
+The **Entity Graph** tab is an optional, observational view of repeated
+evidence. It includes only explicitly stored, unexpired cases and supports
+phone numbers, UPI IDs, email addresses, and URLs. It does not inspect analyses
+that were not saved locally.
+
+Choose a repeated-incident threshold from 2 through 20, then select **Refresh
+Graph**. The dashboard does not run the graph query until explicit Refresh Graph
+is selected. The page can still read **Recent Analysis History** separately. The
+API defaults for `GET /graph` are `minimum_case_count=2` and `case_limit=100`.
+minimum_case_count must be between 2 and 20, and case_limit must be between 1
+and 100. The graph uses a fixed internal max_edges=1000 bound; it is not an API
+query parameter.
+
+API entity nodes expose opaque HMAC-backed identifiers and masked labels. The
+dashboard shows masked labels and hides opaque identifiers. Graph output does
+not include raw text or raw entity values. If the graph is empty, no qualifying
+stored cases meet the selected threshold. If it is marked `truncated`, the safe
+display limit was reached; narrow the investigation or raise the threshold
+before interpreting it.
+
+Deleting a case, clearing case history, or retention expiry removes its graph
+links. Graph results do not change a case's risk score or fraud classification.
+This is not fraud-network detection, a production fraud-network claim, or a
+GNN; it is a bounded visualization of locally retained evidence.
+
 ## Safety Note
 
 Replace real phone numbers, account numbers, UPI IDs, and names with dummy

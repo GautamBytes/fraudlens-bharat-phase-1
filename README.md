@@ -29,10 +29,12 @@ These synthetic bootstrap results are not a production accuracy claim.
 - Streamlit dashboard with text and screenshot input
 - Local Tesseract OCR for English and Hindi screenshot text
 - Optional SQLite case history. API and compatibility callers default to off unless `FRAUDLENS_STORE_CASES=true` is configured; the dashboard always requires explicit consent.
+- Privacy-safe, observational entity relationship graph for repeated evidence in stored cases
 - Unit/API tests
 - Metrics and demo case outputs
 
-Transformer fine-tuning and graph analytics remain outside the current scope.
+OCR and basic graph analytics are now present. Transformer fine-tuning and GNN
+models remain outside the current scope.
 
 ## Setup
 
@@ -116,6 +118,33 @@ migration, legacy records with a valid creation timestamp receive the configured
 retention deadline and expired records are purged. Rows with malformed retention
 timestamps are deleted rather than retaining raw text indefinitely.
 
+## Inspect Stored Entity Relationships
+
+`GET /graph` is an investigative view of **explicitly stored, unexpired cases**
+only. It links repeated phone numbers, UPI IDs, email addresses, and URLs across
+those cases. Analyses that were not stored, and cases removed by retention, are
+not graph inputs.
+
+The endpoint defaults to `minimum_case_count=2` and `case_limit=100`.
+minimum_case_count must be between 2 and 20, and case_limit must be between 1
+and 100. The graph uses a fixed internal max_edges=1000 bound; it is not an API
+query parameter. For example:
+
+```bash
+curl "http://127.0.0.1:8000/graph?minimum_case_count=2&case_limit=100"
+```
+
+API entity nodes expose opaque HMAC-backed identifiers and masked labels. Graph
+output does not include raw text or raw entity values. An empty result means
+there are no qualifying stored cases for the selected threshold. A `truncated`
+result means the safe case or link display limit was reached; narrow the
+investigation before drawing conclusions.
+
+Deleting a case, clearing case history, or retention expiry removes its graph
+links. The graph is observational: it does not change a case's risk score or
+fraud classification, does not perform fraud-network detection, and is not a
+production fraud-network claim or a GNN.
+
 `POST /analyze-image` accepts a raw PNG or JPEG body. For example:
 
 ```bash
@@ -139,6 +168,12 @@ streamlit run src/fraudlens/dashboard.py
 Use the **Screenshot** tab to choose a PNG or JPEG and click **Analyze
 Screenshot**. The dashboard's “Store this analysis locally” checkbox is always
 off by default, even when the API/compatibility storage setting is enabled.
+
+The **Entity Graph** tab does not run the graph query until explicit Refresh
+Graph is selected after choosing a threshold. The page can still read **Recent
+Analysis History** separately. The dashboard shows masked labels and hides
+opaque identifiers; it presents the same privacy-safe, bounded evidence as
+`GET /graph`.
 
 ## Run Tests
 

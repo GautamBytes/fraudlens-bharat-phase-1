@@ -26,3 +26,7 @@
 | TC-022 | OCR failure redaction | OCR unavailable, timeout, corrupt image, or internal OCR detail | API and dashboard return fixed safe messages without process details | Automated |
 | TC-023 | Screenshot metadata removal | PNG/JPEG containing EXIF, ICC, or text metadata | OCR receives a fresh metadata-free RGB PNG | Automated |
 | TC-024 | OCR command boundary | Valid screenshot | Tesseract runs through stdin/stdout with `eng+hin`, fixed page segmentation, timeout, and no shell | Automated |
+| TC-025 | Entity graph privacy contract | Repeated phone, UPI, email, and URL in explicitly stored cases | API exposes masked labels and HMAC-backed IDs only; dashboard shows masks but hides IDs; no raw text or raw entity values | Automated/manual |
+| TC-026 | Entity graph retention and deletion | Delete one stored case, clear history, or expire retained cases | Removed cases no longer contribute graph links | Automated |
+| TC-027 | Entity graph API bounds and empty result | `GET /graph` defaults, out-of-range query values, and no qualifying cases | Safe defaults/bounds are enforced; empty graph is serialized without raw data | Automated |
+| TC-028 | Entity graph dashboard refresh and truncation | Change threshold, explicitly refresh, and exceed a display limit | No graph query before refresh; stale views are hidden and truncation is disclosed | Automated/manual |

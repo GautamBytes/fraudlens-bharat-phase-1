@@ -68,6 +68,44 @@ def test_screenshot_test_inventory_covers_security_boundaries():
         assert test_case in documentation
 
 
+def test_entity_graph_privacy_and_operational_contract_is_documented():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    manual = (ROOT / "docs/user_manual.md").read_text(encoding="utf-8")
+    inventory = (ROOT / "docs/test_cases.md").read_text(encoding="utf-8")
+    documentation = " ".join((readme + manual).split())
+
+    for expected_text in (
+        "explicitly stored, unexpired cases",
+        "phone numbers, UPI IDs, email addresses, and URLs",
+        "masked labels",
+        "API entity nodes expose opaque HMAC-backed identifiers",
+        "dashboard shows masked labels and hides opaque identifiers",
+        "does not include raw text or raw entity values",
+        "GET /graph",
+        "minimum_case_count=2",
+        "case_limit=100",
+        "fixed internal max_edges=1000",
+        "minimum_case_count must be between 2 and 20",
+        "case_limit must be between 1 and 100",
+        "does not run the graph query until explicit Refresh",
+        "no qualifying stored cases",
+        "truncated",
+        "Deleting a case, clearing case history, or retention expiry removes its graph links",
+        "does not change a case's risk score or fraud classification",
+        "does not perform fraud-network detection",
+        "GNN",
+    ):
+        assert expected_text in documentation
+
+    for test_case in (
+        "Entity graph privacy contract",
+        "Entity graph retention and deletion",
+        "Entity graph API bounds and empty result",
+        "Entity graph dashboard refresh and truncation",
+    ):
+        assert test_case in inventory
+
+
 def test_dependency_and_ci_security_baseline():
     requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
     development_requirements = (ROOT / "requirements-dev.txt").read_text(
