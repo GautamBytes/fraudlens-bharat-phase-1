@@ -1,10 +1,11 @@
 """HTTP application boundary for FraudLens Bharat."""
 
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import AsyncIterable, Optional
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.concurrency import run_in_threadpool
 
 from fraudlens.analysis_service import (
     AnalysisInput,
@@ -14,9 +15,33 @@ from fraudlens.analysis_service import (
     create_analysis_service,
     resolve_predictor,
 )
+from fraudlens.image_analysis import ImageAnalysisInput, ImageAnalysisService
+from fraudlens.ocr import (
+    ImageTooLargeError,
+    InvalidImageError,
+    NoTextDetectedError,
+    OcrError,
+    OcrService,
+    OcrTimeoutError,
+    OcrUnavailableError,
+)
 from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.schemas import AnalysisResult, AnalyzeRequest
 from fraudlens.settings import Settings
+
+
+async def _read_limited_image_stream(
+    stream: AsyncIterable[bytes],
+    max_bytes: int,
+) -> bytes:
+    image_bytes = bytearray()
+    async for chunk in stream:
+        remaining = max_bytes + 1 - len(image_bytes)
+        if remaining > 0:
+            image_bytes.extend(chunk[:remaining])
+        if len(image_bytes) > max_bytes or len(chunk) > remaining:
+            raise ImageTooLargeError("Image encoded size exceeds the configured limit")
+    return bytes(image_bytes)
 
 
 def create_app(
@@ -24,6 +49,7 @@ def create_app(
     predictor: Optional[Predictor] = None,
     store: Optional[CaseStore] = None,
     predictor_registry: Optional[PredictorRegistry] = None,
+    ocr_service: Optional[OcrService] = None,
 ) -> FastAPI:
     """Build the API with explicit runtime dependencies where needed."""
 
@@ -45,6 +71,7 @@ def create_app(
             retention_days=resolved_settings.retention_days,
         )
     )
+    resolved_ocr_service = ocr_service if ocr_service is not None else OcrService()
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
@@ -56,10 +83,16 @@ def create_app(
                 initializer()
             except Exception:
                 raise RuntimeError("Case storage initialization failed") from None
-        application.state.analysis_service = create_analysis_service(
+        analysis_service = create_analysis_service(
             settings=resolved_settings,
             predictor=resolved_predictor,
             store=resolved_store,
+        )
+        application.state.analysis_service = analysis_service
+        application.state.ocr_service = resolved_ocr_service
+        application.state.image_analysis_service = ImageAnalysisService(
+            resolved_ocr_service,
+            analysis_service,
         )
         yield
 
@@ -100,6 +133,57 @@ def create_app(
                     store_case=store_case,
                 )
             )
+        except Exception:
+            raise HTTPException(status_code=500, detail="Internal server error") from None
+
+    @application.post("/analyze-image", response_model=AnalysisResult)
+    async def analyze_image(
+        request: Request,
+        store_case: Optional[bool] = Query(default=None),
+        user_notes: Optional[str] = Query(default=None, max_length=2_000),
+    ) -> AnalysisResult:
+        media_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+        if media_type not in {"image/png", "image/jpeg"}:
+            raise HTTPException(status_code=415, detail="Unsupported image media type")
+
+        content_encoding = request.headers.get("content-encoding")
+        if content_encoding is not None and content_encoding.strip().lower() != "identity":
+            raise HTTPException(status_code=415, detail="Unsupported content encoding")
+
+        max_bytes = request.app.state.ocr_service.policy.max_bytes
+        content_length = request.headers.get("content-length")
+        if content_length is not None:
+            if not content_length.isascii() or not content_length.isdigit():
+                raise HTTPException(status_code=400, detail="Invalid Content-Length")
+            try:
+                parsed_content_length = int(content_length, 10)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid Content-Length") from None
+            if parsed_content_length > max_bytes:
+                raise HTTPException(status_code=413, detail="Image upload is too large")
+
+        try:
+            image_bytes = await _read_limited_image_stream(request.stream(), max_bytes)
+            resolved_store_case = store_case
+            if resolved_store_case is None:
+                resolved_store_case = request.app.state.settings.store_cases_by_default
+            return await run_in_threadpool(
+                request.app.state.image_analysis_service.analyze,
+                ImageAnalysisInput(
+                    image_bytes=image_bytes,
+                    media_type=media_type,
+                    user_notes=user_notes,
+                    store_case=resolved_store_case,
+                )
+            )
+        except ImageTooLargeError:
+            raise HTTPException(status_code=413, detail="Image upload is too large") from None
+        except OcrUnavailableError:
+            raise HTTPException(status_code=503, detail="OCR service unavailable") from None
+        except OcrTimeoutError:
+            raise HTTPException(status_code=504, detail="OCR service timed out") from None
+        except (InvalidImageError, NoTextDetectedError, OcrError):
+            raise HTTPException(status_code=422, detail="Image could not be analyzed") from None
         except Exception:
             raise HTTPException(status_code=500, detail="Internal server error") from None
 

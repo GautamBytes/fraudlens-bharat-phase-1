@@ -1,6 +1,6 @@
-# FraudLens Bharat - Phase 1
+# FraudLens Bharat
 
-FraudLens Bharat is a pure-software cyber-fraud triage prototype for Indian users. Phase 1 focuses on a reliable baseline system that analyzes pasted scam messages, classifies the fraud type, extracts useful evidence, scores risk, and generates a complaint-ready summary.
+FraudLens Bharat is a pure-software cyber-fraud triage prototype for Indian users. It analyzes pasted scam messages or screenshots, classifies the fraud type, extracts useful evidence, scores risk, and generates a complaint-ready summary.
 
 The project is designed for my capstone project submission. It includes implementation code, dataset scaffolding, testing evidence, documentation, references, and demo cases aligned with the provided capstone format and rubric.
 
@@ -17,7 +17,7 @@ The project is designed for my capstone project submission. It includes implemen
 
 These synthetic bootstrap results are not a production accuracy claim.
 
-## Phase 1 Scope
+## Current Scope
 
 - Hinglish/Hindi/English scam text analysis
 - Eight fraud classes: KYC scam, digital arrest, fake job, investment scam, loan scam, courier scam, UPI refund scam, OTP/phishing scam
@@ -26,12 +26,13 @@ These synthetic bootstrap results are not a production accuracy claim.
 - Entity extraction for phone numbers, UPI IDs, URLs, emails, money amounts, OTP-like codes, urgency phrases, and threat phrases
 - URL and identifier risk scoring
 - FastAPI backend
-- Streamlit dashboard
+- Streamlit dashboard with text and screenshot input
+- Local Tesseract OCR for English and Hindi screenshot text
 - Optional SQLite case history. API and compatibility callers default to off unless `FRAUDLENS_STORE_CASES=true` is configured; the dashboard always requires explicit consent.
 - Unit/API tests
 - Metrics and demo case outputs
 
-OCR, transformer fine-tuning, graph analytics, and screenshot analysis are intentionally reserved for Phase 2.
+Transformer fine-tuning and graph analytics remain outside the current scope.
 
 ## Setup
 
@@ -39,7 +40,24 @@ FraudLens Bharat requires Python 3.10 or later.
 
 ### Runtime installation
 
-Use the runtime requirements to run the API, dashboard, or training command:
+Install Tesseract and its English and Hindi language data before using screenshot
+analysis.
+
+On macOS with Homebrew:
+
+```bash
+brew install tesseract tesseract-lang
+```
+
+On Debian or Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install tesseract-ocr tesseract-ocr-eng tesseract-ocr-hin
+```
+
+Then install the Python runtime requirements to run the API, dashboard, or
+training command:
 
 ```bash
 cd "/Users/gautammanch/capstone-project(phase-1)"
@@ -98,14 +116,29 @@ migration, legacy records with a valid creation timestamp receive the configured
 retention deadline and expired records are purged. Rows with malformed retention
 timestamps are deleted rather than retaining raw text indefinitely.
 
+`POST /analyze-image` accepts a raw PNG or JPEG body. For example:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/analyze-image?store_case=false" \
+  -H "Content-Type: image/png" \
+  --data-binary @screenshot.png
+```
+
+Screenshot input supports PNG and JPEG files up to 5 MiB, with dimensions no
+larger than 4096 x 4096 and no more than 16,000,000 pixels. Tesseract reads
+English and Hindi (`eng+hin`). Images are never retained. OCR text is stored only
+when you explicitly enable local case storage; the same configured retention
+period used for pasted text then applies.
+
 ## Run Dashboard
 
 ```bash
 streamlit run src/fraudlens/dashboard.py
 ```
 
-The dashboard's “Store this analysis locally” checkbox is always off by default,
-even when the API/compatibility storage setting is enabled.
+Use the **Screenshot** tab to choose a PNG or JPEG and click **Analyze
+Screenshot**. The dashboard's “Store this analysis locally” checkbox is always
+off by default, even when the API/compatibility storage setting is enabled.
 
 ## Run Tests
 

@@ -14,6 +14,60 @@ def test_installation_docs_separate_runtime_and_contributor_dependencies():
         assert "pip install -r requirements-dev.txt" in documentation
 
 
+def test_ocr_runtime_dependencies_are_documented_for_supported_platforms():
+    for relative_path in ("README.md", "docs/installation_guide.md"):
+        documentation = (ROOT / relative_path).read_text(encoding="utf-8")
+
+        assert "brew install tesseract tesseract-lang" in documentation
+        assert (
+            "tesseract-ocr tesseract-ocr-eng tesseract-ocr-hin"
+            in documentation
+        )
+
+
+def test_screenshot_contract_is_documented_for_api_and_dashboard_users():
+    documentation = " ".join("\n".join(
+        (ROOT / relative_path).read_text(encoding="utf-8")
+        for relative_path in ("README.md", "docs/user_manual.md")
+    ).split())
+
+    for expected_text in (
+        "POST /analyze-image",
+        "Content-Type: image/png",
+        "--data-binary @screenshot.png",
+        "PNG and JPEG",
+        "5 MiB",
+        "4096 x 4096",
+        "16,000,000 pixels",
+        "English and Hindi",
+        "Images are never retained",
+        "OCR text is stored only when you explicitly enable local case storage",
+    ):
+        assert expected_text in documentation
+
+
+def test_screenshot_api_error_contract_is_documented():
+    documentation = (ROOT / "docs/user_manual.md").read_text(encoding="utf-8")
+
+    for status_code in ("400", "413", "415", "422", "503", "504", "500"):
+        assert f"`{status_code}`" in documentation
+    assert "generic error messages" in documentation
+
+
+def test_screenshot_test_inventory_covers_security_boundaries():
+    documentation = (ROOT / "docs/test_cases.md").read_text(encoding="utf-8")
+
+    for test_case in (
+        "Screenshot OCR analysis",
+        "Screenshot format rejection",
+        "Screenshot size rejection",
+        "Screenshot dimension and pixel rejection",
+        "Screenshot retention consent",
+        "OCR failure redaction",
+    ):
+        assert test_case in documentation
+
+
 def test_dependency_and_ci_security_baseline():
     requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
     development_requirements = (ROOT / "requirements-dev.txt").read_text(

@@ -2,6 +2,9 @@ import pandas as pd
 import streamlit as st
 
 from fraudlens.analysis_service import AnalysisInput, DatabaseCaseStore, create_analysis_service
+from fraudlens.dashboard_workflow import analyze_uploaded_file
+from fraudlens.image_analysis import ImageAnalysisService
+from fraudlens.ocr import OcrService
 from fraudlens.settings import Settings
 
 
@@ -27,38 +30,13 @@ def _analysis_dependencies():
         hmac_secret=settings.hmac_secret,
         retention_days=settings.retention_days,
     )
-    return create_analysis_service(settings=settings, store=case_store), case_store
+    analysis_service = create_analysis_service(settings=settings, store=case_store)
+    ocr_service = OcrService()
+    image_analysis_service = ImageAnalysisService(ocr_service, analysis_service)
+    return analysis_service, image_analysis_service, case_store
 
 
-st.set_page_config(page_title="FraudLens Bharat", page_icon="FL", layout="wide")
-st.title("FraudLens Bharat")
-st.caption("Phase 1 baseline prototype for Hinglish cyber-fraud triage")
-
-if "message_text" not in st.session_state:
-    st.session_state.message_text = DEMO_MESSAGES["Fake KYC SMS"]
-
-demo_cols = st.columns(4)
-for index, (label, message) in enumerate(DEMO_MESSAGES.items()):
-    if demo_cols[index].button(label, use_container_width=True):
-        st.session_state.message_text = message
-
-message = st.text_area(
-    "Suspicious message",
-    key="message_text",
-    height=180,
-)
-store_case = st.checkbox("Store this analysis locally", value=False)
-
-if st.button("Analyze Message", type="primary"):
-    analysis_service, _ = _analysis_dependencies()
-    result = analysis_service.analyze(
-        AnalysisInput(text=message, store_case=store_case)
-    )
-    result_data = _result_to_dict(result)
-    st.session_state.last_result = result_data
-
-if "last_result" in st.session_state:
-    result = st.session_state.last_result
+def _render_result(result):
     metric_cols = st.columns(4)
     metric_cols[0].metric("Fraud Type", result["predicted_label"])
     metric_cols[1].metric("Risk Level", result["risk_level"].upper())
@@ -73,6 +51,18 @@ if "last_result" in st.session_state:
             metadata.get("stored", False),
         )
     )
+
+    if metadata.get("input_source") == "image":
+        st.subheader("Extracted OCR Text")
+        st.code(result.get("original_text", ""), language="text")
+        st.caption(
+            "Input source: image | OCR engine: {} | OCR languages: {} | Image dimensions: {} x {}".format(
+                metadata.get("ocr_engine", "unknown"),
+                metadata.get("ocr_languages", "unknown"),
+                metadata.get("ocr_width", "unknown"),
+                metadata.get("ocr_height", "unknown"),
+            )
+        )
 
     left, right = st.columns([1.1, 0.9])
     with left:
@@ -98,11 +88,75 @@ if "last_result" in st.session_state:
         if metadata.get("storage_warning"):
             st.warning(metadata["storage_warning"])
 
-st.divider()
-st.subheader("Recent Analysis History")
-_, case_store = _analysis_dependencies()
-recent_cases = case_store.list_cases(limit=10)
-if recent_cases:
-    st.dataframe(pd.DataFrame(recent_cases), use_container_width=True)
-else:
-    st.info("No cases analyzed yet.")
+
+def main():
+    st.set_page_config(page_title="FraudLens Bharat", page_icon="FL", layout="wide")
+    st.title("FraudLens Bharat")
+    st.caption("Phase 1 baseline prototype for Hinglish cyber-fraud triage")
+
+    if "message_text" not in st.session_state:
+        st.session_state.message_text = DEMO_MESSAGES["Fake KYC SMS"]
+
+    store_case = st.checkbox("Store this analysis locally", value=False)
+    text_tab, screenshot_tab = st.tabs(["Text", "Screenshot"])
+
+    with text_tab:
+        demo_cols = st.columns(4)
+        for index, (label, message) in enumerate(DEMO_MESSAGES.items()):
+            if demo_cols[index].button(label, use_container_width=True):
+                st.session_state.message_text = message
+
+        message = st.text_area(
+            "Suspicious message",
+            key="message_text",
+            height=180,
+        )
+        if st.button("Analyze Message", type="primary"):
+            analysis_service, _, _ = _analysis_dependencies()
+            result = analysis_service.analyze(
+                AnalysisInput(text=message, store_case=store_case)
+            )
+            st.session_state.last_result = _result_to_dict(result)
+            st.session_state.pop("screenshot_error", None)
+
+    with screenshot_tab:
+        uploaded_file = st.file_uploader(
+            "Upload a screenshot",
+            type=["png", "jpg", "jpeg"],
+            accept_multiple_files=False,
+            max_upload_size=5,
+        )
+        if st.button("Analyze Screenshot", type="primary"):
+            if uploaded_file is None:
+                st.warning("Choose a PNG or JPEG screenshot before analyzing.")
+            else:
+                _, image_analysis_service, _ = _analysis_dependencies()
+                outcome = analyze_uploaded_file(
+                    image_analysis_service,
+                    uploaded_file=uploaded_file,
+                    store_case=store_case,
+                )
+                if outcome.error_message:
+                    st.session_state.pop("last_result", None)
+                    st.session_state.screenshot_error = outcome.error_message
+                else:
+                    st.session_state.last_result = _result_to_dict(outcome.result)
+                    st.session_state.pop("screenshot_error", None)
+
+    if "screenshot_error" in st.session_state:
+        st.error(st.session_state.screenshot_error)
+    if "last_result" in st.session_state:
+        _render_result(st.session_state.last_result)
+
+    st.divider()
+    st.subheader("Recent Analysis History")
+    _, _, case_store = _analysis_dependencies()
+    recent_cases = case_store.list_cases(limit=10)
+    if recent_cases:
+        st.dataframe(pd.DataFrame(recent_cases), use_container_width=True)
+    else:
+        st.info("No cases analyzed yet.")
+
+
+if __name__ == "__main__":
+    main()
