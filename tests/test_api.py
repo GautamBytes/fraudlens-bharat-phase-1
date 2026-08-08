@@ -1,12 +1,21 @@
 import inspect
 import sqlite3
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
 from fraudlens import api
 from fraudlens import config, database
+from fraudlens.ocr import (
+    InvalidImageError,
+    NoTextDetectedError,
+    OcrError,
+    OcrResult,
+    OcrTimeoutError,
+    OcrUnavailableError,
+)
 from fraudlens.prediction import Prediction, PredictorRegistry
 from fraudlens.settings import Settings
 
@@ -56,6 +65,25 @@ class _Store:
         return deleted_count
 
 
+class _OcrService:
+    def __init__(self, error=None, max_bytes=5 * 1024 * 1024):
+        self.error = error
+        self.policy = SimpleNamespace(max_bytes=max_bytes)
+        self.calls = []
+
+    def extract(self, image_bytes, media_type):
+        self.calls.append((image_bytes, media_type))
+        if self.error is not None:
+            raise self.error
+        return OcrResult(
+            text="Urgent KYC verification required",
+            engine="test-ocr",
+            languages="eng+hin",
+            width=640,
+            height=480,
+        )
+
+
 def _settings(store_cases_by_default=False, allowed_hosts=()):
     return Settings(
         model_backend="tfidf",
@@ -68,11 +96,12 @@ def _settings(store_cases_by_default=False, allowed_hosts=()):
     )
 
 
-def _client(store_cases_by_default=False, store=None, allowed_hosts=()):
+def _client(store_cases_by_default=False, store=None, allowed_hosts=(), ocr_service=None):
     app = api.create_app(
         settings=_settings(store_cases_by_default, allowed_hosts),
         predictor=_StubPredictor(Prediction("kyc_scam", 0.91, "test", "test-v1", False)),
         store=store or _Store(),
+        ocr_service=ocr_service,
     )
     return app, TestClient(app)
 
@@ -199,6 +228,174 @@ def test_analyze_handles_storage_failure_without_leaking_details():
     assert response.json()["metadata"]["stored"] is False
     assert response.json()["metadata"]["storage_warning"] == "Case storage was unavailable."
     assert "/private" not in response.text
+
+
+@pytest.mark.parametrize("media_type", ["image/png", "image/jpeg"])
+def test_analyze_image_accepts_raw_png_and_jpeg_requests(media_type):
+    ocr_service = _OcrService()
+    _, test_client = _client(ocr_service=ocr_service)
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"raw-image-payload",
+            headers={"content-type": media_type},
+            params={"user_notes": "customer supplied screenshot", "store_case": "false"},
+        )
+
+    assert response.status_code == 200
+    assert ocr_service.calls == [(b"raw-image-payload", media_type)]
+    assert response.json()["metadata"]["input_source"] == "image"
+    assert response.json()["metadata"]["ocr_engine"] == "test-ocr"
+    assert response.json()["metadata"]["source_image_retained"] is False
+
+
+def test_analyze_image_uses_the_runtime_storage_default_when_query_is_omitted():
+    store = _Store()
+    _, test_client = _client(
+        store_cases_by_default=True,
+        store=store,
+        ocr_service=_OcrService(),
+    )
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"raw-image-payload",
+            headers={"content-type": "image/png"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["metadata"]["stored"] is True
+    assert len(store.saved) == 1
+
+
+def test_analyze_image_rejects_oversized_content_length_before_ocr():
+    ocr_service = _OcrService(max_bytes=4)
+    _, test_client = _client(ocr_service=ocr_service)
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"x",
+            headers={"content-type": "image/png", "content-length": "5"},
+        )
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": "Image upload is too large"}
+    assert ocr_service.calls == []
+
+
+def test_analyze_image_stops_when_an_unknown_length_stream_exceeds_the_limit():
+    ocr_service = _OcrService(max_bytes=4)
+    _, test_client = _client(ocr_service=ocr_service)
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=iter([b"12", b"345"]),
+            headers={"content-type": "image/png"},
+        )
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": "Image upload is too large"}
+    assert ocr_service.calls == []
+
+
+@pytest.mark.parametrize(
+    ("headers", "expected_detail"),
+    [
+        ({}, "Unsupported image media type"),
+        ({"content-type": "application/octet-stream"}, "Unsupported image media type"),
+        (
+            {"content-type": "image/png", "content-encoding": "gzip"},
+            "Unsupported content encoding",
+        ),
+    ],
+)
+def test_analyze_image_rejects_unsupported_media_and_encoding(headers, expected_detail):
+    ocr_service = _OcrService()
+    _, test_client = _client(ocr_service=ocr_service)
+
+    with test_client:
+        response = test_client.post("/analyze-image", content=b"image", headers=headers)
+
+    assert response.status_code == 415
+    assert response.json() == {"detail": expected_detail}
+    assert ocr_service.calls == []
+
+
+@pytest.mark.parametrize("content_length", ["not-a-number", "-1", "+1", "1.0"])
+def test_analyze_image_rejects_malformed_content_length(content_length):
+    ocr_service = _OcrService()
+    _, test_client = _client(ocr_service=ocr_service)
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"image",
+            headers={"content-type": "image/png", "content-length": content_length},
+        )
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid Content-Length"}
+    assert ocr_service.calls == []
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        InvalidImageError("private invalid image details"),
+        NoTextDetectedError("private no-text details"),
+        OcrError("private bounded OCR text details"),
+    ],
+)
+def test_analyze_image_maps_invalid_or_unusable_images_to_generic_422(error):
+    _, test_client = _client(ocr_service=_OcrService(error=error))
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"image",
+            headers={"content-type": "image/png"},
+        )
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Image could not be analyzed"}
+    assert "private" not in response.text
+
+
+@pytest.mark.parametrize(
+    ("error", "status_code", "detail"),
+    [
+        (OcrUnavailableError("/private/tesseract missing"), 503, "OCR service unavailable"),
+        (OcrTimeoutError("private timeout details"), 504, "OCR service timed out"),
+        (RuntimeError("private implementation details"), 500, "Internal server error"),
+    ],
+)
+def test_analyze_image_maps_operational_failures_without_leaking_details(
+    error, status_code, detail
+):
+    _, test_client = _client(ocr_service=_OcrService(error=error))
+
+    with test_client:
+        response = test_client.post(
+            "/analyze-image",
+            content=b"image",
+            headers={"content-type": "image/png"},
+        )
+
+    assert response.status_code == status_code
+    assert response.json() == {"detail": detail}
+    assert "private" not in response.text
+
+
+def test_analyze_image_reads_the_raw_request_stream_without_body_or_multipart_helpers():
+    source = inspect.getsource(api.create_app)
+
+    assert "request.stream()" in source
+    assert "request.body()" not in source
+    assert "UploadFile" not in source
 
 
 def test_cases_limit_and_security_headers_are_constrained():
