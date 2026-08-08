@@ -8,6 +8,18 @@ from typing import Any, Mapping
 REQUEST_LOGGER = logging.getLogger("fraudlens.request")
 
 
+def configure_request_logging() -> None:
+    """Route safe request events through Uvicorn's configured error sink."""
+
+    REQUEST_LOGGER.setLevel(logging.INFO)
+    uvicorn_error_logger = logging.getLogger("uvicorn.error")
+    uvicorn_logger = logging.getLogger("uvicorn")
+    configured_handlers = uvicorn_error_logger.handlers or uvicorn_logger.handlers
+    if not REQUEST_LOGGER.handlers and configured_handlers:
+        REQUEST_LOGGER.handlers = list(configured_handlers)
+        REQUEST_LOGGER.propagate = False
+
+
 def request_log_event(
     *,
     request_id: str,

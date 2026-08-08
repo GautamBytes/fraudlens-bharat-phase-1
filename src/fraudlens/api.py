@@ -28,7 +28,7 @@ from fraudlens.ocr import (
     OcrUnavailableError,
 )
 from fraudlens import __version__
-from fraudlens.observability import write_request_log
+from fraudlens.observability import configure_request_logging, write_request_log
 from fraudlens.prediction import Predictor, PredictorRegistry
 from fraudlens.schemas import AnalysisResult, AnalyzeRequest
 from fraudlens.settings import Settings
@@ -79,6 +79,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
+        configure_request_logging()
         application.state.settings = resolved_settings
         application.state.case_store = resolved_store
         initializer = getattr(resolved_store, "initialize", None)

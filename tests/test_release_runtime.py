@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from fraudlens import __version__
 from fraudlens.api import create_app
+from fraudlens.observability import REQUEST_LOGGER, configure_request_logging
 from fraudlens.prediction import Prediction
 from fraudlens.settings import Settings
 
@@ -121,6 +122,7 @@ def test_request_log_uses_route_template_and_excludes_sensitive_inputs(caplog):
     request_ids = [response.headers["x-request-id"], missing.headers["x-request-id"]]
     assert len(set(request_ids)) == 2
     assert all(re.fullmatch(r"[0-9a-f]{32}", request_id) for request_id in request_ids)
+    assert REQUEST_LOGGER.level == logging.INFO
 
     events = [json.loads(record.message) for record in caplog.records]
     assert {event["route"] for event in events} >= {"/analyze", "/cases/{case_id}"}
@@ -138,3 +140,18 @@ def test_unmatched_paths_are_not_written_to_request_logs(caplog):
     event = json.loads(caplog.records[-1].message)
     assert event["route"] == "<unmatched>"
     assert "SECRET-PATH-COMPONENT" not in caplog.records[-1].message
+
+
+def test_request_logger_uses_uvicorns_configured_output_handler(monkeypatch):
+    handler = logging.NullHandler()
+    uvicorn_logger = logging.getLogger("uvicorn")
+    uvicorn_error_logger = logging.getLogger("uvicorn.error")
+    monkeypatch.setattr(REQUEST_LOGGER, "handlers", [])
+    monkeypatch.setattr(REQUEST_LOGGER, "propagate", True)
+    monkeypatch.setattr(uvicorn_logger, "handlers", [handler])
+    monkeypatch.setattr(uvicorn_error_logger, "handlers", [])
+
+    configure_request_logging()
+
+    assert REQUEST_LOGGER.handlers == [handler]
+    assert REQUEST_LOGGER.propagate is False
