@@ -101,15 +101,19 @@ naturally collected noisy complaints or screenshots.
 
 ## Statistical comparison
 
-The paired bootstrap resamples the same test-row indices for both candidates,
-preserving the paired nature of their predictions. It uses seed 42 and 2,000
-resamples to estimate the Macro-F1 difference and its percentile 95% confidence interval.
-A positive interval is evidence only for this frozen split. With
-eight rows, the interval cannot establish real-world superiority.
+Hypothesis H1 pre-registers character TF-IDF as model A and word TF-IDF as
+model B before reading their frozen-test scores. The paired bootstrap resamples
+the same test-row indices for both candidates, preserving the paired nature of
+their predictions. It uses seed 42 and 2,000 resamples to estimate the Macro-F1
+difference and its percentile 95% confidence interval. A positive interval is
+evidence only for this frozen split. With eight rows, the interval cannot
+establish real-world superiority.
 
 ## Reproducibility and interpretation rules
 
-- Canonical JSON and CSV omit wall-clock values.
+- Generated JSON and CSV omit wall-clock values.
+- Compact CSV and audit evidence is committed; verbose diagnostics are
+  regenerated twice and byte-compared in CI.
 - CI regenerates all research artifacts and compares them byte-for-byte.
 - Published accuracy is always accompanied by its original task and dataset.
 - A larger value from a different task is not a shared-leaderboard win.

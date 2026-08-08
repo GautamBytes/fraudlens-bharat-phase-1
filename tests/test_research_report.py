@@ -101,8 +101,9 @@ def test_readme_and_comparison_point_to_research_evidence():
     for expected in (
         "Research Benchmark",
         "docs/phase2_research_report.md",
-        "outputs/research/classification_benchmark.json",
-        "outputs/research/robustness_benchmark.json",
+        "outputs/research/classification_summary.csv",
+        "outputs/research/ablation_summary.csv",
+        "full diagnostic JSON is generated locally",
     ):
         assert expected in readme
     assert "Phase 2 research benchmark" in comparison
@@ -122,5 +123,21 @@ def test_ci_regenerates_every_canonical_research_artifact():
         "classification_summary.csv",
         "robustness_benchmark.json",
         "ablation_summary.csv",
+        '"$research_tmp/first/$artifact" "$research_tmp/second/$artifact"',
     ):
         assert expected in workflow
+
+
+def test_verbose_diagnostic_json_is_generated_but_not_tracked():
+    ignore = _read(".gitignore")
+
+    assert "outputs/research/classification_benchmark.json" in ignore
+    assert "outputs/research/robustness_benchmark.json" in ignore
+
+
+def test_hingbert_reference_uses_the_official_acl_authors():
+    references = _read("docs/references.md")
+    reference = next(line for line in references.splitlines() if line.startswith("[14]"))
+
+    assert reference.startswith("[14] R. Nayak and R. Joshi")
+    assert "R. R. Shah" not in reference

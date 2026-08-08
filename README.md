@@ -52,10 +52,12 @@ the release's selected calibrated runtime artifact.
 
 Read `docs/phase2_research_report.md` for the literature comparison, metric
 rationale, error analysis, robustness study, statistical interpretation, and
-threats to validity. Canonical machine-readable results are in
-`outputs/research/classification_benchmark.json` and
-`outputs/research/robustness_benchmark.json`; the dataset audit and CSV summaries
-are in the same directory.
+threats to validity. Committed compact evidence is in
+`outputs/research/classification_summary.csv`,
+`outputs/research/ablation_summary.csv`, and the dataset audit in the same
+directory. The full diagnostic JSON is generated locally by the reproduction
+commands and compared run-to-run in CI, but ignored by Git to keep reviews
+concise.
 
 ## Current Scope
 

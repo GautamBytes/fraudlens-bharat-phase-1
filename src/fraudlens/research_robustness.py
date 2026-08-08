@@ -38,6 +38,8 @@ PERTURBATIONS = (
     "ocr_confusion",
 )
 _SEED = 42
+_PRIMARY_MODEL_A = "character_tfidf_logistic_regression"
+_PRIMARY_MODEL_B = "word_tfidf_logistic_regression"
 _CSV_FIELDS = (
     "model",
     "condition",
@@ -202,18 +204,10 @@ def run_robustness_benchmark(
             "conditions": conditions,
         }
 
-    classical_names = [
-        name for name in model_results if name not in {"rule_only", "word_tfidf_logistic_regression"}
-    ]
-    best_name = max(
-        classical_names,
-        key=lambda name: float(model_results[name]["conditions"]["clean"]["macro_f1"]),
-    )
-    baseline_name = "word_tfidf_logistic_regression"
     comparison = paired_bootstrap_delta(
         y_test,
-        clean_predictions[best_name],
-        clean_predictions[baseline_name],
+        clean_predictions[_PRIMARY_MODEL_A],
+        clean_predictions[_PRIMARY_MODEL_B],
         seed=_SEED,
         samples=bootstrap_samples,
     )
@@ -230,8 +224,9 @@ def run_robustness_benchmark(
         },
         "models": model_results,
         "paired_bootstrap": {
-            "model_a": best_name,
-            "model_b": baseline_name,
+            "model_a": _PRIMARY_MODEL_A,
+            "model_b": _PRIMARY_MODEL_B,
+            "selection_basis": "pre_registered_h1_character_vs_word",
             **asdict(comparison),
             "interpretation": (
                 "A positive interval supports model A only on this eight-row synthetic test; "

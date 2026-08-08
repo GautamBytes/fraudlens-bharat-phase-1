@@ -252,8 +252,10 @@ hardware and repetition protocol.
 
 Robustness uses deterministic case/punctuation, whitespace, Hinglish spelling,
 digit-masking, and OCR confusion transformations. Statistical comparison uses
-2,000 paired bootstrap samples of the same eight test indices and a percentile
-95% confidence interval for the Macro-F1 difference.
+the pre-registered H1 pair—character TF-IDF versus word TF-IDF—rather than a
+winner selected from the frozen test. It uses 2,000 paired bootstrap samples of
+the same eight test indices and a percentile 95% confidence interval for the
+Macro-F1 difference.
 
 ## 8. Classification Results
 
@@ -329,10 +331,12 @@ accurate, smaller, faster, more private, or more complete.
 
 ## 11. Statistical Interpretation
 
-The selected character model has a Macro-F1 point advantage of **+0.3333** over
-word TF-IDF. The paired bootstrap 95% interval is **0.0498 to 0.4084**, and
-97.7% of the 2,000 resamples give a positive difference. On this fixed split,
-that supports the claim that character features help.
+The pre-registered H1 comparison uses character TF-IDF against word TF-IDF; it
+does not select a winner after inspecting the frozen test results. Character
+TF-IDF has a Macro-F1 point advantage of **+0.3333**. The paired bootstrap 95%
+interval is **0.0498 to 0.4084**, and 97.7% of the 2,000 resamples give a
+positive difference. On this fixed split, that supports the claim that
+character features help.
 
 The result remains fragile. Bootstrap resampling cannot create diversity absent
 from the eight original observations. The narrow-looking positive lower bound
@@ -417,6 +421,9 @@ PYTHONPATH=src python -m fraudlens.research_robustness \
 PYTHONPATH=src python -m pytest -q
 ```
 
-Canonical evidence is stored under `outputs/research/`. CI regenerates and
-byte-compares every JSON and CSV artifact. References [1]-[14] are listed in
+Compact evidence is committed under `outputs/research/`. The full
+`classification_benchmark.json` and `robustness_benchmark.json` diagnostics are
+generated locally but ignored by Git. CI creates two independent runs,
+byte-compares every JSON and CSV artifact between them, and compares the compact
+committed evidence with the generated result. References [1]-[14] are listed in
 `docs/references.md`.

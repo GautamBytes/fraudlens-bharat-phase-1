@@ -99,6 +99,11 @@ def test_robustness_evidence_is_deterministic_and_complete(tmp_path):
         assert result["conditions"]["clean"]["rows"] == 8
         assert result["conditions"]["clean"]["macro_f1_drop_from_clean"] == 0.0
 
+    comparison = payload["paired_bootstrap"]
+    assert comparison["model_a"] == "character_tfidf_logistic_regression"
+    assert comparison["model_b"] == "word_tfidf_logistic_regression"
+    assert comparison["selection_basis"] == "pre_registered_h1_character_vs_word"
+
     with (first / "ablation_summary.csv").open(newline="", encoding="utf-8") as stream:
         rows = list(csv.DictReader(stream))
     assert len(rows) == 5 * (len(PERTURBATIONS) + 1)

@@ -28,4 +28,4 @@ Use IEEE format in the final PDF. These sources support the Phase 1 report, lite
 
 [13] National Institute of Standards and Technology, "Artificial Intelligence Risk Management Framework (AI RMF 1.0)," NIST AI 100-1, January 2023. Available: https://doi.org/10.6028/NIST.AI.100-1
 
-[14] R. Nayak and R. R. Shah, "L3Cube-HingCorpus and HingBERT: A Code Mixed Hindi-English Dataset and BERT Language Models," in Proceedings of WILDRE-6, 2022. Available: https://aclanthology.org/2022.wildre-1.2/
+[14] R. Nayak and R. Joshi, "L3Cube-HingCorpus and HingBERT: A Code Mixed Hindi-English Dataset and BERT Language Models," in Proceedings of WILDRE-6, 2022. Available: https://aclanthology.org/2022.wildre-1.2/
