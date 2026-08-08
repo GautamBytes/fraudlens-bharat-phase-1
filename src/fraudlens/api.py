@@ -2,6 +2,7 @@
 
 from contextlib import asynccontextmanager
 from typing import AsyncIterable, Optional
+from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -26,7 +27,10 @@ from fraudlens.ocr import (
     OcrTimeoutError,
     OcrUnavailableError,
 )
+from fraudlens import __version__
+from fraudlens.observability import configure_request_logging, write_request_log
 from fraudlens.prediction import Predictor, PredictorRegistry
+from fraudlens.request_limits import ANALYZE_BODY_MAX_BYTES, RequestBodyLimitMiddleware
 from fraudlens.schemas import AnalysisResult, AnalyzeRequest
 from fraudlens.settings import Settings
 
@@ -76,6 +80,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
+        configure_request_logging()
         application.state.settings = resolved_settings
         application.state.case_store = resolved_store
         initializer = getattr(resolved_store, "initialize", None)
@@ -97,21 +102,48 @@ def create_app(
         )
         yield
 
+    expose_schema = resolved_settings.environment != "production"
     application = FastAPI(
-        title="FraudLens Bharat Phase 1 API",
-        description="Baseline cyber-fraud triage API for Hinglish/Hindi/English scam messages.",
-        version="0.1.0",
+        title="FraudLens Bharat API",
+        description="Privacy-conscious cyber-fraud triage API for Hinglish, Hindi, and English messages.",
+        version=__version__,
         lifespan=lifespan,
+        docs_url="/docs" if expose_schema else None,
+        redoc_url="/redoc" if expose_schema else None,
+        openapi_url="/openapi.json" if expose_schema else None,
     )
     if resolved_settings.allowed_hosts:
         application.add_middleware(
             TrustedHostMiddleware,
             allowed_hosts=list(resolved_settings.allowed_hosts),
         )
+    application.add_middleware(
+        RequestBodyLimitMiddleware,
+        path_limits={"/analyze": ANALYZE_BODY_MAX_BYTES},
+    )
 
     @application.middleware("http")
-    async def add_api_security_headers(request: Request, call_next):
-        response = await call_next(request)
+    async def observe_and_secure_api_response(request: Request, call_next):
+        request_id = uuid4().hex
+        status_code = 500
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+        except Exception:
+            write_request_log(
+                request_id=request_id,
+                method=request.method,
+                route=_route_template(request),
+                status_code=status_code,
+            )
+            raise
+        write_request_log(
+            request_id=request_id,
+            method=request.method,
+            route=_route_template(request),
+            status_code=status_code,
+        )
+        response.headers["X-Request-ID"] = request_id
         if response.headers.get("content-type", "").startswith("application/json"):
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["Cache-Control"] = "no-store"
@@ -119,7 +151,15 @@ def create_app(
 
     @application.get("/health")
     def health() -> dict:
-        return {"status": "ok", "service": "fraudlens-bharat-phase-1"}
+        return {"status": "ok", "service": "fraudlens-bharat", "version": __version__}
+
+    @application.get("/ready")
+    def ready(request: Request) -> dict:
+        try:
+            request.app.state.case_store.healthcheck()
+        except Exception:
+            raise HTTPException(status_code=503, detail="Service not ready") from None
+        return {"status": "ready", "service": "fraudlens-bharat", "version": __version__}
 
     @application.post("/analyze", response_model=AnalysisResult)
     def analyze(analysis_request: AnalyzeRequest, request: Request) -> AnalysisResult:
@@ -250,6 +290,12 @@ def create_app(
         return {"deleted": True, "case_id": case_id}
 
     return application
+
+
+def _route_template(request: Request) -> str:
+    route = request.scope.get("route")
+    path = getattr(route, "path", None)
+    return path if isinstance(path, str) else "<unmatched>"
 
 
 def analyze_message(

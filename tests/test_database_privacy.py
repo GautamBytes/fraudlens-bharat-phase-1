@@ -38,6 +38,23 @@ def _store(tmp_path, retention_days=30):
     )
 
 
+def test_storage_healthcheck_is_read_only_and_does_not_create_a_missing_database(tmp_path):
+    database_path = tmp_path / "missing" / "cases.sqlite3"
+    store = DatabaseCaseStore(database_path, hmac_secret="unit-test-secret")
+
+    with pytest.raises(sqlite3.OperationalError):
+        store.healthcheck()
+
+    assert not database_path.exists()
+
+
+def test_storage_healthcheck_accepts_an_initialized_database(tmp_path):
+    store = _store(tmp_path)
+    store.initialize()
+
+    store.healthcheck()
+
+
 def test_initialize_migrates_old_cases_without_losing_them_and_is_idempotent(tmp_path):
     database_path = tmp_path / "cases.sqlite3"
     with sqlite3.connect(database_path) as conn:

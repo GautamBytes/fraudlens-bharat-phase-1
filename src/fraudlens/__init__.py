@@ -1,4 +1,3 @@
-"""FraudLens Bharat Phase 1 package."""
+"""FraudLens Bharat package."""
 
-__version__ = "0.1.0"
-
+__version__ = "1.0.0"

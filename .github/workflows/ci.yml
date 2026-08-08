@@ -61,3 +61,66 @@ jobs:
           cmp "$evaluation_tmp/first/evaluation.json" outputs/phase2/evaluation.json
           cmp "$evaluation_tmp/first/summary.txt" outputs/phase2/summary.txt
           git diff --exit-code -- outputs/phase2
+
+  container-smoke:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build pinned production image
+        run: docker build --tag fraudlens-bharat:ci .
+      - name: Validate Compose and start restricted API
+        run: |
+          smoke_secret="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
+          FRAUDLENS_HMAC_SECRET="$smoke_secret" docker compose config --quiet
+          docker run --detach --name fraudlens-ci \
+            --publish 127.0.0.1:18000:8000 \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,nodev \
+            --tmpfs /data:rw,noexec,nosuid,nodev,uid=10001,gid=10001 \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --env FRAUDLENS_ENVIRONMENT=production \
+            --env FRAUDLENS_HMAC_SECRET="$smoke_secret" \
+            --env FRAUDLENS_ALLOWED_HOSTS=localhost,127.0.0.1 \
+            fraudlens-bharat:ci
+      - name: Verify runtime, readiness, model, OCR, and safe logs
+        run: |
+          ready=false
+          for attempt in $(seq 1 30)
+          do
+            if curl --fail --silent http://127.0.0.1:18000/ready > /tmp/ready.json
+            then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = true
+          python3 -c "import json; payload=json.load(open('/tmp/ready.json')); assert payload == {'status':'ready','service':'fraudlens-bharat','version':'1.0.0'}"
+          curl --fail --silent \
+            --header 'Content-Type: application/json' \
+            --data '{"text":"CI-PRIVATE-MARKER urgent KYC verification now","store_case":false}' \
+            http://127.0.0.1:18000/analyze > /tmp/analyze.json
+          python3 -c "import json; payload=json.load(open('/tmp/analyze.json')); assert payload['metadata']['stored'] is False; assert payload['predicted_label']"
+          test "$(docker exec fraudlens-ci id -u)" = 10001
+          test "$(docker inspect --format '{{.Config.User}}' fraudlens-ci)" = 10001:10001
+          docker exec fraudlens-ci python -c "import importlib.util; assert all(importlib.util.find_spec(name) is None for name in ('pip', 'setuptools', 'pytest'))"
+          docker exec fraudlens-ci tesseract --list-langs > /tmp/tesseract-languages.txt
+          grep --fixed-strings --line-regexp eng /tmp/tesseract-languages.txt
+          grep --fixed-strings --line-regexp hin /tmp/tesseract-languages.txt
+          docker logs fraudlens-ci > /tmp/fraudlens-ci.log 2>&1
+          if grep --fixed-strings CI-PRIVATE-MARKER /tmp/fraudlens-ci.log
+          then
+            echo "Sensitive request data appeared in logs"
+            exit 1
+          fi
+          grep --fixed-strings '"route":"/ready"' /tmp/fraudlens-ci.log
+          grep --fixed-strings '"route":"/analyze"' /tmp/fraudlens-ci.log
+          cat /tmp/fraudlens-ci.log
+      - name: Remove smoke container
+        if: always()
+        run: docker rm --force fraudlens-ci || true

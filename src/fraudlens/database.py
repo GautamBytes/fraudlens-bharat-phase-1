@@ -145,6 +145,24 @@ def init_db(path: Optional[Path] = None, retention_days: int = _DEFAULT_RETENTIO
         _initialize_database(conn, retention_days, datetime.now(timezone.utc))
 
 
+def check_database(path: Optional[Path] = None) -> None:
+    """Verify that the initialized case store is reachable and complete."""
+
+    database_path = Path(path) if path is not None else DB_PATH
+    database_uri = "{}?mode=ro".format(database_path.resolve().as_uri())
+    with sqlite3.connect(database_uri, uri=True) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute("SELECT 1").fetchone()
+        tables = {
+            row["name"]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('cases', 'case_entities')"
+            )
+        }
+    if tables != {"cases", "case_entities"}:
+        raise RuntimeError("Case storage schema is unavailable")
+
+
 def save_case(
     result: AnalysisResult,
     path: Optional[Path] = None,

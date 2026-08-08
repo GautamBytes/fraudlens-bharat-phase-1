@@ -43,6 +43,10 @@ class _Store:
     def initialize(self):
         self.initialized += 1
 
+    def healthcheck(self):
+        if self.error:
+            raise self.error
+
     def save(self, result):
         if self.error:
             raise self.error
@@ -194,6 +198,21 @@ def test_analyze_endpoint_rejects_overlong_text():
     with test_client:
         response = test_client.post("/analyze", json={"text": "x" * 20_001})
         assert response.status_code == 422
+
+
+def test_analyze_endpoint_rejects_oversized_chunked_json_before_parsing():
+    _, test_client = _client()
+    chunks = iter([b'{"text":"', b"x" * (64 * 1024), b'"}'])
+
+    with test_client:
+        response = test_client.post(
+            "/analyze",
+            content=chunks,
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": "Request body is too large"}
 
 
 def test_analyze_endpoint_rejects_unknown_fields():
