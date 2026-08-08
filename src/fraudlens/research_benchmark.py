@@ -21,7 +21,12 @@ from fraudlens.model_training import _select_threshold
 from fraudlens.preprocessing import normalize_text
 from fraudlens.research_dataset import ResearchRow, load_research_rows
 from fraudlens.research_metrics import classification_metrics
-from fraudlens.research_models import ResearchModel, build_candidate_models, build_estimator
+from fraudlens.research_models import (
+    ResearchModel,
+    build_candidate_models,
+    build_estimator,
+    normalize_research_estimator,
+)
 
 
 _SEED = 42
@@ -84,6 +89,7 @@ def run_benchmark(dataset_path: Path | str, output_dir: Path | str) -> Benchmark
             "threshold_selection_ids": _sorted_ids(split_rows["validation"]),
             "single_evaluation_ids": _sorted_ids(split_rows["test"]),
             "test_evaluation_calls_per_model": 1,
+            "learned_parameter_decimal_places": 12,
             "selection_rule": "threshold maximises validation correct-minus-incorrect; ties favour coverage",
             "timing_note": "Wall-clock latency is excluded from canonical evidence and must be measured separately.",
         },
@@ -131,6 +137,7 @@ def _evaluate_candidate(
     train_texts = [_model_text(row.text) for row in split_rows["train"]]
     train_labels = [row.label for row in split_rows["train"]]
     estimator.fit(train_texts, train_labels)
+    normalize_research_estimator(estimator, decimals=12)
 
     validation_probabilities = _aligned_probabilities(
         estimator, [_model_text(row.text) for row in split_rows["validation"]], labels
@@ -248,7 +255,7 @@ def _write_outputs(report: BenchmarkReport, output_dir: Path) -> None:
     with (output_dir / "classification_summary.csv").open(
         "w", newline="", encoding="utf-8"
     ) as stream:
-        writer = csv.DictWriter(stream, fieldnames=_SUMMARY_FIELDS)
+        writer = csv.DictWriter(stream, fieldnames=_SUMMARY_FIELDS, lineterminator="\n")
         writer.writeheader()
         for name, result in document["models"].items():
             metrics = result["test"]["selective"]

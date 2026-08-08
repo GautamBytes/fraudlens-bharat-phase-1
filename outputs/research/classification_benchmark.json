@@ -94,6 +94,7 @@
       "62"
     ],
     "test_evaluation_calls_per_model": 1,
+    "learned_parameter_decimal_places": 12,
     "selection_rule": "threshold maximises validation correct-minus-incorrect; ties favour coverage",
     "timing_note": "Wall-clock latency is excluded from canonical evidence and must be measured separately."
   },

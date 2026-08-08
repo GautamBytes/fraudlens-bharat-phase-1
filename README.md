@@ -40,6 +40,23 @@ checks the initialized case store. Both report version `1.0.0`. See
 
 These synthetic bootstrap results are not a production accuracy claim.
 
+## Research Benchmark
+
+The capstone now includes a same-split academic benchmark of canonical rules,
+word TF-IDF, character TF-IDF, word-character TF-IDF, and a calibrated hybrid.
+On the eight-row frozen synthetic test, character TF-IDF and the word-character
+hybrid each reach 0.7500 accuracy and 0.6667 macro-F1. This is promising
+internal evidence, not production accuracy: the dataset remains 64 synthetic
+fraud-only rows and has no legitimate examples. The benchmark does not replace
+the release's selected calibrated runtime artifact.
+
+Read `docs/phase2_research_report.md` for the literature comparison, metric
+rationale, error analysis, robustness study, statistical interpretation, and
+threats to validity. Canonical machine-readable results are in
+`outputs/research/classification_benchmark.json` and
+`outputs/research/robustness_benchmark.json`; the dataset audit and CSV summaries
+are in the same directory.
+
 ## Current Scope
 
 - Hinglish/Hindi/English scam text analysis

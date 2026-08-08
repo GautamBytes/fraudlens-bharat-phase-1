@@ -87,6 +87,7 @@ def test_robustness_evidence_is_deterministic_and_complete(tmp_path):
     assert (first / "ablation_summary.csv").read_bytes() == (
         second / "ablation_summary.csv"
     ).read_bytes()
+    assert b"\r\n" not in (first / "ablation_summary.csv").read_bytes()
     payload = json.loads(
         (first / "robustness_benchmark.json").read_text(encoding="utf-8")
     )

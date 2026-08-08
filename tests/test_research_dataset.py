@@ -59,6 +59,20 @@ def test_load_research_rows_rejects_missing_contract_columns(tmp_path):
         raise AssertionError("missing provenance must be rejected")
 
 
+def test_load_research_rows_enforces_the_full_training_data_contract(tmp_path):
+    frame = pd.read_csv(DATASET_PATH)
+    frame.loc[0, "label"] = "invented_fraud_label"
+    path = tmp_path / "invalid-label.csv"
+    frame.to_csv(path, index=False)
+
+    try:
+        load_research_rows(path)
+    except ValueError as error:
+        assert "invalid label values" in str(error)
+    else:
+        raise AssertionError("invalid research labels must be rejected")
+
+
 def test_audit_records_balance_gaps_and_split_evidence():
     audit = audit_dataset(load_research_rows(DATASET_PATH))
 

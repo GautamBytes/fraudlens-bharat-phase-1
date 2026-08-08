@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -57,6 +58,30 @@ def build_estimator(candidate: ResearchModel, seed: int = 42):
     if candidate.calibrated:
         return CalibratedClassifierCV(estimator=pipeline, method="sigmoid", cv=3)
     return pipeline
+
+
+def normalize_research_estimator(estimator, decimals: int = 12) -> None:
+    """Remove insignificant cross-platform BLAS drift from learned parameters."""
+    if decimals < 0:
+        raise ValueError("decimals must be non-negative")
+    if isinstance(estimator, Pipeline):
+        for _, step in estimator.steps:
+            normalize_research_estimator(step, decimals)
+        return
+    if isinstance(estimator, FeatureUnion):
+        for _, step in estimator.transformer_list:
+            normalize_research_estimator(step, decimals)
+        return
+    if isinstance(estimator, LogisticRegression):
+        estimator.coef_ = np.round(estimator.coef_, decimals)
+        estimator.intercept_ = np.round(estimator.intercept_, decimals)
+        return
+    if isinstance(estimator, CalibratedClassifierCV):
+        for calibrated in estimator.calibrated_classifiers_:
+            normalize_research_estimator(calibrated.estimator, decimals)
+            for calibrator in calibrated.calibrators:
+                calibrator.a_ = round(float(calibrator.a_), decimals)
+                calibrator.b_ = round(float(calibrator.b_), decimals)
 
 
 def _word_vectorizer() -> TfidfVectorizer:

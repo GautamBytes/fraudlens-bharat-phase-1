@@ -11,7 +11,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from fraudlens.data_contract import PHASE2_TARGET_PER_LABEL, REQUIRED_COLUMNS, TRAINED_LABELS
+from fraudlens.data_contract import (
+    PHASE2_TARGET_PER_LABEL,
+    REQUIRED_COLUMNS,
+    TRAINED_LABELS,
+    load_phase2_dataset,
+)
 from fraudlens.preprocessing import normalize_text
 
 
@@ -60,6 +65,7 @@ def load_research_rows(path: Path | str) -> tuple[ResearchRow, ...]:
             ResearchRow(**{column: str(record[column]) for column in REQUIRED_COLUMNS})
             for record in reader
         )
+    load_phase2_dataset(Path(path), minimum_per_label=0)
     return rows
 
 

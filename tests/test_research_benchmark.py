@@ -3,7 +3,11 @@ import json
 from pathlib import Path
 
 from fraudlens.research_benchmark import run_benchmark
-from fraudlens.research_models import build_candidate_models
+from fraudlens.research_models import (
+    build_candidate_models,
+    build_estimator,
+    normalize_research_estimator,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +26,23 @@ def test_candidate_models_cover_rules_classical_character_and_hybrid_families():
     ]
     assert candidates[0].fit_required is False
     assert all(candidate.fit_required for candidate in candidates[1:])
+
+
+def test_research_estimator_normalization_rounds_learned_parameters():
+    candidate = build_candidate_models(seed=42)[1]
+    estimator = build_estimator(candidate, seed=42)
+    estimator.fit(
+        ["bank kyc freeze", "job registration fee", "loan processing fee", "otp share code"],
+        ["kyc", "job", "loan", "otp"],
+    )
+
+    classifier = estimator.named_steps["classifier"]
+    classifier.coef_[0, 0] = 0.123456789
+    classifier.intercept_[0] = -0.987654321
+    normalize_research_estimator(estimator, decimals=6)
+
+    assert classifier.coef_[0, 0] == 0.123457
+    assert classifier.intercept_[0] == -0.987654
 
 
 def test_benchmark_uses_train_validation_and_test_for_distinct_purposes(tmp_path):
@@ -68,6 +89,7 @@ def test_benchmark_outputs_are_canonical_while_runtime_latency_is_separate(tmp_p
     assert (first_dir / "classification_summary.csv").read_bytes() == (
         second_dir / "classification_summary.csv"
     ).read_bytes()
+    assert b"\r\n" not in (first_dir / "classification_summary.csv").read_bytes()
     payload = json.loads(
         (first_dir / "classification_benchmark.json").read_text(encoding="utf-8")
     )

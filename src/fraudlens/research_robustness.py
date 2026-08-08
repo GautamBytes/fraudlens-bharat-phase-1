@@ -23,7 +23,11 @@ from fraudlens.research_benchmark import (
 )
 from fraudlens.research_dataset import ResearchRow, load_research_rows
 from fraudlens.research_metrics import classification_metrics
-from fraudlens.research_models import build_candidate_models, build_estimator
+from fraudlens.research_models import (
+    build_candidate_models,
+    build_estimator,
+    normalize_research_estimator,
+)
 
 
 PERTURBATIONS = (
@@ -159,6 +163,7 @@ def run_robustness_benchmark(
         if candidate.fit_required:
             estimator = build_estimator(candidate, seed=_SEED)
             estimator.fit([_model_text(row.text) for row in train], [row.label for row in train])
+            normalize_research_estimator(estimator, decimals=12)
             validation_probabilities = _aligned_probabilities(
                 estimator, [_model_text(row.text) for row in validation], labels
             )
@@ -263,7 +268,7 @@ def _write_outputs(document: dict[str, object], output_dir: Path) -> None:
     with (output_dir / "ablation_summary.csv").open(
         "w", newline="", encoding="utf-8"
     ) as stream:
-        writer = csv.DictWriter(stream, fieldnames=_CSV_FIELDS)
+        writer = csv.DictWriter(stream, fieldnames=_CSV_FIELDS, lineterminator="\n")
         writer.writeheader()
         for model_name, result in document["models"].items():
             for condition, metrics in result["conditions"].items():
