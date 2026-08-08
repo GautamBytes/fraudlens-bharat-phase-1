@@ -4,6 +4,10 @@
 
 FraudLens Bharat helps a user analyze suspicious scam messages and prepare a structured report summary. It does not replace official reporting portals or law enforcement advice.
 
+For the Docker release, open the dashboard at `http://127.0.0.1:8501`. An
+operator can check API liveness at `/health` and dependency readiness at
+`/ready`; both responses identify release `1.0.0`.
+
 ## Analyze a Message
 
 1. Open the Streamlit dashboard.
@@ -106,3 +110,8 @@ GNN; it is a bounded visualization of locally retained evidence.
 Replace real phone numbers, account numbers, UPI IDs, and names with dummy
 values when testing. Review screenshots for private information before upload,
 and enable local storage only with the affected person's consent.
+
+Application request logs contain a generated request ID, HTTP method, route
+template, and status code only. They intentionally omit message text, OCR text,
+notes, query strings, headers, client addresses, and concrete case IDs. The
+response `X-Request-ID` can be used to correlate a request with that safe event.

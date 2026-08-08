@@ -34,7 +34,7 @@ The output must include `eng` and `hin`. Next, install the Python runtime for
 the API, dashboard, or training command.
 
 ```bash
-cd "/Users/gautammanch/capstone-project(phase-1)"
+cd /path/to/fraudlens-bharat
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -79,11 +79,18 @@ python -m fraudlens.generate_demo_cases
 uvicorn fraudlens.api:app --reload
 ```
 
+`--reload` is for local development only. The production container runs without
+the reloader and disables Uvicorn's raw access log in favor of the application's
+redacted structured request events.
+
 Open:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
+
+Check process liveness with `GET /health`. Check application readiness,
+including the initialized SQLite case store, with `GET /ready`.
 
 Send screenshots as a raw request body, not as multipart form data:
 
@@ -108,3 +115,21 @@ streamlit run src/fraudlens/dashboard.py
 ```bash
 pytest
 ```
+
+## Run the hardened containers
+
+Docker Compose runs the API and dashboard as a non-root user, binds both ports
+to loopback, keeps the container filesystem read-only, and mounts a persistent
+data volume for SQLite.
+
+```bash
+cp .env.example .env
+python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+# Paste that unique output after FRAUDLENS_HMAC_SECRET= in .env.
+docker compose config --quiet
+docker compose up --build --detach
+curl --fail http://127.0.0.1:8000/ready
+```
+
+Open `http://127.0.0.1:8501` for the dashboard. Follow
+`docs/deployment_guide.md` for exposure, backups, monitoring, and rollback.

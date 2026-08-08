@@ -4,6 +4,29 @@ FraudLens Bharat is a pure-software cyber-fraud triage prototype for Indian user
 
 The project is designed for my capstone project submission. It includes implementation code, dataset scaffolding, testing evidence, documentation, references, and demo cases aligned with the provided capstone format and rubric.
 
+## Release 1.0
+
+Release 1.0 is the final Phase 2 software release of the capstone prototype. It
+aligns package/API identity, adds dependency-aware readiness, emits
+privacy-safe structured request logs, and supplies a pinned, non-root container
+for the API and dashboard. This release designation means the planned software
+scope is integrated and release-tested; it does not turn the synthetic
+evaluation into a production accuracy claim.
+
+For a local production-style launch:
+
+```bash
+cp .env.example .env
+# Put a unique secrets.token_urlsafe(48) value in FRAUDLENS_HMAC_SECRET.
+docker compose up --build --detach
+```
+
+The API is available at `http://127.0.0.1:8000` and the dashboard at
+`http://127.0.0.1:8501`. `GET /health` is process liveness; `GET /ready` also
+checks the initialized case store. Both report version `1.0.0`. See
+`docs/deployment_guide.md` before changing the loopback-only exposure and use
+`docs/release_checklist.md` for the release gate.
+
 ## Current Phase 2 Evaluation Evidence
 
 - Dataset: 64 synthetic, manually reviewed bootstrap examples across 8 fraud classes; no `legitimate` rows are present
@@ -62,7 +85,7 @@ Then install the Python runtime requirements to run the API, dashboard, or
 training command:
 
 ```bash
-cd "/Users/gautammanch/capstone-project(phase-1)"
+cd /path/to/fraudlens-bharat
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -213,6 +236,8 @@ python -m fraudlens.generate_demo_cases
 - `docs/test_cases.md`: Phase 1 test case inventory
 - `docs/user_manual.md`: dashboard usage guide
 - `docs/installation_guide.md`: setup and run instructions
+- `docs/deployment_guide.md`: hardened Docker deployment, backup, monitoring, and rollback
+- `docs/release_checklist.md`: final pre-release and post-release verification gate
 
 ## Ethical Guardrails
 
