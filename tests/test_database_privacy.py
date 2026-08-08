@@ -374,6 +374,30 @@ def test_entity_link_case_selection_is_bounded_and_deterministic_by_case_id(tmp_
     assert [link.case_id for link in links] == ["case-{:03d}".format(index) for index in range(100)]
 
 
+def test_entity_link_case_boundary_preserves_microsecond_ordering(tmp_path):
+    store = _store(tmp_path)
+    clearly_newer = datetime(2099, 1, 2, tzinfo=timezone.utc)
+    for index in range(99):
+        result = _result("recent-{:03d}".format(index), clearly_newer)
+        result.entities = [Entity(type="phone", value="9876543210")]
+        store.save(result)
+    boundary = datetime(2099, 1, 1, 12, 0, tzinfo=timezone.utc)
+    older = _result("a-older", boundary)
+    newer = _result("z-newer", boundary + timedelta(microseconds=1))
+    older.entities = newer.entities = [Entity(type="phone", value="9876543210")]
+    store.save(older)
+    store.save(newer)
+
+    links, truncated = list_entity_links(
+        path=tmp_path / "cases.sqlite3", case_limit=100, edge_limit=101
+    )
+
+    retained_case_ids = {link.case_id for link in links}
+    assert truncated is True
+    assert "z-newer" in retained_case_ids
+    assert "a-older" not in retained_case_ids
+
+
 def test_entity_link_case_selection_orders_legacy_offsets_by_utc_instant(tmp_path):
     store = _store(tmp_path)
     for case_id in ("newest", "middle", "oldest"):
@@ -393,9 +417,16 @@ def test_entity_link_case_selection_orders_legacy_offsets_by_utc_instant(tmp_pat
     links, truncated = list_entity_links(
         path=tmp_path / "cases.sqlite3", case_limit=2, edge_limit=3
     )
+    with sqlite3.connect(tmp_path / "cases.sqlite3") as conn:
+        stored_created_at = dict(conn.execute("SELECT case_id, created_at FROM cases"))
 
     assert truncated is True
     assert [link.case_id for link in links] == ["newest", "middle"]
+    assert stored_created_at == {
+        "middle": "2099-01-01T00:15:00+00:00",
+        "newest": "2099-01-01T00:30:00+00:00",
+        "oldest": "2099-01-01T00:00:00+00:00",
+    }
 
 
 @pytest.mark.parametrize(

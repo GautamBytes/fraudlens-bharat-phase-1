@@ -98,6 +98,12 @@ def _migrate_cases(conn: sqlite3.Connection, retention_days: int, now: datetime)
             cursor = conn.execute("DELETE FROM cases WHERE case_id = ?", (row["case_id"],))
             deleted_count += cursor.rowcount
             continue
+        canonical_created_at = _utc_iso(created_at)
+        if row["created_at"] != canonical_created_at:
+            conn.execute(
+                "UPDATE cases SET created_at = ? WHERE case_id = ?",
+                (canonical_created_at, row["case_id"]),
+            )
         maximum_expiry = created_at + timedelta(days=retention_days)
         recorded_expiry = _parse_utc(row["expires_at"])
         if row["expires_at"] is not None and recorded_expiry is None:
@@ -288,13 +294,13 @@ def list_entity_links(
             WITH candidate_cases AS (
                 SELECT case_id, created_at, predicted_label, risk_level, risk_score
                 FROM cases
-                ORDER BY julianday(created_at) DESC, case_id ASC
+                ORDER BY created_at DESC, case_id ASC
                 LIMIT ?
             ),
             recent_cases AS (
                 SELECT case_id, created_at, predicted_label, risk_level, risk_score
                 FROM candidate_cases
-                ORDER BY julianday(created_at) DESC, case_id ASC
+                ORDER BY created_at DESC, case_id ASC
                 LIMIT ?
             ),
             qualifying_entities AS (
@@ -337,7 +343,7 @@ def list_entity_links(
             FROM case_limit_status
             LEFT JOIN qualifying_links ON 1 = 1
             ORDER BY
-                julianday(qualifying_links.created_at) DESC,
+                qualifying_links.created_at DESC,
                 qualifying_links.case_id ASC,
                 qualifying_links.entity_type ASC,
                 qualifying_links.entity_id ASC
