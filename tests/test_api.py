@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from fraudlens import api
 from fraudlens import config, database
+from fraudlens.graph_analysis import EntityLink, build_entity_graph
 from fraudlens.ocr import (
     ImageTooLargeError,
     InvalidImageError,
@@ -36,6 +37,8 @@ class _Store:
         self.initialized = 0
         self.saved = []
         self.case_ids = set(case_ids)
+        self.graph_calls = []
+        self.graph_result = _graph_result()
 
     def initialize(self):
         self.initialized += 1
@@ -66,6 +69,12 @@ class _Store:
         self.case_ids.clear()
         return deleted_count
 
+    def entity_graph(self, minimum_case_count=2, case_limit=100, max_edges=1_000):
+        if self.error:
+            raise self.error
+        self.graph_calls.append((minimum_case_count, case_limit, max_edges))
+        return self.graph_result
+
 
 class _OcrService:
     def __init__(self, error=None, max_bytes=5 * 1024 * 1024):
@@ -95,6 +104,34 @@ def _settings(store_cases_by_default=False, allowed_hosts=()):
         store_cases_by_default=store_cases_by_default,
         environment="test",
         allowed_hosts=allowed_hosts,
+    )
+
+
+def _graph_result():
+    entity_id = "phone_" + "a" * 64
+    return build_entity_graph(
+        [
+            EntityLink(
+                case_id="case-one",
+                created_at="2026-08-08T12:00:00Z",
+                predicted_label="kyc_scam",
+                risk_level="high",
+                risk_score=91.0,
+                entity_type="phone",
+                entity_id=entity_id,
+                masked_value="******1234",
+            ),
+            EntityLink(
+                case_id="case-two",
+                created_at="2026-08-08T12:05:00Z",
+                predicted_label="kyc_scam",
+                risk_level="medium",
+                risk_score=72.0,
+                entity_type="phone",
+                entity_id=entity_id,
+                masked_value="******1234",
+            ),
+        ]
     )
 
 
@@ -455,6 +492,92 @@ def test_cases_limit_and_security_headers_are_constrained():
 
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["cache-control"] == "no-store"
+
+
+def test_graph_endpoint_returns_a_serializable_graph_for_default_and_bounded_queries():
+    store = _Store()
+    _, test_client = _client(store=store)
+
+    with test_client:
+        default_response = test_client.get("/graph")
+        bounded_response = test_client.get(
+            "/graph", params={"minimum_case_count": 4, "case_limit": 20}
+        )
+
+    assert default_response.status_code == 200
+    assert bounded_response.status_code == 200
+    payload = default_response.json()
+    assert payload["case_nodes"]
+    assert payload["entity_nodes"]
+    assert payload["edges"]
+    assert payload["components"]
+    assert payload["summary"] == {
+        "case_count": 2,
+        "entity_count": 1,
+        "edge_count": 2,
+        "component_count": 1,
+        "truncated": False,
+    }
+    assert store.graph_calls == [(2, 100, 1_000), (4, 20, 1_000)]
+    assert default_response.headers["x-content-type-options"] == "nosniff"
+    assert default_response.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"minimum_case_count": 1},
+        {"minimum_case_count": 21},
+        {"case_limit": 0},
+        {"case_limit": 101},
+    ],
+)
+def test_graph_endpoint_rejects_unbounded_queries_before_reading_storage(params):
+    store = _Store()
+    _, test_client = _client(store=store)
+
+    with test_client:
+        response = test_client.get("/graph", params=params)
+
+    assert response.status_code == 422
+    assert store.graph_calls == []
+
+
+def test_graph_endpoint_hides_storage_failure_details():
+    _, test_client = _client(store=_Store(error=RuntimeError("/private/cases.sqlite SQL secret")))
+
+    with test_client:
+        response = test_client.get("/graph")
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Internal server error"}
+    assert "/private" not in response.text
+    assert "SQL" not in response.text
+    assert "secret" not in response.text
+
+
+def test_graph_endpoint_returns_a_valid_zero_summary_for_an_empty_graph():
+    store = _Store()
+    store.graph_result = build_entity_graph(())
+    _, test_client = _client(store=store)
+
+    with test_client:
+        response = test_client.get("/graph")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "case_nodes": [],
+        "entity_nodes": [],
+        "edges": [],
+        "components": [],
+        "summary": {
+            "case_count": 0,
+            "entity_count": 0,
+            "edge_count": 0,
+            "component_count": 0,
+            "truncated": False,
+        },
+    }
 
 
 def test_allowed_hosts_are_enabled_only_when_configured():

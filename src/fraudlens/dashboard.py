@@ -3,6 +3,7 @@ import streamlit as st
 
 from fraudlens.analysis_service import AnalysisInput, DatabaseCaseStore, create_analysis_service
 from fraudlens.dashboard_workflow import analyze_uploaded_file
+from fraudlens.graph_dashboard import build_graph_view
 from fraudlens.image_analysis import ImageAnalysisService
 from fraudlens.ocr import OcrService
 from fraudlens.settings import Settings
@@ -89,6 +90,63 @@ def _render_result(result):
             st.warning(metadata["storage_warning"])
 
 
+def _render_entity_graph_tab(case_store):
+    """Render stored relationship evidence only after the investigator refreshes it."""
+
+    minimum_case_count = st.selectbox(
+        "Repeated incident threshold",
+        options=list(range(2, 21)),
+        index=0,
+        help="Show evidence hubs linked to at least this many stored incidents.",
+    )
+    st.caption(
+        "Evidence hubs use masked identifiers. Cases are shown as linked incidents; "
+        "raw messages and raw entity values are never displayed."
+    )
+    if st.button("Refresh Graph", type="primary"):
+        try:
+            graph_result = case_store.entity_graph(
+                minimum_case_count=minimum_case_count,
+                case_limit=100,
+                max_edges=1_000,
+            )
+            st.session_state["entity_graph_view"] = build_graph_view(graph_result)
+            st.session_state["entity_graph_threshold"] = minimum_case_count
+        except Exception:
+            st.session_state.pop("entity_graph_view", None)
+            st.session_state.pop("entity_graph_threshold", None)
+            st.error("Entity graph could not be loaded. Try refreshing again.")
+            return
+
+    graph_view = st.session_state.get("entity_graph_view")
+    if (
+        graph_view is None
+        or st.session_state.get("entity_graph_threshold") != minimum_case_count
+    ):
+        st.info("Choose a threshold, then select Refresh Graph to inspect repeated evidence.")
+        return
+
+    metrics = graph_view.metrics
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Linked incidents", metrics.case_count)
+    metric_cols[1].metric("Evidence hubs", metrics.entity_count)
+    metric_cols[2].metric("Links", metrics.edge_count)
+    metric_cols[3].metric("Clusters", metrics.component_count)
+    if metrics.truncated:
+        st.warning("This graph is truncated to the safe display limit. Narrow the investigation.")
+    if metrics.edge_count == 0:
+        st.info(
+            "No repeated evidence meets this threshold. Store more consented analyses or lower the threshold."
+        )
+        return
+
+    st.graphviz_chart(graph_view.dot, use_container_width=True)
+    st.subheader("Evidence hubs")
+    st.dataframe(pd.DataFrame(graph_view.entity_rows), use_container_width=True)
+    st.subheader("Linked incident clusters")
+    st.dataframe(pd.DataFrame(graph_view.component_rows), use_container_width=True)
+
+
 def main():
     st.set_page_config(page_title="FraudLens Bharat", page_icon="FL", layout="wide")
     st.title("FraudLens Bharat")
@@ -98,7 +156,7 @@ def main():
         st.session_state.message_text = DEMO_MESSAGES["Fake KYC SMS"]
 
     store_case = st.checkbox("Store this analysis locally", value=False)
-    text_tab, screenshot_tab = st.tabs(["Text", "Screenshot"])
+    text_tab, screenshot_tab, graph_tab = st.tabs(["Text", "Screenshot", "Entity Graph"])
 
     with text_tab:
         demo_cols = st.columns(4)
@@ -142,6 +200,10 @@ def main():
                 else:
                     st.session_state.last_result = _result_to_dict(outcome.result)
                     st.session_state.pop("screenshot_error", None)
+
+    with graph_tab:
+        _, _, case_store = _analysis_dependencies()
+        _render_entity_graph_tab(case_store)
 
     if "screenshot_error" in st.session_state:
         st.error(st.session_state.screenshot_error)
