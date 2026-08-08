@@ -18,6 +18,8 @@ outputs/screenshots/*.png
 outputs/screenshots/*.jpg
 outputs/screenshots/*.jpeg
 outputs/screenshots/*.webp
+outputs/research/classification_benchmark.json
+outputs/research/robustness_benchmark.json
 data/raw/*
 data/processed/*
 !data/raw/.gitkeep

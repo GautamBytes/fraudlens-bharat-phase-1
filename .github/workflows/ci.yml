@@ -61,6 +61,41 @@ jobs:
           cmp "$evaluation_tmp/first/evaluation.json" outputs/phase2/evaluation.json
           cmp "$evaluation_tmp/first/summary.txt" outputs/phase2/summary.txt
           git diff --exit-code -- outputs/phase2
+      - name: Verify deterministic research evidence
+        if: matrix.python-version == '3.11.15'
+        run: |
+          research_tmp=$(mktemp -d)
+          for run in first second
+          do
+            mkdir "$research_tmp/$run"
+            python -m fraudlens.research_dataset \
+              --dataset data/samples/phase2_dataset.csv \
+              --output "$research_tmp/$run/dataset_audit.json"
+            python -m fraudlens.research_benchmark \
+              --dataset data/samples/phase2_dataset.csv \
+              --output "$research_tmp/$run"
+            python -m fraudlens.research_robustness \
+              --dataset data/samples/phase2_dataset.csv \
+              --output "$research_tmp/$run" \
+              --bootstrap-samples 2000
+          done
+          for artifact in \
+            dataset_audit.json \
+            classification_benchmark.json \
+            classification_summary.csv \
+            robustness_benchmark.json \
+            ablation_summary.csv
+          do
+            cmp "$research_tmp/first/$artifact" "$research_tmp/second/$artifact"
+          done
+          for artifact in \
+            dataset_audit.json \
+            classification_summary.csv \
+            ablation_summary.csv
+          do
+            cmp "$research_tmp/first/$artifact" "outputs/research/$artifact"
+          done
+          git diff --exit-code -- outputs/research
 
   container-smoke:
     needs: test

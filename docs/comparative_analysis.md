@@ -119,3 +119,14 @@ The historical marker-enhanced model outperformed the rule-only fallback on its 
 It is not yet better than mature transformer or graph systems on real-world external benchmarks.
 
 The strongest Phase 1 claim is workflow completeness: classification, evidence extraction, URL checks, risk scoring, API/dashboard, local storage, tests, and documentation in one prototype.
+
+## Phase 2 research benchmark
+
+The final Phase 2 research benchmark adds rule-only, word TF-IDF, character
+TF-IDF, word-character TF-IDF, and calibrated-hybrid candidates on the same
+frozen split. Character and word-character candidates reach 0.7500 accuracy and
+0.6667 macro-F1, compared with 0.3750 and 0.3333 for word TF-IDF. These values
+come from the same eight-row synthetic test and are therefore suitable for an
+internal ablation, not for declaring superiority over external transformer,
+URL, or graph datasets. Full methods and limitations are in
+`docs/phase2_research_report.md`.
