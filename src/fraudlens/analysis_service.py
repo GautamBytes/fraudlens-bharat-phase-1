@@ -29,6 +29,9 @@ class CaseStore(Protocol):
     def initialize(self) -> None:
         """Prepare storage and run safe migrations."""
 
+    def healthcheck(self) -> None:
+        """Raise when the prepared storage dependency is unavailable."""
+
     def save(self, result: AnalysisResult) -> None:
         """Persist an analysis result."""
 
@@ -70,6 +73,11 @@ class DatabaseCaseStore:
 
         init_db(path=self._database_path, retention_days=self._retention_days)
         purge_expired(path=self._database_path, retention_days=self._retention_days)
+
+    def healthcheck(self) -> None:
+        from fraudlens.database import check_database
+
+        check_database(path=self._database_path)
 
     def save(self, result: AnalysisResult) -> None:
         from fraudlens.database import save_case

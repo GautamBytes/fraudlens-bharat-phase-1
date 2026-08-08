@@ -43,6 +43,10 @@ class _Store:
     def initialize(self):
         self.initialized += 1
 
+    def healthcheck(self):
+        if self.error:
+            raise self.error
+
     def save(self, result):
         if self.error:
             raise self.error
