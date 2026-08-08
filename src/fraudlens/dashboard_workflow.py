@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from fraudlens.image_analysis import ImageAnalysisInput, ImageAnalysisService
 from fraudlens.ocr import (
     ImageTooLargeError,
+    ImagePolicy,
     InvalidImageError,
     NoTextDetectedError,
     OcrError,
@@ -18,6 +19,25 @@ from fraudlens.schemas import AnalysisResult
 class ScreenshotAnalysisOutcome:
     result: AnalysisResult | None = None
     error_message: str | None = None
+
+
+def analyze_uploaded_file(
+    image_analysis_service: ImageAnalysisService,
+    *,
+    uploaded_file,
+    store_case: bool,
+) -> ScreenshotAnalysisOutcome:
+    """Reject an oversize Streamlit upload before materializing its bytes."""
+    if uploaded_file.size > ImagePolicy().max_bytes:
+        return ScreenshotAnalysisOutcome(
+            error_message="This screenshot exceeds the supported size limit."
+        )
+    return analyze_uploaded_screenshot(
+        image_analysis_service,
+        image_bytes=uploaded_file.getvalue(),
+        media_type=uploaded_file.type,
+        store_case=store_case,
+    )
 
 
 def analyze_uploaded_screenshot(

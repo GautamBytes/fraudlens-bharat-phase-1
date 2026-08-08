@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from fraudlens.analysis_service import AnalysisInput, DatabaseCaseStore, create_analysis_service
-from fraudlens.dashboard_workflow import analyze_uploaded_screenshot
+from fraudlens.dashboard_workflow import analyze_uploaded_file
 from fraudlens.image_analysis import ImageAnalysisService
 from fraudlens.ocr import OcrService
 from fraudlens.settings import Settings
@@ -124,16 +124,16 @@ def main():
             "Upload a screenshot",
             type=["png", "jpg", "jpeg"],
             accept_multiple_files=False,
+            max_upload_size=5,
         )
         if st.button("Analyze Screenshot", type="primary"):
             if uploaded_file is None:
                 st.warning("Choose a PNG or JPEG screenshot before analyzing.")
             else:
                 _, image_analysis_service, _ = _analysis_dependencies()
-                outcome = analyze_uploaded_screenshot(
+                outcome = analyze_uploaded_file(
                     image_analysis_service,
-                    image_bytes=uploaded_file.getvalue(),
-                    media_type=uploaded_file.type,
+                    uploaded_file=uploaded_file,
                     store_case=store_case,
                 )
                 if outcome.error_message:

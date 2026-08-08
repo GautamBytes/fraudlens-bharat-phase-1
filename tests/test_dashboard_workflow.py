@@ -23,6 +23,33 @@ class _ImageAnalysisService:
         return self.result
 
 
+class _OversizeUpload:
+    type = "image/png"
+
+    def __init__(self, size):
+        self.size = size
+        self.getvalue_calls = 0
+
+    def getvalue(self):
+        self.getvalue_calls += 1
+        raise AssertionError("oversize upload bytes must not be materialized")
+
+
+def test_analyze_uploaded_file_rejects_oversize_upload_before_materializing_bytes():
+    from fraudlens.dashboard_workflow import analyze_uploaded_file
+    from fraudlens.ocr import ImagePolicy
+
+    uploaded_file = _OversizeUpload(ImagePolicy().max_bytes + 1)
+    service = _ImageAnalysisService()
+
+    outcome = analyze_uploaded_file(service, uploaded_file=uploaded_file, store_case=False)
+
+    assert outcome.result is None
+    assert outcome.error_message == "This screenshot exceeds the supported size limit."
+    assert uploaded_file.getvalue_calls == 0
+    assert service.calls == []
+
+
 def test_analyze_uploaded_screenshot_builds_an_image_analysis_input():
     from fraudlens.dashboard_workflow import analyze_uploaded_screenshot
 
