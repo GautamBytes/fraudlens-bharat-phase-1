@@ -107,6 +107,7 @@ def test_duplicate_case_entity_rows_do_not_duplicate_edges():
         (_link(), {"minimum_case_count": 1}),
         (_link(), {"minimum_case_count": 21}),
         (_link(), {"max_edges": 0}),
+        (_link(), {"max_edges": 1_001}),
     ],
 )
 def test_invalid_values_are_rejected_before_graph_building(link, kwargs):
@@ -142,6 +143,62 @@ def test_ordering_and_component_ids_are_deterministic_across_input_order():
         "component:1",
         "component:2",
     ]
+
+
+def test_unknown_prediction_label_is_allowed_for_runtime_abstentions():
+    result = build_entity_graph(
+        [
+            _link(case_id="case-1", predicted_label="unknown"),
+            _link(case_id="case-2", predicted_label="unknown"),
+        ]
+    )
+
+    assert [node.predicted_label for node in result.case_nodes] == ["unknown", "unknown"]
+
+
+@pytest.mark.parametrize(
+    "masked_value",
+    [
+        "9876543210",
+        "example..com",
+        ".example.com",
+        "example-.com",
+        "-example.com",
+        "example.com.",
+    ],
+)
+def test_url_masks_reject_numeric_or_malformed_hostnames(masked_value):
+    with pytest.raises(ValueError):
+        build_entity_graph(
+            [
+                _link(
+                    entity_type="url",
+                    entity_id="url_{}".format("f" * 64),
+                    masked_value=masked_value,
+                )
+            ]
+        )
+
+
+def test_url_masks_allow_conventional_hostnames_from_mask_entity():
+    result = build_entity_graph(
+        [
+            _link(
+                case_id="case-1",
+                entity_type="url",
+                entity_id="url_{}".format("f" * 64),
+                masked_value="kyc-login.example",
+            ),
+            _link(
+                case_id="case-2",
+                entity_type="url",
+                entity_id="url_{}".format("f" * 64),
+                masked_value="kyc-login.example",
+            ),
+        ]
+    )
+
+    assert result.entity_nodes[0].masked_value == "kyc-login.example"
 
 
 def test_edges_are_deterministically_truncated_at_the_default_cap():

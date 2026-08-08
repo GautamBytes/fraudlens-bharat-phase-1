@@ -11,11 +11,12 @@ from fraudlens.data_contract import TRAINED_LABELS
 
 
 _ENTITY_TYPES = frozenset({"phone", "upi_id", "email", "url"})
+_PREDICTED_LABELS = TRAINED_LABELS | {"unknown"}
 _RISK_LEVELS = frozenset({"low", "medium", "high"})
 _OPAQUE_ID_RE = re.compile(r"^[0-9a-f]{64}$")
 _PHONE_MASK_RE = re.compile(r"^\*{4,}\d{4}$")
 _LOCAL_MASK_RE = re.compile(r"^[^@\s*]\*{3}@[A-Za-z0-9.-]+$")
-_HOST_MASK_RE = re.compile(r"^[A-Za-z0-9.-]+$")
+_HOST_LABEL_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$")
 
 
 @dataclass(frozen=True)
@@ -197,8 +198,12 @@ def _validate_options(minimum_case_count: int, max_edges: int, source_truncated:
         raise ValueError("minimum_case_count must be an integer")
     if not 2 <= minimum_case_count <= 20:
         raise ValueError("minimum_case_count must be between 2 and 20")
-    if isinstance(max_edges, bool) or not isinstance(max_edges, int) or max_edges <= 0:
-        raise ValueError("max_edges must be a positive integer")
+    if (
+        isinstance(max_edges, bool)
+        or not isinstance(max_edges, int)
+        or not 1 <= max_edges <= 1_000
+    ):
+        raise ValueError("max_edges must be an integer between one and 1,000")
     if not isinstance(source_truncated, bool):
         raise ValueError("source_truncated must be a boolean")
 
@@ -213,7 +218,7 @@ def _normalize_link(link: EntityLink) -> _ValidatedLink:
     entity_type = _normalized_text(link.entity_type, "entity_type").casefold()
     entity_id = _normalized_text(link.entity_id, "entity_id").casefold()
     masked_value = _normalized_text(link.masked_value, "masked_value")
-    if predicted_label not in TRAINED_LABELS:
+    if predicted_label not in _PREDICTED_LABELS:
         raise ValueError("predicted_label must be an approved model label")
     if risk_level not in _RISK_LEVELS:
         raise ValueError("risk_level is invalid")
@@ -254,7 +259,14 @@ def _is_masked(entity_type: str, masked_value: str) -> bool:
         return _PHONE_MASK_RE.fullmatch(masked_value) is not None
     if entity_type in {"upi_id", "email"}:
         return _LOCAL_MASK_RE.fullmatch(masked_value) is not None
-    return _HOST_MASK_RE.fullmatch(masked_value) is not None
+    return _is_safe_hostname(masked_value)
+
+
+def _is_safe_hostname(value: str) -> bool:
+    if len(value) > 253 or not any(character.isalpha() for character in value):
+        return False
+    labels = value.split(".")
+    return all(_HOST_LABEL_RE.fullmatch(label) is not None for label in labels)
 
 
 def _record_consistent_case(cases: dict[str, _ValidatedLink], link: _ValidatedLink) -> None:
