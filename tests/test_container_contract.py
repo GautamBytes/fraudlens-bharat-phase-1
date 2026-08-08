@@ -61,3 +61,15 @@ def test_example_environment_contains_no_secret_value():
 
     assert values["FRAUDLENS_HMAC_SECRET"] == ""
     assert values["FRAUDLENS_ALLOWED_HOSTS"] == "localhost,127.0.0.1"
+
+
+def test_ci_builds_and_smokes_the_hardened_container():
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert "container-smoke:" in workflow
+    assert "docker build --tag fraudlens-bharat:ci ." in workflow
+    assert "--read-only" in workflow
+    assert "--cap-drop ALL" in workflow
+    assert "tesseract --list-langs" in workflow
+    assert "CI-PRIVATE-MARKER" in workflow
+    assert "docker logs fraudlens-ci" in workflow
