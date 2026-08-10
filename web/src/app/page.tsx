@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AnalysisTrace } from "@/components/analysis-trace";
+import { RecordedDemoTour } from "@/components/recorded-demo-tour";
 import { SignalField } from "@/components/signal-field";
 import { RESEARCH_MODELS, RESEARCH_SNAPSHOT } from "@/lib/research-data";
 
@@ -43,6 +44,8 @@ export default function EvaluatePage() {
           <article className="mosaicCard relationshipCard"><span className="mosaicLabel">Relationship intelligence</span><h3>Separate cases.<br />One repeated signal.</h3><div className="miniGraph" aria-hidden="true"><i /><i /><i /><span /></div><p>Observed links support review. They do not make the fraud decision.</p></article>
         </div>
       </section>
+
+      <RecordedDemoTour />
 
       <section className="homeSection researchBoundary">
         <div className="boundaryHeading"><p className="eyebrow">Honest by design</p><h2>The research result and the deployed result are different claims.</h2></div>

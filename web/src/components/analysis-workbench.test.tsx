@@ -20,12 +20,14 @@ describe("AnalysisWorkbench", () => {
     expect(
       screen.getByRole("checkbox", { name: /store this synthetic analysis/i }),
     ).not.toBeChecked();
+    expect(screen.getByRole("heading", { name: "What happens next" })).toBeVisible();
     await user.click(screen.getByRole("button", { name: /analyze message/i }));
 
     expect(await screen.findByText("KYC scam")).toBeVisible();
     expect(screen.getByTestId("analysis-workspace")).toHaveAttribute("data-state", "complete");
     expect(screen.getByRole("heading", { name: /review decision/i })).toBeVisible();
     expect(screen.getByRole("heading", { name: /complaint draft/i })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "What happens next" })).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
       "/api/analyze",
       expect.objectContaining({ method: "POST" }),

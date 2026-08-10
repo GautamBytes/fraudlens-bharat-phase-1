@@ -70,6 +70,11 @@ export function RelationshipWorkbench({ initialGraph }: { initialGraph: EntityGr
           </div>
         </div>
       </section>
+      <ol className="relationshipCue" aria-label="Relationship walkthrough">
+        <li><span>01</span><div><strong>Build</strong><small>Create two controlled synthetic cases that reuse one URL.</small></div></li>
+        <li><span>02</span><div><strong>Inspect</strong><small>See the repeated value connect otherwise separate scam reports.</small></div></li>
+        <li><span>03</span><div><strong>Verify</strong><small>Confirm the stored entity stays masked and every edge remains auditable.</small></div></li>
+      </ol>
       {error && <div role="alert" className="errorNotice">{error}</div>}
       {graph && graph.components.length > 0 && (
         <section className="clusterMetrics" aria-label="Bounded cluster metrics">

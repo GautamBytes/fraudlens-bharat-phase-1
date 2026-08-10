@@ -16,5 +16,9 @@ describe("ProfessorGuide", () => {
     expect(screen.getByText(/synthetic examples only/i)).toBeVisible();
     expect(screen.getByRole("heading", { name: "Open the project" })).toBeVisible();
     expect(screen.queryByText(/engine ready|check engine status/i)).not.toBeInTheDocument();
+    const paths = screen.getByRole("navigation", { name: "Evaluation paths" });
+    expect(paths).toHaveTextContent("Hosted");
+    expect(paths).toHaveTextContent("Docker");
+    expect(paths).toHaveTextContent("Development");
   });
 });

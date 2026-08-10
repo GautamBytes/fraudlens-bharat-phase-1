@@ -42,6 +42,11 @@ describe("RelationshipWorkbench", () => {
     const user = userEvent.setup();
     render(<RelationshipWorkbench initialGraph={null} />);
 
+    const walkthrough = screen.getByRole("list", { name: "Relationship walkthrough" });
+    expect(walkthrough).toHaveTextContent("Build");
+    expect(walkthrough).toHaveTextContent("Inspect");
+    expect(walkthrough).toHaveTextContent("Verify");
+
     await user.click(screen.getByRole("button", { name: /build synthetic link/i }));
 
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(4));

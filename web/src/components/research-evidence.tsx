@@ -12,6 +12,11 @@ function modelSize(model: (typeof RESEARCH_MODELS)[number]): string {
 export function ResearchEvidence() {
   const candidate = RESEARCH_MODELS[2];
   const deployed = RESEARCH_MODELS[4];
+  const metricSignals = [
+    { label: "Accuracy", candidate: candidate.accuracy, deployed: deployed.accuracy },
+    { label: "Macro-F1", candidate: candidate.macro_f1, deployed: deployed.macro_f1 },
+    { label: "Coverage", candidate: candidate.coverage, deployed: deployed.coverage },
+  ];
 
   return (
     <div className="researchStack">
@@ -30,6 +35,23 @@ export function ResearchEvidence() {
           <div className="researchMetrics"><Metric label="Accuracy" value={deployed.accuracy} /><Metric label="Coverage" value={deployed.coverage} /></div><div className="modelSize">Committed artifact bundle · {modelSize(deployed)}</div>
           <p>{deployed.weakness}</p>
         </article>
+      </section>
+
+      <section className="researchSignal" aria-label="Research metric signal">
+        <div className="researchSignalIntro">
+          <p className="eyebrow">Visual comparison</p>
+          <h2>Accuracy is only one part of the decision</h2>
+          <p>These same-split signals explain why the highest-scoring experiment is reported separately from the conservative runtime used in the demo.</p>
+        </div>
+        <div className="researchSignalGrid">
+          {metricSignals.map((metric) => (
+            <article className="researchSignalMetric" key={metric.label}>
+              <h3>{metric.label}</h3>
+              <div className="metricSignalRow"><span>Candidate</span><div className="metricSignalTrack"><i className="metricSignalCandidate" style={{ width: `${metric.candidate * 100}%` }} /></div><b>{(metric.candidate * 100).toFixed(1)}%</b></div>
+              <div className="metricSignalRow"><span>Runtime</span><div className="metricSignalTrack"><i className="metricSignalRuntime" style={{ width: `${metric.deployed * 100}%` }} /></div><b>{(metric.deployed * 100).toFixed(1)}%</b></div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <div className="evidenceCaveat">

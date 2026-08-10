@@ -105,7 +105,7 @@ export function AnalysisWorkbench() {
       <EvidenceRail activeStep={result ? 4 : pending ? 2 : 1} />
 
       <div
-        className={result ? "analysisWorkspace analysisWorkspaceComplete" : "analysisWorkspace"}
+        className={result ? "analysisWorkspace analysisWorkspaceComplete" : "analysisWorkspace analysisWorkspaceReady"}
         data-state={result ? "complete" : pending ? "pending" : "ready"}
         data-testid="analysis-workspace"
       >
@@ -202,6 +202,19 @@ export function AnalysisWorkbench() {
 
         {error && <div className="errorNotice" role="alert">{error}</div>}
         </section>
+
+        {!result && (
+          <aside className="analysisGuide" aria-labelledby="analysis-guide-title">
+            <p className="eyebrow">Guided review</p>
+            <h2 id="analysis-guide-title">What happens next</h2>
+            <ol>
+              <li><span>01</span><div><strong>Classify the evidence</strong><small>The calibrated runtime predicts a scam category or abstains when confidence is insufficient.</small></div></li>
+              <li><span>02</span><div><strong>Inspect the signals</strong><small>Review detected entities, confidence, risk cues, and the reasons behind the decision.</small></div></li>
+              <li><span>03</span><div><strong>Keep a human in control</strong><small>Use the generated draft as a starting point for review—not as an automatic complaint.</small></div></li>
+            </ol>
+            <div className="analysisGuideBoundary">Storage stays off unless you explicitly enable it.</div>
+          </aside>
+        )}
 
         {result && <AnalysisResultView result={result} />}
       </div>

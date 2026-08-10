@@ -11,6 +11,11 @@ function Command({ children }: { children: string }) {
 export function ProfessorGuide() {
   return (
     <div className="guideStack">
+      <nav className="guidePathIndex" aria-label="Evaluation paths">
+        <a href="#hosted"><span>01</span><div><strong>Hosted</strong><small>Fastest assessment with no installation.</small></div></a>
+        <a href="#docker-run"><span>02</span><div><strong>Docker</strong><small>Complete reproducible local stack.</small></div></a>
+        <a href="#development"><span>03</span><div><strong>Development</strong><small>Source-level API and web inspection.</small></div></a>
+      </nav>
       <section className="guidePath hostedPath" id="hosted">
         <p className="eyebrow">No installation</p><h2>Fastest: hosted evaluation</h2>
         <p>Open the published Vercel URL. Its server securely calls the containerized Python engine; the private key never reaches the browser.</p>
