@@ -35,14 +35,15 @@ during the live meeting.
 ### 0:00-0:15 - Title and safe default
 
 Show the Next.js website home page. Say: “FraudLens Bharat accepts pasted messages or
-bounded screenshots. Local case storage starts off.” Pause over the unchecked
-storage control.
+bounded screenshots. Local case storage starts off.” Then navigate to
+`/analyze`; the home page has no storage control.
 
 ### 0:15-1:05 - Text analysis
 
-1. Open **Text Analysis**.
-2. Load the named Fake KYC SMS synthetic demo.
-3. Click **Analyze Message**.
+1. Open **Analyze** (`/analyze`) and keep the **Message text** tab selected.
+2. Confirm **Store this synthetic analysis** is unchecked, then load the named
+   **Fake KYC** synthetic demo.
+3. Click **Analyze message**.
 4. Point to the scam category, confidence, risk band, extracted evidence,
    reasons, and complaint draft.
 5. Say that the website and API use the same analysis service.
@@ -53,9 +54,10 @@ current screen.
 
 ### 1:05-2:00 - Screenshot OCR
 
-1. Open **Screenshot Analysis**.
-2. Upload the committed synthetic PNG fixture.
-3. Click **Analyze Screenshot**.
+1. Select the **Screenshot** tab in **Analyze**.
+2. Upload the committed synthetic PNG fixture, which must remain at or below
+   4,000,000 bytes (4 MB) for the website.
+3. Click **Analyze screenshot**.
 4. Show the extracted text and the analysis result.
 5. Point to the source and retention metadata.
 
@@ -68,12 +70,13 @@ with a real victim screenshot.
 
 ### 2:00-3:05 - Consented repeated-entity graph
 
-1. Return to **Text Analysis**.
-2. Select storage consent for the prepared synthetic graph cases only.
+1. Return to **Analyze** (`/analyze`) and select **Message text**.
+2. Select **Store this synthetic analysis** for the prepared synthetic graph
+   cases only.
 3. Analyze the KYC and courier fixtures that share
    `fraud-demo.example`.
-4. Open **Entity Graph**, keep the minimum case count at 2, and click
-   **Refresh Graph**.
+4. Open **Relationships** (`/relationships`), keep the minimum case count at 2, click **Build
+   synthetic link**, then use **Refresh** only to rerun the graph read.
 5. Point to the two incidents and the masked shared host.
 
 Say: “The graph reads only unexpired cases that I chose to retain. It uses
@@ -85,7 +88,7 @@ Fallback: show `outputs/screenshots/final_entity_graph.png`.
 ### 3:05-3:35 - API and close
 
 Show `GET /ready` and the Swagger page. State that FastAPI provides the same
-analysis workflow and that the release has 379 automated tests plus Python
+analysis workflow and that the release has 355 automated tests plus Python
 3.10, 3.11.15, 3.12, and container smoke checks.
 
 Close with: “This is an assistive local prototype with human review, not a
@@ -110,7 +113,7 @@ container smoke test.
 
 - Trim setup, loading pauses, and failed takes.
 - Keep the video between 3:00 and 4:00.
-- Add small section labels only: Text, OCR, Entity Graph, API.
+- Add small section labels only: Analyze, OCR, Relationships, API.
 - Do not add an accuracy animation or “AI detects fraud” claim.
 - Blur any accidental secret, notification, local username, or unrelated tab.
 - Use captions for the final narration and verify technical terms manually.

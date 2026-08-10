@@ -31,4 +31,4 @@ are listed separately in `docs/supervisor_interaction.md`.
 | 21 | Research benchmark | Compared rules, word, character, hybrid, and calibrated candidates on one split | Character TF-IDF produced the best parsimonious result |
 | 22 | Robustness and statistical analysis | Added deterministic perturbations and paired bootstrap | Results limited to the eight-row synthetic test |
 | 23 | Final demo evidence | Regenerated named demos, current screenshots, architecture, and charts | Stale Phase 1 claims removed from final evidence |
-| 24 | Final capstone package | Prepared final report, 10-slide deck, and video runbook | Full suite passes with 379 automated tests |
+| 24 | Final capstone package | Prepared final report, 10-slide deck, and video runbook | Full suite passes with 355 automated tests |

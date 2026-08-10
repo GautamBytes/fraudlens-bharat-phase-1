@@ -19,12 +19,15 @@ identifiers, checks URLs, explains a risk score, and creates a complaint draft.
 It can read bounded PNG/JPEG screenshots through local Tesseract OCR and show
 repeated masked entities across cases that the user chose to retain.
 
-Phase 1 established the text-analysis pipeline, API, initial web interface,
-SQLite storage, tests, and documentation. Phase 2 added calibrated inference
-with abstention, screenshot OCR, privacy-safe entity relationships,
-reproducible model research, release hardening, and final presentation
-evidence. The completed codebase has 379 automated tests and runs through the
-Next.js website and FastAPI, including a hardened local container path.
+Phase 1 established the text-analysis pipeline, FastAPI, a Streamlit
+demonstration interface, SQLite storage, tests, and documentation. Phase 2
+added calibrated inference with abstention, screenshot OCR, privacy-safe entity
+relationships, reproducible model research, release hardening, and final
+presentation evidence. The completed codebase has 355 automated tests and runs
+through the Next.js website and FastAPI, including a hardened local container
+path.
+
+> Current-scope note (2026-08-10): Phase 1 used a Streamlit demonstration interface. That interface is retired; the supported final product uses the Next.js website and FastAPI.
 
 The research result remains limited. The frozen dataset contains 64 synthetic
 fraud-only messages, no legitimate class, and one test message per scam class.
@@ -75,12 +78,12 @@ Phase 1 produced the first complete vertical slice:
 - auditable URL and identifier rules;
 - explainable low, medium, or high risk scoring;
 - a complaint-draft template;
-- FastAPI endpoints, a Next.js website, SQLite history, tests, and installation
-  documentation.
+- FastAPI endpoints, the now-retired Streamlit demonstration interface, SQLite
+  history, tests, and installation documentation.
 
-The API and website use the same analysis service. This keeps the user-facing
-workflow on one code path and allows later Phase 2 input types to reuse the
-same pipeline.
+The Phase 1 API and demonstration interface used the same analysis service.
+The supported final Next.js website continues to use that shared FastAPI-backed
+pipeline for its user-facing workflow.
 
 ## Phase 2 Completion
 
@@ -236,7 +239,7 @@ and one abstention. The deck and demo keep these models separate.
 
 ## Software Verification
 
-The final local suite contains 379 automated tests across preprocessing,
+The final local suite contains 355 automated tests across preprocessing,
 training, inference trust boundaries, evaluation, research reproducibility,
 entities, URL signals, risk, API, OCR, image policies, storage, retention,
 privacy, graph analysis, website integration, deployment, and presentation

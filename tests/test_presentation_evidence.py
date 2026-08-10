@@ -106,6 +106,9 @@ def test_committed_presentation_manifest_matches_fresh_generation(tmp_path):
     assert (tmp_path / "final_evidence.json").read_bytes() == (
         ROOT / "outputs" / "presentation" / "final_evidence.json"
     ).read_bytes()
+    assert (tmp_path / "final_system_architecture.png").read_bytes() == (
+        ROOT / "outputs" / "presentation" / "final_system_architecture.png"
+    ).read_bytes()
 
 
 def test_ci_regenerates_presentation_evidence_manifest():

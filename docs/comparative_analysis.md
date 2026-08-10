@@ -8,6 +8,8 @@ The key rule is fairness: do not compare a small synthetic Phase 1 split directl
 
 ## Current Scope Context
 
+> Current-scope note (2026-08-10): Phase 1 used a Streamlit demonstration interface. That interface is retired; the supported final product uses the Next.js website and FastAPI.
+
 The comparisons below preserve Phase 1 baselines, but the current implementation
 includes screenshot OCR and basic privacy-safe graph analytics. The graph links
 repeated phone, UPI, email, and URL identifiers only across explicitly stored,
@@ -26,7 +28,7 @@ Transformer comparison and GNN research remain future work.
 
 | Capability | Initial State | After Phase 1 |
 |---|---|---|
-| Input handling | Unstructured pasted text only in notes | Pasted text accepted through FastAPI and the Next.js website |
+| Input handling | Unstructured pasted text only in notes | Pasted text accepted through FastAPI and the now-retired Streamlit demonstration interface |
 | Fraud taxonomy | No reproducible taxonomy | 8 fraud classes with labeling guide |
 | Classification | Manual guesswork | Calibrated raw-normalized TF-IDF + Logistic Regression with explicit abstention |
 | Evidence extraction | Manual reading | Regex extraction for phone, URL, UPI ID, email, money, OTP-like code, urgency, threat |
@@ -81,7 +83,7 @@ The fair comparison is:
 | Best cited metric | 74.41 percent accuracy, 71.49 percent F1 | Historical marker-enhanced 1.0000 internal accuracy/F1 on 16-row synthetic test split; superseded |
 | Model type | Hinglish-adapted transformers | Current calibrated raw-normalized TF-IDF; historical markers superseded |
 | Explainability | Not the main contribution | Visible entities, risk signals, complaint draft |
-| Deployment artifact | Django REST/frontend tool | FastAPI, Next.js, SQLite |
+| Deployment artifact | Django REST/frontend tool | Phase 1: FastAPI, Streamlit, SQLite; final product: Next.js + FastAPI |
 | Best use in this project | Phase 2 benchmark target | Phase 1 baseline and workflow proof |
 
 ## Comparison With URL-Only Phishing Models
@@ -118,7 +120,7 @@ The historical marker-enhanced model outperformed the rule-only fallback on its 
 
 It is not yet better than mature transformer or graph systems on real-world external benchmarks.
 
-The strongest Phase 1 claim is workflow completeness: classification, evidence extraction, URL checks, risk scoring, FastAPI, a website interface, local storage, tests, and documentation in one prototype.
+The strongest Phase 1 claim is workflow completeness: classification, evidence extraction, URL checks, risk scoring, FastAPI, the retired demonstration interface, local storage, tests, and documentation in one prototype. The current final product exposes that workflow through the Next.js website and FastAPI.
 
 ## Phase 2 research benchmark
 

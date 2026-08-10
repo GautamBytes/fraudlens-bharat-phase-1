@@ -10,6 +10,8 @@ The current implementation includes screenshot OCR and basic privacy-safe graph
 analytics beyond that Phase 1 snapshot. Transformer comparison and GNN research
 remain future work.
 
+> Current-scope note (2026-08-10): Phase 1 used a Streamlit demonstration interface. That interface is retired; the supported final product uses the Next.js website and FastAPI.
+
 ## Indian Cyber-Fraud Reporting Context
 
 The Ministry of Home Affairs describes cybercrime handling as a coordinated system involving I4C, NCRP, CFCFRMS, 1930, banks, payment aggregators, telecom providers, and state law enforcement [1].
@@ -93,7 +95,7 @@ This supports the Phase 1 choice: use a simple, reproducible baseline before mov
 
 Most published systems focus on a single technical task such as classification, URL detection, or graph fraud modeling.
 
-FraudLens Bharat combines a small classifier, entity extraction, URL checks, risk scoring, local storage, FastAPI access, and a Next.js website into one reproducible student prototype.
+Phase 1 combined a small classifier, entity extraction, URL checks, risk scoring, local storage, FastAPI access, and a Streamlit demonstration interface into one reproducible student prototype. The current final product uses the Next.js website and FastAPI.
 
 The contribution is not state-of-the-art model performance. The contribution is an explainable end-to-end triage workflow for Indian Hinglish cyber-fraud messages.
 

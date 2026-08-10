@@ -21,6 +21,17 @@ ACTIVE_DOCUMENTS = (
     "outputs/screenshots/README.md",
 )
 
+HISTORICAL_DOCUMENTS = (
+    "docs/phase1_report.md",
+    "docs/weekly_progress.md",
+)
+
+RETIREMENT_NOTE = (
+    "Current-scope note (2026-08-10): Phase 1 used a Streamlit demonstration "
+    "interface. That interface is retired; the supported final product uses the "
+    "Next.js website and FastAPI."
+)
+
 
 def test_streamlit_is_absent_from_the_active_runtime():
     for relative_path in (
@@ -46,10 +57,43 @@ def test_streamlit_is_absent_from_the_active_runtime():
 def test_active_documentation_supports_only_nextjs_and_fastapi():
     for relative_path in ACTIVE_DOCUMENTS:
         text = (ROOT / relative_path).read_text(encoding="utf-8").lower()
-        assert "streamlit" not in text, relative_path
         assert "streamlit run" not in text, relative_path
         assert "legacy streamlit dashboard retained" not in text, relative_path
+        if "streamlit" in text:
+            assert RETIREMENT_NOTE.lower() in text, relative_path
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "modern Next.js professor website" in readme
     assert "FastAPI backend" in readme
+    for relative_path in HISTORICAL_DOCUMENTS:
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert RETIREMENT_NOTE in text, relative_path
+        assert "streamlit run" not in text.lower(), relative_path
+
+    manual = (ROOT / "docs/user_manual.md").read_text(encoding="utf-8")
+    inventory = (ROOT / "docs/test_cases.md").read_text(encoding="utf-8")
+    runbook = (ROOT / "docs/presentation/demo_video_runbook.md").read_text(
+        encoding="utf-8"
+    )
+    documentation = "\n".join((manual, inventory, runbook))
+
+    for expected in (
+        "Store this synthetic analysis",
+        "Fake KYC",
+        "Courier hold",
+        "Digital arrest",
+        "Investment trap",
+        "4,000,000 bytes (4 MB)",
+        "Analyze",
+        "Relationships",
+        "Message text",
+        "Screenshot",
+        "Analyze message",
+        "Analyze screenshot",
+        "Build synthetic link",
+        "Refresh",
+    ):
+        assert expected in documentation
+
+    assert "Store this analysis locally" not in documentation
+    assert "Fake KYC SMS" not in documentation
