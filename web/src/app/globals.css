@@ -409,23 +409,27 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .clusterMetrics small { color: var(--slate); }
 
 /* Research evidence */
+.docsPage { width: min(1180px, calc(100% - 64px)); }
+.docsPage .pageIntro { padding-bottom: 38px; border-bottom: 1px solid var(--line); }
+.docsPage .pageIntro h1 { font-size: clamp(48px,5.6vw,76px); }
+.docsPage section[id] { scroll-margin-top: 108px; }
 .researchComparison { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.researchHeroCard { position: relative; overflow: hidden; padding: 30px; border: 1px solid var(--line); }
+.researchHeroCard { position: relative; overflow: hidden; padding: 28px; border: 1px solid var(--line); border-radius: 14px; }
 .researchHeroCard::after { position: absolute; width: 170px; height: 170px; border-radius: 50%; right: -85px; top: -85px; opacity: .14; background: currentColor; content: ""; }
-.candidateCard { color: #8b4c00; background: #fff6e7; }
-.deployedCard { color: #075f5a; background: #eaf8f6; }
+.candidateCard { color: #9b3a33; background: var(--coral-soft); }
+.deployedCard { color: #075f5a; background: var(--teal-soft); }
 .researchHeroCard h2 { margin: 5px 0 14px; color: var(--ink); font: 700 clamp(1.5rem, 2.5vw, 2.35rem)/1.08 var(--font-display); }
 .researchHeroCard h3 { margin: 0 0 22px; color: currentColor; font-size: 1rem; }
 .researchHeroCard > p:last-child { max-width: 60ch; margin: 20px 0 0; color: var(--slate); }
 .modelSize { margin-top: 12px; color: currentColor; font: 600 .72rem var(--font-mono); }
 .researchMetrics { display: flex; gap: 10px; }
-.researchMetric { min-width: 125px; padding: 14px 16px; background: rgba(255,255,255,.7); }
+.researchMetric { min-width: 125px; padding: 14px 16px; background: rgba(255,255,255,.8); border-radius: 10px; }
 .researchMetric span, .researchMetric strong { display: block; }
 .researchMetric span { color: var(--slate); font-size: .76rem; }
 .researchMetric strong { margin-top: 4px; color: var(--ink); font: 700 1.35rem var(--font-mono); }
-.evidenceCaveat { display: flex; gap: 14px; padding: 16px 20px; color: var(--slate); background: #fff9ec; border-left: 4px solid var(--saffron); }
+.evidenceCaveat { display: flex; gap: 14px; padding: 18px 20px; color: var(--slate); background: var(--saffron-soft); border: 1px solid #f2df9a; border-radius: 12px; }
 .evidenceCaveat strong { flex: 0 0 auto; color: var(--ink); }
-.researchSection, .guideChecklist { padding: 30px; border: 1px solid var(--line); background: var(--surface); }
+.researchSection, .guideChecklist { padding: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .sectionIntro { margin-bottom: 20px; }
 .sectionIntro h2 { margin: 4px 0 0; font: 700 clamp(1.35rem, 2.2vw, 2rem)/1.15 var(--font-display); }
 .modelTableWrap { overflow-x: auto; }
@@ -434,37 +438,37 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .modelTable thead th { color: var(--slate); font: 600 .7rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
 .modelTable tbody th { max-width: 250px; font-weight: 650; }
 .modelTable tbody td:nth-child(3), .modelTable tbody td:nth-child(4), .modelTable tbody td:nth-child(5), .modelTable tbody td:nth-child(6) { font-family: var(--font-mono); }
-.rolePill { display: inline-block; padding: 4px 8px; color: var(--slate); background: var(--paper); white-space: nowrap; font-size: .7rem; }
+.rolePill { display: inline-block; padding: 4px 8px; color: var(--slate); background: var(--paper); border-radius: 999px; white-space: nowrap; font-size: .7rem; }
 .role-experimental-candidate { color: #985800; background: #fff0d8; }
 .role-deployed { color: #07645f; background: #dff4f1; }
 .parameterGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.parameterGrid article { padding: 18px; background: var(--paper); }
+.parameterGrid article { padding: 18px; background: var(--paper); border-radius: 11px; }
 .parameterGrid span { color: var(--teal); font: 600 .72rem var(--font-mono); }
 .parameterGrid h3 { margin: 20px 0 8px; font-size: .95rem; }
 .parameterGrid p { margin: 0; color: var(--slate); font-size: .82rem; }
 
 /* Professor run guide */
-.guidePath { padding: clamp(26px, 4vw, 46px); border: 1px solid var(--line); }
-.hostedPath { color: #f8f1df; background: linear-gradient(125deg, #13252c, #1e3a41); }
-.dockerPath { background: #fff6e7; }
+.guidePath { padding: clamp(26px, 4vw, 42px); border: 1px solid var(--line); border-radius: 14px; }
+.hostedPath { color: #f8f1df; background: var(--ink); }
+.dockerPath { background: var(--coral-soft); }
 .guidePath h2 { margin: 5px 0 10px; font: 700 clamp(1.6rem, 3vw, 2.5rem)/1.08 var(--font-display); }
 .guidePath > p:not(.eyebrow) { max-width: 78ch; opacity: .75; }
 .guideSteps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 28px; }
-.guideStep { display: flex; gap: 13px; padding: 18px; background: rgba(255,255,255,.07); }
+.guideStep { display: flex; gap: 13px; padding: 18px; background: rgba(255,255,255,.07); border-radius: 10px; }
 .guideStep > span { color: var(--saffron); font: 600 .75rem var(--font-mono); }
 .guideStep h3 { margin: 0 0 7px; font-size: .9rem; }
 .guideStep p { margin: 0; opacity: .67; font-size: .8rem; }
-.dockerPath pre { overflow-x: auto; margin: 24px 0; padding: 20px; color: #e9f4f1; background: #17272d; font: .88rem/1.8 var(--font-mono); }
-.researchSection pre { overflow-x: auto; min-height: 100%; margin: 0; padding: 18px; color: #e9f4f1; background: #17272d; font: .78rem/1.75 var(--font-mono); }
+.dockerPath pre { overflow-x: auto; margin: 24px 0; padding: 20px; color: #f5f5f1; background: var(--ink); border-radius: 11px; font: .88rem/1.8 var(--font-mono); }
+.researchSection pre { overflow-x: auto; min-height: 100%; margin: 0; padding: 18px; color: #f5f5f1; background: var(--ink); border-radius: 10px; font: .78rem/1.75 var(--font-mono); }
 .commandGrid, .verificationGrid { display: grid; gap: 12px; }
 .commandGrid { grid-template-columns: 1fr 1fr; }
 .verificationGrid { grid-template-columns: repeat(3, 1fr); }
 .commandGrid article, .verificationGrid article { min-width: 0; }
 .commandGrid h3, .verificationGrid h3 { margin-bottom: 10px; font-size: .9rem; }
-.guideNote { margin: 20px 0 0; padding: 16px; color: var(--slate); background: var(--paper); line-height: 1.65; }
+.guideNote { margin: 20px 0 0; padding: 16px; color: var(--slate); background: var(--paper); border-radius: 10px; line-height: 1.65; }
 .dockerPath code, .guideChecklist code { font-family: var(--font-mono); }
 .guideChecklist ul { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; margin: 0; padding: 0; list-style: none; }
-.guideChecklist li { position: relative; padding: 14px 14px 14px 40px; color: var(--slate); background: var(--paper); }
+.guideChecklist li { position: relative; padding: 14px 14px 14px 40px; color: var(--slate); background: var(--paper); border-radius: 10px; }
 .guideChecklist li::before { position: absolute; left: 15px; color: var(--teal); font-weight: 800; content: "✓"; }
 
 @media (max-width: 1050px) {
@@ -472,6 +476,7 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
   .guideSteps { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 760px) {
+  .docsPage { width: min(100% - 32px,680px); }
   .relationshipPage { width: min(100% - 32px,680px); }
   .relationshipControls { align-items: stretch; flex-direction: column; }
   .relationshipActions { justify-items: stretch; }

@@ -15,7 +15,7 @@ export function ResearchEvidence() {
 
   return (
     <div className="researchStack">
-      <section className="researchComparison" aria-label="Primary model comparison">
+      <section className="researchComparison" aria-label="Primary model comparison" id="comparison">
         <article className="researchHeroCard candidateCard">
           <p className="eyebrow">Highest internal score</p>
           <h2>Experimental candidate</h2>
@@ -37,7 +37,7 @@ export function ResearchEvidence() {
         <span>{RESEARCH_SNAPSHOT.dataset.rows}-row synthetic fraud-only bootstrap; {RESEARCH_SNAPSHOT.dataset.test_rows} test rows, one per class; no legitimate label. This is internal comparative evidence, not a production accuracy claim.</span>
       </div>
 
-      <section className="researchSection">
+      <section className="researchSection" id="approaches">
         <div className="sectionIntro"><p className="eyebrow">All evaluated approaches</p><h2>Same split, different trade-offs</h2></div>
         <div className="modelTableWrap">
           <table className="modelTable">
@@ -48,7 +48,7 @@ export function ResearchEvidence() {
         </div>
       </section>
 
-      <section className="researchSection">
+      <section className="researchSection" id="parameters">
         <div className="sectionIntro"><p className="eyebrow">Evaluation design</p><h2>Why these parameters matter</h2></div>
         <div className="parameterGrid">{RESEARCH_PARAMETERS.map((parameter, index) => <article key={parameter.name}><span>{String(index + 1).padStart(2, "0")}</span><h3>{parameter.name}</h3><p>{parameter.explanation}</p></article>)}</div>
       </section>
