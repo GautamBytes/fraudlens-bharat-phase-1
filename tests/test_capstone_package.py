@@ -1,6 +1,7 @@
 import csv
 import html
 import json
+import posixpath
 import re
 import subprocess
 import sys
@@ -161,6 +162,70 @@ def test_final_deck_uses_current_source_backed_claims_and_boundaries():
         assert stale_claim not in text
 
 
+def test_final_deck_describes_only_the_supported_interfaces():
+    slide_text = " ".join(_deck_slide_text()).lower()
+    assert "streamlit" not in slide_text
+    assert "api and dashboard" not in slide_text
+    assert "next.js" in slide_text
+    assert "fastapi" in slide_text
+
+    with zipfile.ZipFile(DECK) as archive:
+        package_text = " ".join(
+            archive.read(name).decode("utf-8", errors="ignore").lower()
+            for name in archive.namelist()
+            if name.endswith(".xml")
+        )
+    assert "streamlit" not in package_text
+
+
+def test_final_deck_embeds_the_current_architecture_evidence():
+    expected = (
+        ROOT / "outputs" / "presentation" / "final_system_architecture.png"
+    ).read_bytes()
+
+    with zipfile.ZipFile(DECK) as archive:
+        slide = archive.read("ppt/slides/slide5.xml").decode("utf-8")
+        relationship_id = re.search(
+            r'<a:blip r:embed="([^"]+)"', slide
+        ).group(1)
+        relationships = archive.read(
+            "ppt/slides/_rels/slide5.xml.rels"
+        ).decode("utf-8")
+        target = re.search(
+            rf'<Relationship Id="{relationship_id}"[^>]+Target="([^"]+)"',
+            relationships,
+        ).group(1)
+        media_name = posixpath.normpath(posixpath.join("ppt/slides", target))
+
+        assert archive.read(media_name) == expected
+
+
+def test_final_deck_embeds_the_current_website_demo_evidence():
+    expected_paths = (
+        ROOT / "outputs" / "screenshots" / "final_text_analysis.png",
+        ROOT / "outputs" / "screenshots" / "final_ocr_analysis.png",
+        ROOT / "outputs" / "screenshots" / "final_entity_graph.png",
+    )
+
+    with zipfile.ZipFile(DECK) as archive:
+        slide = archive.read("ppt/slides/slide7.xml").decode("utf-8")
+        relationship_ids = re.findall(r'<a:blip r:embed="([^"]+)"', slide)
+        relationships = archive.read(
+            "ppt/slides/_rels/slide7.xml.rels"
+        ).decode("utf-8")
+
+        assert len(relationship_ids) == len(expected_paths)
+        for relationship_id, expected_path in zip(
+            relationship_ids, expected_paths, strict=True
+        ):
+            target = re.search(
+                rf'<Relationship Id="{relationship_id}"[^>]+Target="([^"]+)"',
+                relationships,
+            ).group(1)
+            media_name = posixpath.normpath(posixpath.join("ppt/slides", target))
+            assert archive.read(media_name) == expected_path.read_bytes()
+
+
 def test_video_runbook_covers_the_recorded_demo_without_a_script_file():
     runbook = RUNBOOK.read_text(encoding="utf-8")
 
@@ -168,7 +233,7 @@ def test_video_runbook_covers_the_recorded_demo_without_a_script_file():
     assert "## Failure-safe fallback" in runbook
     assert "outputs/screenshots/final_ocr_analysis.png" in runbook
     assert "outputs/screenshots/final_entity_graph.png" in runbook
-    assert "Fake KYC SMS" in runbook
+    assert "Fake KYC" in runbook
 
 
 def test_final_report_and_readme_point_to_the_defensible_evidence_package():

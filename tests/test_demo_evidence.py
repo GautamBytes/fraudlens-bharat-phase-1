@@ -1,4 +1,3 @@
-import inspect
 import json
 from dataclasses import asdict
 from pathlib import Path
@@ -6,7 +5,7 @@ from pathlib import Path
 from PIL import Image
 
 from fraudlens.analysis_service import AnalysisInput, create_analysis_service
-from fraudlens import dashboard, generate_demo_cases
+from fraudlens import generate_demo_cases
 from fraudlens.analysis_service import DatabaseCaseStore
 from fraudlens.settings import Settings
 
@@ -22,27 +21,6 @@ def test_release_model_classifies_every_named_demo_as_advertised():
 
         assert result.predicted_label == case.expected_label, case.button_label
         assert result.metadata["prediction_abstained"] is False
-
-
-def test_dashboard_identifies_the_final_phase_1_and_phase_2_scope():
-    source = inspect.getsource(dashboard.main)
-
-    assert "Final Phase 1 + Phase 2 Hinglish cyber-fraud triage prototype" in source
-    assert "Phase 1 baseline prototype" not in source
-
-
-def test_dashboard_and_generated_demo_catalogs_cannot_drift():
-    expected_slug_by_button = {
-        "Fake KYC SMS": "fake_kyc_sms",
-        "OTP Phishing": "otp_phishing",
-        "Fake Job Scam": "fake_job_scam",
-        "Investment Scam": "investment_scam",
-    }
-
-    assert {
-        button: generate_demo_cases.DEMO_CASES[slug]
-        for button, slug in expected_slug_by_button.items()
-    } == dashboard.DEMO_MESSAGES
 
 
 def test_generated_demo_outputs_are_byte_deterministic(tmp_path, monkeypatch):
@@ -84,6 +62,15 @@ def test_explicit_generator_matches_committed_demo_evidence(tmp_path):
     }
     for path in written:
         assert path.read_bytes() == (ROOT / "outputs" / "demo_cases" / path.name).read_bytes()
+
+
+def test_demo_case_generation_uses_service_without_persisting_cases():
+    source = (ROOT / "src" / "fraudlens" / "generate_demo_cases.py").read_text(
+        encoding="utf-8"
+    )
+    assert "from fraudlens.api" not in source
+    assert "create_analysis_service" in source
+    assert "AnalysisInput(text=text, store_case=False)" in source
 
 
 def test_ci_regenerates_and_compares_demo_evidence():
@@ -162,7 +149,7 @@ def test_demo_cli_prepares_json_screenshot_and_graph_database(tmp_path):
 
 def test_final_demo_screenshots_use_a_consistent_presentation_viewport():
     expected_names = {
-        "final_dashboard_home.png",
+        "final_web_home.png",
         "final_text_analysis.png",
         "final_ocr_analysis.png",
         "final_entity_graph.png",

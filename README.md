@@ -9,7 +9,7 @@ The project is designed for my capstone project submission. It includes implemen
 Release 1.0 is the final Phase 2 software release of the capstone prototype. It
 aligns package/API identity, adds dependency-aware readiness, emits
 privacy-safe structured request logs, and supplies a pinned, non-root container
-for the API and dashboard. This release designation means the planned software
+for the API and website. This release designation means the planned software
 scope is integrated and release-tested; it does not turn the synthetic
 evaluation into a production accuracy claim.
 
@@ -36,7 +36,7 @@ sequence, see `docs/deployment_guide.md` before changing exposure, and use
 - Rule-only evidence calls the canonical runtime fallback for every frozen row. Its runtime acceptance is `label != unknown`; it does not receive an evaluator-tuned threshold or calibration score.
 - The Phase 2 target is not met: the bootstrap is below 200 examples per label and lacks the `legitimate` label
 - Rule fallback: used only if calibrated artifacts are unavailable or corrupt, and abstains on weak generic keyword matches
-- Interfaces: modern Next.js professor website, FastAPI backend, and retained legacy Streamlit dashboard
+- Interfaces: modern Next.js professor website and FastAPI backend
 - Evidence outputs: calibrated artifact metadata, metrics JSON, demo cases, screenshots, and pitch deck
 
 These synthetic bootstrap results are not a production accuracy claim.
@@ -86,9 +86,8 @@ concise.
 - URL and identifier risk scoring
 - FastAPI backend
 - Modern responsive professor website with text and screenshot analysis, relationship evidence, research comparison, and an in-app run guide
-- Legacy Streamlit dashboard retained as a compatibility interface, not the primary experience
 - Local Tesseract OCR for English and Hindi screenshot text
-- Optional SQLite case history. API and compatibility callers default to off unless `FRAUDLENS_STORE_CASES=true` is configured; the dashboard always requires explicit consent.
+- Optional SQLite case history. API requests default to off unless `FRAUDLENS_STORE_CASES=true` is configured; the website requires explicit consent.
 - Privacy-safe, observational entity relationship graph for repeated evidence in stored cases
 - Unit/API tests
 - Metrics and demo case outputs
@@ -118,8 +117,7 @@ sudo apt-get update
 sudo apt-get install tesseract-ocr tesseract-ocr-eng tesseract-ocr-hin
 ```
 
-Then install the Python runtime requirements to run the API, dashboard, or
-training command:
+Then install the Python runtime requirements to run the API or training command:
 
 ```bash
 cd /path/to/fraudlens-bharat
@@ -166,9 +164,9 @@ http://127.0.0.1:8000/docs
 ```
 
 `POST /analyze` accepts an optional `store_case` boolean. Omitting it uses the
-safe API runtime default (`false` unless `FRAUDLENS_STORE_CASES=true`). The
-compatibility helper follows the same setting. Responses include prediction
-provenance, abstention status, and whether the case was actually stored.
+safe API runtime default (`false` unless `FRAUDLENS_STORE_CASES=true`). Responses
+include prediction provenance, abstention status, and whether the case was
+actually stored.
 
 When storage is enabled, the full analysis record is retained only for the
 configured `FRAUDLENS_RETENTION_DAYS` period. Case-to-case entity links use
@@ -219,21 +217,18 @@ English and Hindi (`eng+hin`). Images are never retained. OCR text is stored onl
 when you explicitly enable local case storage; the same configured retention
 period used for pasted text then applies.
 
-## Run Dashboard
+## Use the Website
 
-```bash
-streamlit run src/fraudlens/dashboard.py
-```
+Open the hosted Vercel website for the professor path, or start the complete
+local stack with `docker compose up --build --detach` and open
+`http://127.0.0.1:3000`. Use `/analyze` for message or screenshot analysis and
+`/relationships` to review relationship evidence. The message tab corresponds
+to `POST /analyze`; the screenshot tab corresponds to `POST /analyze-image`.
 
-Use the **Screenshot** tab to choose a PNG or JPEG and click **Analyze
-Screenshot**. The dashboard's “Store this analysis locally” checkbox is always
-off by default, even when the API/compatibility storage setting is enabled.
-
-The **Entity Graph** tab does not run the graph query until explicit Refresh
-Graph is selected after choosing a threshold. The page can still read **Recent
-Analysis History** separately. The dashboard shows masked labels and hides
-opaque identifiers; it presents the same privacy-safe, bounded evidence as
-`GET /graph`.
+The relationship view includes only explicitly stored, unexpired cases. It
+does not run the graph query until explicit Build synthetic link or Refresh.
+The website shows masked labels and hides opaque identifiers; it
+presents the same privacy-safe, bounded evidence as `GET /graph`.
 
 ## Run Tests
 
@@ -276,7 +271,7 @@ python -m fraudlens.generate_demo_cases
 - `docs/model_card.md`: Phase 1 model/data card
 - `docs/references.md`: IEEE-style source list
 - `docs/test_cases.md`: Phase 1 test case inventory
-- `docs/user_manual.md`: dashboard usage guide
+- `docs/user_manual.md`: website usage guide
 - `docs/installation_guide.md`: setup and run instructions
 - `docs/deployment_guide.md`: hardened Docker deployment, backup, monitoring, and rollback
 - `docs/release_checklist.md`: final pre-release and post-release verification gate

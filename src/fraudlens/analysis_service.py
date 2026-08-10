@@ -190,7 +190,7 @@ class AnalysisService:
         self._id_generator = id_generator
 
     def analyze(self, analysis_input: AnalysisInput) -> AnalysisResult:
-        # Dashboard and compatibility callers do not pass through FastAPI, so
+        # Direct shared-service callers do not pass through FastAPI, so
         # the service owns this validation boundary as well.
         validated_input = AnalyzeRequest.model_validate(
             {"text": analysis_input.text, "user_notes": analysis_input.user_notes}

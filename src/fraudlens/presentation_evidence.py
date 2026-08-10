@@ -34,6 +34,9 @@ _CLAIM_BOUNDARY = (
     "Internal synthetic evidence only; the research candidate is not the deployed model "
     "and no production-accuracy claim is made."
 )
+_ARCHITECTURE_CONTRACT = (
+    "Text input=Next.js / FastAPI|Web + API=Result + provenance"
+)
 
 
 def _read_json(path: Path):
@@ -155,13 +158,22 @@ def _build_payload(repo_root: Path):
     }
 
 
-def _save_figure(fig, output_path: Path) -> Path:
+def _save_figure(
+    fig,
+    output_path: Path,
+    *,
+    metadata: Optional[dict[str, str]] = None,
+) -> Path:
+    figure_metadata = {
+        "Software": "FraudLens Bharat deterministic evidence generator",
+        **(metadata or {}),
+    }
     fig.savefig(
         output_path,
         dpi=160,
         facecolor="white",
         bbox_inches=None,
-        metadata={"Software": "FraudLens Bharat deterministic evidence generator"},
+        metadata=figure_metadata,
     )
     plt.close(fig)
     return output_path
@@ -189,14 +201,14 @@ def _architecture_figure(output_path: Path) -> Path:
 
     axis.text(0.6, 8.5, "FraudLens Bharat - Final Phase 1 + Phase 2 Architecture", fontsize=21, fontweight="bold", color=_NAVY)
     axis.text(0.6, 8.12, "One shared analysis path; storage is optional and privacy-bounded", fontsize=11, color="#486581")
-    box(0.7, 6.6, 2.0, 1.0, "Text input", "FastAPI / Streamlit", _BLUE)
+    box(0.7, 6.6, 2.0, 1.0, "Text input", "Next.js / FastAPI", _BLUE)
     box(0.7, 4.9, 2.0, 1.0, "Screenshot", "PNG/JPEG, bounded", _TEAL)
     box(3.35, 4.9, 2.15, 1.0, "Local OCR", "Tesseract eng+hin", _TEAL)
     box(3.35, 6.6, 2.15, 1.0, "Preprocess", "Normalize text", _BLUE)
     box(6.1, 6.8, 2.25, 1.0, "Classifier", "Calibrated TF-IDF", _ORANGE)
     box(6.1, 5.35, 2.25, 1.0, "Evidence", "Entities + URL checks", _ORANGE)
     box(6.1, 3.9, 2.25, 1.0, "Risk & draft", "Reasons + complaint", _ORANGE)
-    box(9.0, 6.0, 2.25, 1.15, "API + dashboard", "Result + provenance", _BLUE)
+    box(9.0, 6.0, 2.25, 1.15, "Web + API", "Result + provenance", _BLUE)
     box(9.0, 4.1, 2.25, 1.15, "Consent storage", "SQLite + retention", _RED)
     box(9.0, 2.2, 2.25, 1.15, "Entity graph", "HMAC IDs + masks", _TEAL)
     box(3.35, 2.2, 4.95, 1.0, "Release boundary", "Readiness, safe logs, non-root read-only containers", _NAVY)
@@ -217,7 +229,11 @@ def _architecture_figure(output_path: Path) -> Path:
         fontsize=10.5, fontweight="bold", color=_NAVY,
     )
     axis.text(0.7, 0.28, "Assistive local prototype - no automatic filing, GNN or production-accuracy claim", fontsize=10, color=_RED)
-    return _save_figure(fig, output_path)
+    return _save_figure(
+        fig,
+        output_path,
+        metadata={"FraudLens-Architecture-Contract": _ARCHITECTURE_CONTRACT},
+    )
 
 
 def _comparison_figure(payload, output_path: Path) -> Path:

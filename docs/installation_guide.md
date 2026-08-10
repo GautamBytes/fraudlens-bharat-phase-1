@@ -31,7 +31,7 @@ tesseract --list-langs
 ```
 
 The output must include `eng` and `hin`. Next, install the Python runtime for
-the API, dashboard, or training command.
+the FastAPI service or training command.
 
 ```bash
 cd /path/to/fraudlens-bharat
@@ -104,12 +104,6 @@ The endpoint accepts PNG and JPEG files up to 5 MiB. Each image must be no
 larger than 4096 x 4096 and 16,000,000 pixels. OCR uses English and Hindi
 language data (`eng+hin`).
 
-## Run Dashboard
-
-```bash
-streamlit run src/fraudlens/dashboard.py
-```
-
 ## Run Tests
 
 ```bash
@@ -118,9 +112,9 @@ pytest
 
 ## Run the hardened containers
 
-Docker Compose runs the API and dashboard as a non-root user, binds both ports
-to loopback, keeps the container filesystem read-only, and mounts a persistent
-data volume for SQLite.
+Docker Compose runs the FastAPI service and Next.js website as non-root users,
+binds both ports to loopback, keeps the container filesystem read-only, and
+mounts a persistent data volume for SQLite.
 
 ```bash
 cp .env.example .env
@@ -131,5 +125,8 @@ docker compose up --build --detach
 curl --fail http://127.0.0.1:8000/ready
 ```
 
-Open `http://127.0.0.1:8501` for the dashboard. Follow
+Open `http://127.0.0.1:3000` for the website. The message tab maps to
+`POST /analyze`, the screenshot tab maps to `POST /analyze-image`, and
+`/relationships` presents the bounded evidence from `GET /graph`. For API-only
+use, run `uvicorn fraudlens.api:app --host 127.0.0.1 --port 8000`. Follow
 `docs/deployment_guide.md` for exposure, backups, monitoring, and rollback.

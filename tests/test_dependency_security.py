@@ -25,7 +25,7 @@ def test_ocr_runtime_dependencies_are_documented_for_supported_platforms():
         )
 
 
-def test_screenshot_contract_is_documented_for_api_and_dashboard_users():
+def test_screenshot_contract_is_documented_for_api_and_website_users():
     documentation = " ".join("\n".join(
         (ROOT / relative_path).read_text(encoding="utf-8")
         for relative_path in ("README.md", "docs/user_manual.md")
@@ -79,7 +79,7 @@ def test_entity_graph_privacy_and_operational_contract_is_documented():
         "phone numbers, UPI IDs, email addresses, and URLs",
         "masked labels",
         "API entity nodes expose opaque HMAC-backed identifiers",
-        "dashboard shows masked labels and hides opaque identifiers",
+        "website shows masked labels and hides opaque identifiers",
         "does not include raw text or raw entity values",
         "GET /graph",
         "minimum_case_count=2",
@@ -87,7 +87,7 @@ def test_entity_graph_privacy_and_operational_contract_is_documented():
         "fixed internal max_edges=1000",
         "minimum_case_count must be between 2 and 20",
         "case_limit must be between 1 and 100",
-        "does not run the graph query until explicit Refresh",
+        "does not run the graph query until explicit Build synthetic link or Refresh",
         "no qualifying stored cases",
         "truncated",
         "Deleting a case, clearing case history, or retention expiry removes its graph links",
@@ -101,7 +101,7 @@ def test_entity_graph_privacy_and_operational_contract_is_documented():
         "Entity graph privacy contract",
         "Entity graph retention and deletion",
         "Entity graph API bounds and empty result",
-        "Entity graph dashboard refresh and truncation",
+        "Entity graph website refresh and truncation",
     ):
         assert test_case in inventory
 
@@ -148,7 +148,6 @@ def test_dependency_and_ci_security_baseline():
 
     for dependency in (
         "fastapi==0.141.1",
-        "streamlit==1.54.0",
         "python-multipart==0.0.31",
         "Pillow==12.3.0",
     ):
