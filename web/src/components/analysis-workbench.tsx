@@ -18,7 +18,7 @@ function errorMessage(status: number, detail?: string): string {
   if (status === 415) return "Use a PNG or JPEG screenshot.";
   if (status === 422) return "No usable message text was found. Try a clearer screenshot.";
   if (status === 503) return "OCR is unavailable on the analysis engine right now.";
-  return "The analysis could not be completed. Check service status and try again.";
+  return "The analysis could not be completed. Try again in a moment.";
 }
 
 export function AnalysisWorkbench() {

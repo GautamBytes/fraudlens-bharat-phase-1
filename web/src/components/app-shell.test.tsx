@@ -16,6 +16,9 @@ describe("AppShell", () => {
     expect(screen.getByRole("banner")).toHaveClass("siteHeader");
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeVisible();
     expect(screen.getByText("Professor workspace")).toBeVisible();
+    expect(screen.queryByText(/engine ready|checking engine/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Safety notice" })).not.toBeInTheDocument();
+    expect(screen.getByRole("contentinfo")).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
 

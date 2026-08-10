@@ -8,7 +8,7 @@ export default function RelationshipsPage() {
   return (
     <main className="pageContent relationshipPage">
       <PageIntro
-        eyebrow="Phase 2 · relationship intelligence"
+        eyebrow="Relationship intelligence"
         title="Trace repeated signals across separate reports."
         description="Build a controlled two-case example, inspect its privacy-safe signal map, then verify each observed edge in the table."
       />

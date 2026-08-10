@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
-import { ServiceStatus } from "./service-status";
+import { SiteFooter } from "./site-footer";
 
 const NAVIGATION = [
   ["/", "Evaluate", "01"],
@@ -63,7 +63,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </nav>
           <div className="headerTools">
-            <ServiceStatus />
             <button
               ref={menuButton}
               className="menuButton"
@@ -79,12 +78,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <div className="pageSurface">
-        <div className="safetyNotice" role="region" aria-label="Safety notice">
-          <span><strong>Educational prototype</strong> · Synthetic evidence only</span>
-          <span>Do not enter real personal, banking or victim information.</span>
-        </div>
         {children}
       </div>
+      <SiteFooter />
     </div>
   );
 }

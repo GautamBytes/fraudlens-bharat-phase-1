@@ -35,7 +35,8 @@ test("professor can move from overview to an explainable analysis", async ({ pag
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /review suspicious messages/i })).toBeVisible();
   await expect(page.getByRole("region", { name: "Synthetic analysis trace" })).toBeVisible();
-  await expect(page.getByText("Engine ready")).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toContainText("Educational prototype · Synthetic evidence only");
+  await expect(page.getByText(/phase 1|phase 2/i)).toHaveCount(0);
 
   await page.getByRole("link", { name: /start guided evaluation/i }).click();
   await page.getByRole("button", { name: /analyze message/i }).click();

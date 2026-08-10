@@ -17,7 +17,7 @@ export default function EvaluatePage() {
       <section className="signalHero" aria-labelledby="signal-hero-title">
         <SignalField />
         <div className="signalHeroCopy">
-          <p className="heroKicker"><span>Phase 1 + Phase 2</span> Explainable cyber-fraud triage</p>
+          <p className="heroKicker">Explainable cyber-fraud triage</p>
           <h1 id="signal-hero-title">Review suspicious messages.<br /><em>Keep the decision human.</em></h1>
           <p>FraudLens Bharat turns synthetic text and screenshots into masked evidence, visible risk signals, relationship context, and a reviewable complaint draft.</p>
           <div className="heroActions">

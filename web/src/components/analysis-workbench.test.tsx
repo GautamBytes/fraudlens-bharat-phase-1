@@ -64,4 +64,19 @@ describe("AnalysisWorkbench", () => {
       ),
     );
   });
+
+  it("gives an actionable retry message for an unexpected analysis failure", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      Response.json({ detail: "Unexpected failure" }, { status: 500 }),
+    );
+    const user = userEvent.setup();
+    render(<AnalysisWorkbench />);
+
+    await user.click(screen.getByRole("button", { name: /analyze message/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The analysis could not be completed. Try again in a moment.",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent(/service status/i);
+  });
 });

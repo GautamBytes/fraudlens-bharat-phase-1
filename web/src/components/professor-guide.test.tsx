@@ -14,5 +14,7 @@ describe("ProfessorGuide", () => {
     expect(screen.getByText(/npm test -- --run/)).toBeVisible();
     expect(screen.getByText(/reset demo data/i)).toBeVisible();
     expect(screen.getByText(/synthetic examples only/i)).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Open the project" })).toBeVisible();
+    expect(screen.queryByText(/engine ready|check engine status/i)).not.toBeInTheDocument();
   });
 });

@@ -4,7 +4,7 @@
 
 **Goal:** Move the prototype warning into a global contact footer, remove the engine badge, and present FraudLens Bharat as one project without phase labels.
 
-**Architecture:** Add a focused `SiteFooter` component and let `AppShell` own its placement after route content. Keep health APIs and the unused status component intact so this visual change does not alter backend behavior. Update only user-facing phase labels and cover the new global contract with component and browser tests.
+**Architecture:** Add a focused `SiteFooter` component and let `AppShell` own its placement after route content. Remove the unused visual status component and its stale recovery copy while keeping health APIs intact. Update only user-facing phase labels and cover the new global contract with component and browser tests.
 
 **Tech Stack:** Next.js 16, React 19, TypeScript, Vitest, Testing Library, Playwright, CSS.
 
@@ -25,11 +25,17 @@
 - Create: `web/src/components/site-footer.test.tsx`
 - Modify: `web/src/components/app-shell.tsx`
 - Modify: `web/src/components/app-shell.test.tsx`
+- Delete: `web/src/components/service-status.tsx`
+- Delete: `web/src/components/service-status.test.tsx`
+- Modify: `web/src/components/professor-guide.tsx`
+- Modify: `web/src/components/professor-guide.test.tsx`
+- Modify: `web/src/components/analysis-workbench.tsx`
+- Modify: `web/src/components/analysis-workbench.test.tsx`
 - Modify: `web/src/app/globals.css`
 
 **Interfaces:**
 - Produces: `SiteFooter(): JSX.Element`, rendered once by `AppShell` after `children`.
-- Removes: visual use of `ServiceStatus` and the top `.safetyNotice`; backend health routes remain unchanged.
+- Removes: `ServiceStatus`, the top `.safetyNotice`, and status-dependent recovery copy; backend health routes remain unchanged.
 
 - [ ] **Step 1: Write failing footer and shell tests**
 
@@ -79,7 +85,7 @@ export function SiteFooter() {
 }
 ```
 
-Remove the `ServiceStatus` import/render and `.safetyNotice` block from `AppShell`, then render `<SiteFooter />` after `children`. Add dark footer layout, hover, focus, and stacked mobile rules in `globals.css`.
+Remove the `ServiceStatus` component, import/render, styles, and `.safetyNotice` block from `AppShell`, then render `<SiteFooter />` after `children`. Update the Run Guide and generic analysis error to use actionable retry guidance without referring to a removed status control. Add dark footer layout, hover, focus, and stacked mobile rules in `globals.css`.
 
 - [ ] **Step 4: Run tests and verify GREEN**
 
