@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_professor_web_deployment_contract_is_documented():
     guide = (ROOT / "docs/professor_testing_guide.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    in_app_guide = (ROOT / "web/src/components/professor-guide.tsx").read_text(
+        encoding="utf-8"
+    )
     for phrase in (
         "Hosted professor evaluation",
         "docker compose up --build",
@@ -20,6 +24,8 @@ def test_professor_web_deployment_contract_is_documented():
         "/ready",
     ):
         assert phrase in guide
+    for document in (guide, readme, in_app_guide):
+        assert "https://fraudlens-bharat.vercel.app" in document
 
 
 def test_render_blueprint_uses_the_hardened_container_and_secrets():

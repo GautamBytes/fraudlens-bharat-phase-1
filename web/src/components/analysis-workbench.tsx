@@ -24,6 +24,16 @@ function errorMessage(status: number, detail?: string): string {
   return "The analysis could not be completed. Try again in a moment.";
 }
 
+async function requestScreenshotAnalysis(file: File, storeCase: boolean): Promise<Response> {
+  const request = () => fetch(`/api/analyze-image?store_case=${storeCase}`, {
+    method: "POST",
+    headers: { "content-type": file.type },
+    body: file,
+  });
+  const response = await request();
+  return response.status === 504 ? request() : response;
+}
+
 export function AnalysisWorkbench() {
   const [mode, setMode] = useState<InputMode>("text");
   const [message, setMessage] = useState<string>(DEFAULT_DEMO_MESSAGE);
@@ -90,11 +100,7 @@ export function AnalysisWorkbench() {
     setError(null);
     setResult(null);
     try {
-      const response = await fetch(`/api/analyze-image?store_case=${storeCase}`, {
-        method: "POST",
-        headers: { "content-type": file.type },
-        body: file,
-      });
+      const response = await requestScreenshotAnalysis(file, storeCase);
       await consumeResponse(response);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : errorMessage(500));

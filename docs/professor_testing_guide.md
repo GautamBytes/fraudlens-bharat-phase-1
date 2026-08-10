@@ -12,18 +12,21 @@ Cyber Crime Reporting Portal decisions.
 
 ## Hosted professor evaluation
 
-The project owner supplies one Vercel URL. Open it in a current Chrome, Edge,
-Firefox, or Safari browser. Vercel serves the Next.js interface and proxies
-requests to the containerized FastAPI service. The server-only
+Open [FraudLens Bharat](https://fraudlens-bharat.vercel.app) in a current
+Chrome, Edge, Firefox, or Safari browser. Vercel serves the Next.js interface
+and proxies requests to the containerized FastAPI service. The server-only
 `FRAUDLENS_API_URL` and `FRAUDLENS_DEMO_API_KEY` are never sent to the browser.
 
-1. On **Overview**, wait for **Engine ready**. A free Render service can take
-   roughly one minute to wake after inactivity. Use **Retry** if requested.
+1. Open the hosted URL and start on **Evaluate**. A free Render service can take
+   roughly one minute to wake after inactivity.
 2. Open **Analyze**. Run a prepared synthetic message and verify that category,
    confidence, risk signals, masked entities, explanation, and complaint draft
    appear. Storage starts off.
 3. Switch to **Screenshot** and use a clear synthetic PNG or JPEG under 4 MB.
-   Source image bytes are processed in memory and not retained.
+   Source image bytes are processed in memory and not retained. If the first
+   screenshot request times out while the engine wakes, the website retries
+   that request once. A second failure remains visible and requires a later
+   manual retry.
 4. Open **Relationships**, choose **Build synthetic link**, and verify that two
    cases connect through a masked repeated entity. The demo clears earlier
    synthetic cases before building its controlled example.

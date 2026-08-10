@@ -86,7 +86,7 @@ Fallback: show `outputs/screenshots/final_entity_graph.png`.
 ### 3:05-3:35 - API and close
 
 Show `GET /ready` and the Swagger page. State that FastAPI provides the same
-analysis workflow and that the release has 355 automated tests plus Python
+analysis workflow and that the release has 358 automated tests plus Python
 3.10, 3.11.15, 3.12, and container smoke checks.
 
 Close with: “This is an assistive local prototype with human review, not a

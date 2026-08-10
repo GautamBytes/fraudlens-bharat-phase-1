@@ -520,6 +520,7 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .guidePathIndex small { color: var(--slate); font-size: .72rem; line-height: 1.4; }
 .guidePath { padding: clamp(26px, 4vw, 42px); border: 1px solid var(--line); border-radius: 14px; }
 .hostedPath { color: #f8f1df; background: var(--ink); }
+.guideHostedAction { margin: 20px 0; }
 .dockerPath { background: var(--coral-soft); }
 .guidePath h2 { margin: 5px 0 10px; font: 700 clamp(1.6rem, 3vw, 2.5rem)/1.08 var(--font-display); }
 .guidePath > p:not(.eyebrow) { max-width: 78ch; opacity: .75; }

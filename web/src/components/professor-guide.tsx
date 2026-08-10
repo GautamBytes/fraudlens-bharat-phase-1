@@ -19,8 +19,9 @@ export function ProfessorGuide() {
       <section className="guidePath hostedPath" id="hosted">
         <p className="eyebrow">No installation</p><h2>Fastest: hosted evaluation</h2>
         <p>Open the published Vercel URL. Its server securely calls the containerized Python engine; the private key never reaches the browser.</p>
+        <div className="guideHostedAction"><a className="primaryButton" href="https://fraudlens-bharat.vercel.app" target="_blank" rel="noreferrer">Open hosted website</a></div>
         <div className="guideSteps">
-          <Step number="01" title="Open the project"><p>Start on Evaluate. If the first hosted request reports temporary unavailability after inactivity, wait about a minute and retry the action.</p></Step>
+          <Step number="01" title="Open the project"><p>Start on Evaluate. The screenshot flow automatically retries one initial timeout while a sleeping analysis engine wakes.</p></Step>
           <Step number="02" title="Run prepared evidence"><p>Analyze synthetic text or a screenshot, then inspect confidence, signals and the draft.</p></Step>
           <Step number="03" title="Inspect a campaign"><p>Build the synthetic relationship and confirm the repeated value is masked.</p></Step>
           <Step number="04" title="Audit the claims"><p>Compare research and runtime models, then read the evidence boundary.</p></Step>
@@ -47,7 +48,7 @@ export function ProfessorGuide() {
 
       <section className="guideChecklist" id="failure-states">
         <div className="sectionIntro"><p className="eyebrow">Failure-safe operation</p><h2>Know what each state means</h2></div>
-        <ul><li>If a hosted request is temporarily unavailable after inactivity, wait about a minute and retry the action; no state-changing request repeats automatically.</li><li>Hosted storage is ephemeral. Use Reset demo data / Clear after the relationship exercise.</li><li>Use synthetic examples only; never submit a real victim message or personal screenshot.</li><li>Uploaded image bytes are analyzed in memory and are not retained.</li><li>If hosting is unavailable, Docker is the complete offline fallback.</li><li>The draft supports human review; it does not replace bank, police, or cybercrime reporting decisions.</li></ul>
+        <ul><li>Screenshot analysis repeats once only after an initial timeout. Other failures and actions remain manual.</li><li>Hosted storage is ephemeral. Use Reset demo data / Clear after the relationship exercise.</li><li>Use synthetic examples only; never submit a real victim message or personal screenshot.</li><li>Uploaded image bytes are analyzed in memory and are not retained.</li><li>If hosting is unavailable, Docker is the complete offline fallback.</li><li>The draft supports human review; it does not replace bank, police, or cybercrime reporting decisions.</li></ul>
       </section>
     </div>
   );

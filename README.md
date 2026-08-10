@@ -13,6 +13,9 @@ for the API and website. This release designation means the planned software
 scope is integrated and release-tested; it does not turn the synthetic
 evaluation into a production accuracy claim.
 
+[Open the hosted professor website](https://fraudlens-bharat.vercel.app) for
+the fastest no-installation evaluation path.
+
 For a local production-style launch of the modern professor web experience:
 
 ```bash
@@ -219,8 +222,9 @@ period used for pasted text then applies.
 
 ## Use the Website
 
-Open the hosted Vercel website for the professor path, or start the complete
-local stack with `docker compose up --build --detach` and open
+Open the [hosted FraudLens Bharat website](https://fraudlens-bharat.vercel.app)
+for the professor path, or start the complete local stack with
+`docker compose up --build --detach` and open
 `http://127.0.0.1:3000`. Use `/analyze` for message or screenshot analysis and
 `/relationships` to review relationship evidence. The message tab corresponds
 to `POST /analyze`; the screenshot tab corresponds to `POST /analyze-image`.

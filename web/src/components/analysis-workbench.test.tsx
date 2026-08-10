@@ -48,6 +48,63 @@ describe("AnalysisWorkbench", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("retries screenshot analysis once when the analysis engine is waking", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        Response.json(
+          { detail: "Analysis service is still starting" },
+          { status: 504 },
+        ),
+      )
+      .mockResolvedValueOnce(Response.json(analysisResultFixture));
+    const user = userEvent.setup();
+    render(<AnalysisWorkbench />);
+    await user.click(screen.getByRole("tab", { name: /screenshot/i }));
+    const file = new File([new Uint8Array([137, 80, 78, 71])], "message.png", {
+      type: "image/png",
+    });
+
+    await user.upload(screen.getByLabelText(/upload screenshot/i), file);
+    await user.click(screen.getByRole("button", { name: /analyze screenshot/i }));
+
+    expect(await screen.findByText("KYC scam")).toBeVisible();
+    expect(fetch).toHaveBeenCalledTimes(2);
+    const [firstUrl, firstOptions] = vi.mocked(fetch).mock.calls[0];
+    const [secondUrl, secondOptions] = vi.mocked(fetch).mock.calls[1];
+    expect(secondUrl).toBe(firstUrl);
+    expect(secondOptions).toEqual(firstOptions);
+    expect(firstOptions).toEqual(
+      expect.objectContaining({
+        method: "POST",
+        headers: { "content-type": "image/png" },
+        body: file,
+      }),
+    );
+  });
+
+  it("stops screenshot retries after a second waking response", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      Response.json(
+        { detail: "Analysis service is still starting" },
+        { status: 504 },
+      ),
+    );
+    const user = userEvent.setup();
+    render(<AnalysisWorkbench />);
+    await user.click(screen.getByRole("tab", { name: /screenshot/i }));
+    const file = new File([new Uint8Array([137, 80, 78, 71])], "message.png", {
+      type: "image/png",
+    });
+
+    await user.upload(screen.getByLabelText(/upload screenshot/i), file);
+    await user.click(screen.getByRole("button", { name: /analyze screenshot/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /waking the analysis engine/i,
+    );
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it("shows a specific recovery message when the analysis engine is waking", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       Response.json(
@@ -65,6 +122,7 @@ describe("AnalysisWorkbench", () => {
         /waking the analysis engine/i,
       ),
     );
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it("reports a missing hosted backend as a deployment configuration problem", async () => {

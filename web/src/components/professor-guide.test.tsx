@@ -15,6 +15,10 @@ describe("ProfessorGuide", () => {
     expect(screen.getByText(/reset demo data/i)).toBeVisible();
     expect(screen.getByText(/synthetic examples only/i)).toBeVisible();
     expect(screen.getByRole("heading", { name: "Open the project" })).toBeVisible();
+    expect(screen.getByRole("link", { name: /open hosted website/i })).toHaveAttribute(
+      "href",
+      "https://fraudlens-bharat.vercel.app",
+    );
     expect(screen.queryByText(/engine ready|check engine status/i)).not.toBeInTheDocument();
     const paths = screen.getByRole("navigation", { name: "Evaluation paths" });
     expect(paths).toHaveTextContent("Hosted");
