@@ -7,3 +7,5 @@ test-results/
 .env
 .env.local
 .vercel/
+AGENTS.md
+CLAUDE.md
