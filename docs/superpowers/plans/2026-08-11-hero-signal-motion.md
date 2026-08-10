@@ -1,91 +1,54 @@
 # Hero Signal Motion Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Animate the three decorative hero signal markers with staggered path drift and a restrained inner pulse.
+**Goal:** Move the three decorative hero signal markers around one visible responsive ellipse, evenly phased and easy to notice without competing with the headline.
 
-**Architecture:** Keep the existing `SignalField` React structure and implement motion entirely in CSS. Each marker owns its drift transform while a pseudo-element owns the independent centre pulse, avoiding transform conflicts and JavaScript animation state.
+**Architecture:** Keep `SignalField` decorative and implement the orbit entirely in CSS. A single static element draws the elliptical track. All three markers use the same motion path and keyframes, with negative delays creating one-third-cycle spacing; each marker's pseudo-element owns the independent centre pulse.
 
-**Tech Stack:** Next.js 16, React 19, CSS keyframes, Vitest, Testing Library
+**Tech Stack:** Next.js 16, React 19, CSS motion paths and keyframes, Vitest, Testing Library
 
 ## Global Constraints
 
-- Drift each complete marker 18-28px along its existing visual direction.
-- Use staggered 5-8 second loops and custom easing.
-- Animate only `transform` and `opacity`.
+- Use one responsive elliptical path around the hero copy.
+- Keep exactly three markers approximately one-third of a cycle apart.
+- Complete one orbit in 11 seconds with linear movement.
+- Keep the track faint and remove the obsolete straight connector lines.
 - Keep the field decorative with `aria-hidden="true"`.
-- Disable drift and pulse under `prefers-reduced-motion: reduce`.
+- Freeze orbit and pulse under `prefers-reduced-motion: reduce`.
 - Do not add an animation dependency or JavaScript loop.
 
 ---
 
-### Task 1: Animated Hero Signal Markers
+### Task 1: Shared Hero Signal Orbit
 
 **Files:**
-- Create: `web/src/test/hero-signal-motion.test.tsx`
-- Modify: `web/src/app/globals.css:72-86`
+- Modify: `web/src/components/signal-field.tsx`
+- Modify: `web/src/test/hero-signal-motion.test.tsx`
+- Modify: `web/src/app/globals.css`
 
 **Interfaces:**
 - Consumes: `SignalField(): JSX.Element` and the existing `.signalNodeOne`, `.signalNodeTwo`, and `.signalNodeThree` classes.
-- Produces: three CSS drift animations named `signal-drift-one`, `signal-drift-two`, and `signal-drift-three`, plus `signal-core-pulse` on `.signalNode::after`.
+- Produces: one `.signalOrbitTrack`, one `signal-orbit` animation shared by the three marker phases, and `signal-core-pulse` on `.signalNode::after`.
 
-- [ ] **Step 1: Write the failing motion contract test**
+- [ ] **Step 1: Revise the motion contract test**
 
-```tsx
-import { readFileSync } from "node:fs";
-
-import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-
-import { SignalField } from "@/components/signal-field";
-
-const stylesheet = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
-
-describe("hero signal motion", () => {
-  it("keeps exactly three decorative signal markers", () => {
-    const { container } = render(<SignalField />);
-    expect(container.querySelector(".signalField")).toHaveAttribute("aria-hidden", "true");
-    expect(container.querySelectorAll(".signalNode")).toHaveLength(3);
-  });
-
-  it("defines staggered marker drift and an inner pulse", () => {
-    for (const name of ["signal-drift-one", "signal-drift-two", "signal-drift-three", "signal-core-pulse"]) {
-      expect(stylesheet).toContain(`@keyframes ${name}`);
-    }
-    expect(stylesheet).toContain(".signalNode::after");
-    expect(stylesheet).toContain("animation: none !important");
-  });
-});
-```
+Require the component to render exactly three decorative signal markers, one orbit track, and no obsolete straight paths. Require the stylesheet to define `signal-orbit`, an ellipse motion path, three distinct phase delays, the centre pulse, and the existing reduced-motion override.
 
 - [ ] **Step 2: Run the focused test and verify RED**
 
 Run: `cd web && npm test -- --run src/test/hero-signal-motion.test.tsx`
 
-Expected: one test passes for the existing three decorative markers and one test fails because `signal-drift-one` is absent.
+Expected: the existing marker-count assertion passes; the orbit-track and shared-orbit assertions fail because the old implementation still contains straight paths and independent drift keyframes.
 
-- [ ] **Step 3: Implement the CSS-only marker motion**
+- [ ] **Step 3: Implement the shared CSS orbit**
 
-Replace the existing `.signalNode` and position rules with:
-
-```css
-.signalNode { position: absolute; width: 13px; height: 13px; background: rgba(255,90,79,.14); border: 1px solid rgba(255,174,168,.9); border-radius: 50%; box-shadow: 0 0 0 3px rgba(255,90,79,.08), 0 0 18px rgba(255,90,79,.24); will-change: transform; }
-.signalNode::after { position: absolute; inset: 3px; background: var(--coral); border-radius: 50%; content: ""; animation: signal-core-pulse 2.8s cubic-bezier(.4,0,.2,1) infinite alternate; }
-.signalNodeOne { top: 27%; left: 17%; animation: signal-drift-one 6.6s cubic-bezier(.45,.05,.55,.95) -2.1s infinite alternate; }
-.signalNodeTwo { top: 16%; right: 19%; animation: signal-drift-two 7.6s cubic-bezier(.45,.05,.55,.95) -5.3s infinite alternate; }
-.signalNodeThree { top: 42%; right: 28%; animation: signal-drift-three 5.8s cubic-bezier(.45,.05,.55,.95) -1.4s infinite alternate; }
-```
-
-Add these keyframes after `signal-breathe`:
-
-```css
-@keyframes signal-drift-one { from { transform: translate3d(-6px,1px,0); } to { transform: translate3d(22px,-5px,0); } }
-@keyframes signal-drift-two { from { transform: translate3d(5px,-7px,0); } to { transform: translate3d(-15px,13px,0); } }
-@keyframes signal-drift-three { from { transform: translate3d(-8px,5px,0); } to { transform: translate3d(14px,-8px,0); } }
-@keyframes signal-core-pulse { from { opacity: .55; transform: scale(.72); } to { opacity: 1; transform: scale(1); } }
-```
-
-The existing global reduced-motion block already applies `animation: none !important` to all elements and pseudo-elements, so it freezes both layers without another override.
+- Replace the two `.signalPath` spans with one `.signalOrbitTrack` span.
+- Draw a responsive, low-contrast ellipse around the hero copy.
+- Give every `.signalNode` the same elliptical `offset-path` and `signal-orbit 11s linear infinite` animation.
+- Set node phase delays to `0s`, approximately `-3.667s`, and approximately `-7.333s`.
+- Keep the existing marker ring treatment and `signal-core-pulse` pseudo-element.
+- Remove the old `signal-drift-one`, `signal-drift-two`, and `signal-drift-three` keyframes.
 
 - [ ] **Step 4: Run focused and complete web verification**
 
@@ -100,17 +63,12 @@ npm run typecheck
 env VERCEL=1 npm run build
 ```
 
-Expected: 2 focused tests pass; all web tests, lint, typecheck, and Vercel-native production build exit successfully.
+Expected: all focused and complete checks exit successfully.
 
 - [ ] **Step 5: Inspect the landing page locally**
 
-Run: `cd web && npm run dev`
+Open `http://127.0.0.1:3000`, confirm all three markers visibly travel around one ellipse without obscuring the headline, and confirm reduced motion leaves three separated static markers.
 
-Open `http://127.0.0.1:3000`, confirm the three markers drift asynchronously without crossing headline text, then emulate reduced motion and confirm they become static.
+- [ ] **Step 6: Wait for visual approval before publishing**
 
-- [ ] **Step 6: Commit the implementation**
-
-```bash
-git add web/src/test/hero-signal-motion.test.tsx web/src/app/globals.css
-git commit -m "feat: animate hero signal markers"
-```
+Keep the implementation local until the user approves the browser preview. Only then commit, push, and allow the existing Vercel deployment to update.
