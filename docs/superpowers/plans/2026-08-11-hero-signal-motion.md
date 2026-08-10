@@ -1,56 +1,92 @@
-# Hero Signal Motion Implementation Plan
+# Diagonal 3D Hero Signal Orbit Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Move the three decorative hero signal markers around one visible responsive ellipse, evenly phased and easy to notice without competing with the headline.
+**Goal:** Replace the flat hero ellipse with three evenly phased markers that travel through a top-left-far to bottom-right-near 3D orbit.
 
-**Architecture:** Keep `SignalField` decorative and implement the orbit entirely in CSS. A single static element draws the elliptical track. All three markers use the same motion path and keyframes, with negative delays creating one-third-cycle spacing; each marker's pseudo-element owns the independent centre pulse.
+**Architecture:** Keep the animation CSS-only and decorative. Three marker elements share one transform keyframe sequence with negative delays; `translate3d`, perspective, scale, opacity, blur, and z-index communicate depth, while two static partial arcs replace the continuous ellipse.
 
-**Tech Stack:** Next.js 16, React 19, CSS motion paths and keyframes, Vitest, Testing Library
+**Tech Stack:** Next.js 16, React 19, CSS 3D transforms and keyframes, Vitest, Testing Library
 
 ## Global Constraints
 
-- Use one responsive elliptical path around the hero copy.
 - Keep exactly three markers approximately one-third of a cycle apart.
-- Complete one orbit in 11 seconds with linear movement.
-- Keep the track faint and remove the obsolete straight connector lines.
-- Keep the field decorative with `aria-hidden="true"`.
-- Freeze orbit and pulse under `prefers-reduced-motion: reduce`.
-- Do not add an animation dependency or JavaScript loop.
+- Use an 11-second continuous linear orbit.
+- Treat top-left as far and bottom-right as near.
+- Remove the continuous ellipse and render exactly two restrained partial arcs.
+- Preserve each marker's pink ring and red centre without a separate pulse.
+- Keep the field `aria-hidden="true"` and freeze it under reduced motion.
+- Add no JavaScript animation loop or animation dependency.
+- Do not commit or push the implementation before visual approval.
 
 ---
 
-### Task 1: Shared Hero Signal Orbit
+### Task 1: Diagonal 3D Signal Orbit
 
 **Files:**
 - Modify: `web/src/components/signal-field.tsx`
-- Modify: `web/src/test/hero-signal-motion.test.tsx`
 - Modify: `web/src/app/globals.css`
+- Modify: `web/src/test/hero-signal-motion.test.tsx`
 
 **Interfaces:**
-- Consumes: `SignalField(): JSX.Element` and the existing `.signalNodeOne`, `.signalNodeTwo`, and `.signalNodeThree` classes.
-- Produces: one `.signalOrbitTrack`, one `signal-orbit` animation shared by the three marker phases, and `signal-core-pulse` on `.signalNode::after`.
+- Consumes: `SignalField(): JSX.Element`.
+- Produces: two `.signalDepthArc` elements, three `.signalNode` elements, and one shared `signal-depth-orbit` CSS animation.
 
-- [ ] **Step 1: Revise the motion contract test**
+- [ ] **Step 1: Write the failing motion contract**
 
-Require the component to render exactly three decorative signal markers, one orbit track, and no obsolete straight paths. Require the stylesheet to define `signal-orbit`, an ellipse motion path, three distinct phase delays, the centre pulse, and the existing reduced-motion override.
+```tsx
+it("renders three markers and two partial depth arcs", () => {
+  const { container } = render(<SignalField />);
+  expect(container.querySelector(".signalField")).toHaveAttribute("aria-hidden", "true");
+  expect(container.querySelectorAll(".signalNode")).toHaveLength(3);
+  expect(container.querySelectorAll(".signalDepthArc")).toHaveLength(2);
+  expect(container.querySelectorAll(".signalOrbitTrack")).toHaveLength(0);
+});
+
+it("defines one staggered diagonal 3D orbit", () => {
+  expect(stylesheet.includes("@keyframes signal-depth-orbit")).toBe(true);
+  expect(stylesheet.includes("perspective(900px)")).toBe(true);
+  expect(stylesheet.includes("transform-style: preserve-3d")).toBe(true);
+  expect(stylesheet.includes("translate3d(")).toBe(true);
+  expect(stylesheet.includes("filter: blur(")).toBe(true);
+  expect(stylesheet.includes("animation-delay: -3.667s")).toBe(true);
+  expect(stylesheet.includes("animation-delay: -7.333s")).toBe(true);
+  expect(stylesheet.includes("animation: none !important")).toBe(true);
+  expect(stylesheet.includes("signal-core-pulse")).toBe(false);
+});
+```
 
 - [ ] **Step 2: Run the focused test and verify RED**
 
 Run: `cd web && npm test -- --run src/test/hero-signal-motion.test.tsx`
 
-Expected: the existing marker-count assertion passes; the orbit-track and shared-orbit assertions fail because the old implementation still contains straight paths and independent drift keyframes.
+Expected: both tests fail because the component still renders `.signalOrbitTrack` and the stylesheet still defines the flat `signal-orbit` motion path.
 
-- [ ] **Step 3: Implement the shared CSS orbit**
+- [ ] **Step 3: Replace the flat track with depth arcs**
 
-- Replace the two `.signalPath` spans with one `.signalOrbitTrack` span.
-- Draw a responsive, low-contrast ellipse around the hero copy.
-- Give every `.signalNode` the same elliptical `offset-path` and `signal-orbit 11s linear infinite` animation.
-- Set node phase delays to `0s`, approximately `-3.667s`, and approximately `-7.333s`.
-- Keep the existing marker ring treatment and `signal-core-pulse` pseudo-element.
-- Remove the old `signal-drift-one`, `signal-drift-two`, and `signal-drift-three` keyframes.
+```tsx
+<span className="signalDepthArc signalDepthArcBack" />
+<span className="signalDepthArc signalDepthArcFront" />
+<span className="signalNode signalNodeOne" />
+<span className="signalNode signalNodeTwo" />
+<span className="signalNode signalNodeThree" />
+```
 
-- [ ] **Step 4: Run focused and complete web verification**
+The back arc shows only a faint top-left trajectory segment. The front arc shows only a brighter bottom-right segment. Neither arc animates.
+
+- [ ] **Step 4: Implement the shared depth animation**
+
+Define responsive orbit coordinates as custom properties on `.signalField`. Place every marker at the same orbit centre, then animate eight transform states around the loop. The near state uses positive Z, larger scale, full opacity, no blur, and z-index 4. The far state uses negative Z, smaller scale, reduced opacity, restrained blur, and z-index 1. Use these phase rules:
+
+```css
+.signalNodeOne { animation-delay: 0s; }
+.signalNodeTwo { animation-delay: -3.667s; }
+.signalNodeThree { animation-delay: -7.333s; }
+```
+
+Provide non-animated near, side, and far transforms on those three classes so the global reduced-motion rule leaves a legible diagonal composition.
+
+- [ ] **Step 5: Run focused and complete verification**
 
 Run:
 
@@ -63,12 +99,12 @@ npm run typecheck
 env VERCEL=1 npm run build
 ```
 
-Expected: all focused and complete checks exit successfully.
+Expected: all tests and static checks pass; the production build completes successfully.
 
-- [ ] **Step 5: Inspect the landing page locally**
+- [ ] **Step 6: Visually inspect desktop and mobile**
 
-Open `http://127.0.0.1:3000`, confirm all three markers visibly travel around one ellipse without obscuring the headline, and confirm reduced motion leaves three separated static markers.
+Open `http://127.0.0.1:3000`. Confirm the markers become larger and sharper toward bottom-right, smaller and dimmer toward top-left, never cover the calls to action, and remain inside a 390×844 viewport.
 
-- [ ] **Step 6: Wait for visual approval before publishing**
+- [ ] **Step 7: Hold for approval**
 
-Keep the implementation local until the user approves the browser preview. Only then commit, push, and allow the existing Vercel deployment to update.
+Leave the implementation uncommitted and unpushed until the user approves the local browser preview.
