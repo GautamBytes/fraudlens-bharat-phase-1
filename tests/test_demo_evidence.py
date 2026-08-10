@@ -1,9 +1,13 @@
 import inspect
 import json
+from dataclasses import asdict
 from pathlib import Path
+
+from PIL import Image
 
 from fraudlens.analysis_service import AnalysisInput, create_analysis_service
 from fraudlens import dashboard, generate_demo_cases
+from fraudlens.analysis_service import DatabaseCaseStore
 from fraudlens.settings import Settings
 
 
@@ -94,3 +98,67 @@ def test_ci_regenerates_and_compares_demo_evidence():
     assert "Verify deterministic demo evidence" in workflow
     assert "fraudlens.generate_demo_cases --output" in workflow
     assert 'cmp "$demo_tmp/$artifact" "outputs/demo_cases/$artifact"' in workflow
+
+
+def test_graph_demo_preparation_creates_two_safely_linked_cases(tmp_path):
+    prepare_graph = getattr(generate_demo_cases, "prepare_graph_demo_database", None)
+    assert prepare_graph is not None
+    database_path = tmp_path / "graph-demo.db"
+
+    results = prepare_graph(database_path)
+    graph = DatabaseCaseStore(database_path).entity_graph(
+        minimum_case_count=2,
+        case_limit=100,
+        max_edges=1000,
+    )
+
+    assert [result.case_id for result in results] == ["graph-demo-1", "graph-demo-2"]
+    assert all(result.metadata["stored"] is True for result in results)
+    assert graph.summary.case_count == 2
+    assert graph.summary.entity_count == 1
+    assert graph.summary.edge_count == 2
+    assert graph.entity_nodes[0].masked_value == "fraud-demo.example"
+    assert "https://fraud-demo.example/claim" not in json.dumps(
+        asdict(graph)
+    )
+
+
+def test_ocr_demo_screenshot_is_safe_valid_and_reproducible(tmp_path):
+    generate_screenshot = getattr(generate_demo_cases, "generate_ocr_demo_screenshot", None)
+    assert generate_screenshot is not None
+    first = generate_screenshot(tmp_path / "first.png")
+    second = generate_screenshot(tmp_path / "second.png")
+
+    assert first.read_bytes() == second.read_bytes()
+    with Image.open(first) as image:
+        assert image.format == "PNG"
+        assert image.mode == "RGB"
+        assert image.size == (1200, 500)
+        assert image.info == {}
+    committed = ROOT / "data" / "demo" / "otp_phishing_screenshot.png"
+    with Image.open(committed) as image:
+        assert image.format == "PNG"
+        assert image.mode == "RGB"
+        assert image.size == (1200, 500)
+        assert image.info == {}
+
+
+def test_demo_cli_prepares_json_screenshot_and_graph_database(tmp_path):
+    output_dir = tmp_path / "json"
+    screenshot_path = tmp_path / "demo.png"
+    database_path = tmp_path / "graph.db"
+
+    generate_demo_cases.main(
+        [
+            "--output",
+            str(output_dir),
+            "--screenshot-output",
+            str(screenshot_path),
+            "--graph-database",
+            str(database_path),
+        ]
+    )
+
+    assert len(list(output_dir.glob("*.json"))) == 4
+    assert screenshot_path.is_file()
+    assert DatabaseCaseStore(database_path).entity_graph().summary.case_count == 2

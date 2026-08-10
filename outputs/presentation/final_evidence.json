@@ -1,0 +1,433 @@
+{
+  "claim_boundary": "Internal synthetic evidence only; the research candidate is not the deployed model and no production-accuracy claim is made.",
+  "dataset": {
+    "legitimate_label_present": false,
+    "phase2_target_met": false,
+    "rows": 64,
+    "synthetic_only": true,
+    "test_rows": 8,
+    "train_rows": 48,
+    "validation_rows": 8
+  },
+  "deployed_runtime": {
+    "abstention_rate": 0.125,
+    "accepted_accuracy": 0.57142857,
+    "accuracy": 0.5,
+    "coverage": 0.875,
+    "macro_f1": 0.5,
+    "name": "calibrated_tfidf"
+  },
+  "research_candidates": [
+    {
+      "accepted_accuracy": 1.0,
+      "accuracy": 0.25,
+      "balanced_accuracy": 0.25,
+      "coverage": 0.25,
+      "estimated_model_bytes": 0,
+      "macro_f1": 0.25,
+      "mcc": 0.36689969,
+      "model": "rule_only"
+    },
+    {
+      "accepted_accuracy": 0.375,
+      "accuracy": 0.375,
+      "balanced_accuracy": 0.375,
+      "coverage": 1.0,
+      "estimated_model_bytes": 85083,
+      "macro_f1": 0.33333333,
+      "mcc": 0.29649973,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accepted_accuracy": 0.75,
+      "accuracy": 0.75,
+      "balanced_accuracy": 0.75,
+      "coverage": 1.0,
+      "estimated_model_bytes": 331415,
+      "macro_f1": 0.66666667,
+      "mcc": 0.74124932,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accepted_accuracy": 0.75,
+      "accuracy": 0.75,
+      "balanced_accuracy": 0.75,
+      "coverage": 1.0,
+      "estimated_model_bytes": 415954,
+      "macro_f1": 0.66666667,
+      "mcc": 0.74124932,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accepted_accuracy": 0.5,
+      "accuracy": 0.5,
+      "balanced_accuracy": 0.5,
+      "coverage": 1.0,
+      "estimated_model_bytes": 969536,
+      "macro_f1": 0.5,
+      "mcc": 0.43643578,
+      "model": "calibrated_word_character_tfidf"
+    }
+  ],
+  "robustness": [
+    {
+      "accuracy": 0.25,
+      "condition": "clean",
+      "coverage": 0.25,
+      "macro_f1": 0.25,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "rule_only"
+    },
+    {
+      "accuracy": 0.25,
+      "condition": "case_and_punctuation",
+      "coverage": 0.25,
+      "macro_f1": 0.25,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "rule_only"
+    },
+    {
+      "accuracy": 0.25,
+      "condition": "whitespace",
+      "coverage": 0.25,
+      "macro_f1": 0.25,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "rule_only"
+    },
+    {
+      "accuracy": 0.25,
+      "condition": "hinglish_spelling",
+      "coverage": 0.25,
+      "macro_f1": 0.25,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "rule_only"
+    },
+    {
+      "accuracy": 0.25,
+      "condition": "digit_masking",
+      "coverage": 0.25,
+      "macro_f1": 0.25,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "rule_only"
+    },
+    {
+      "accuracy": 0.125,
+      "condition": "ocr_confusion",
+      "coverage": 0.125,
+      "macro_f1": 0.125,
+      "macro_f1_drop_from_clean": 0.125,
+      "model": "rule_only"
+    },
+    {
+      "accuracy": 0.375,
+      "condition": "clean",
+      "coverage": 1.0,
+      "macro_f1": 0.33333333,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.5,
+      "condition": "case_and_punctuation",
+      "coverage": 1.0,
+      "macro_f1": 0.5,
+      "macro_f1_drop_from_clean": -0.16666667,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.375,
+      "condition": "whitespace",
+      "coverage": 1.0,
+      "macro_f1": 0.33333333,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.375,
+      "condition": "hinglish_spelling",
+      "coverage": 1.0,
+      "macro_f1": 0.33333333,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.375,
+      "condition": "digit_masking",
+      "coverage": 1.0,
+      "macro_f1": 0.33333333,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.375,
+      "condition": "ocr_confusion",
+      "coverage": 0.875,
+      "macro_f1": 0.33333333,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "clean",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "case_and_punctuation",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "whitespace",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "hinglish_spelling",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "digit_masking",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.625,
+      "condition": "ocr_confusion",
+      "coverage": 1.0,
+      "macro_f1": 0.58333333,
+      "macro_f1_drop_from_clean": 0.08333334,
+      "model": "character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "clean",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "case_and_punctuation",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "whitespace",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "hinglish_spelling",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.75,
+      "condition": "digit_masking",
+      "coverage": 1.0,
+      "macro_f1": 0.66666667,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.625,
+      "condition": "ocr_confusion",
+      "coverage": 1.0,
+      "macro_f1": 0.58333333,
+      "macro_f1_drop_from_clean": 0.08333334,
+      "model": "word_character_tfidf_logistic_regression"
+    },
+    {
+      "accuracy": 0.5,
+      "condition": "clean",
+      "coverage": 1.0,
+      "macro_f1": 0.5,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "calibrated_word_character_tfidf"
+    },
+    {
+      "accuracy": 0.625,
+      "condition": "case_and_punctuation",
+      "coverage": 1.0,
+      "macro_f1": 0.58333333,
+      "macro_f1_drop_from_clean": -0.08333333,
+      "model": "calibrated_word_character_tfidf"
+    },
+    {
+      "accuracy": 0.5,
+      "condition": "whitespace",
+      "coverage": 1.0,
+      "macro_f1": 0.5,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "calibrated_word_character_tfidf"
+    },
+    {
+      "accuracy": 0.5,
+      "condition": "hinglish_spelling",
+      "coverage": 1.0,
+      "macro_f1": 0.5,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "calibrated_word_character_tfidf"
+    },
+    {
+      "accuracy": 0.5,
+      "condition": "digit_masking",
+      "coverage": 1.0,
+      "macro_f1": 0.5,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "calibrated_word_character_tfidf"
+    },
+    {
+      "accuracy": 0.5,
+      "condition": "ocr_confusion",
+      "coverage": 1.0,
+      "macro_f1": 0.5,
+      "macro_f1_drop_from_clean": 0.0,
+      "model": "calibrated_word_character_tfidf"
+    }
+  ],
+  "runtime_confusion_matrix": [
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "runtime_labels": [
+    "courier_scam",
+    "digital_arrest",
+    "fake_job",
+    "investment_scam",
+    "kyc_scam",
+    "loan_scam",
+    "otp_phishing",
+    "upi_refund_scam",
+    "unknown"
+  ],
+  "schema_version": 1,
+  "sources": {
+    "models/metrics.json": "f8b3530b3c14c0df73bb7d59cd6527e5711bc9f1830242e80025604e0af7290f",
+    "outputs/phase2/evaluation.json": "6c588d52920b5a0d3b22babce1a87cf1356c7278f93cd0fdc4206285165d0adb",
+    "outputs/research/ablation_summary.csv": "b11cfe53153c3daa37d3e79905967085b54e8e748a11f8c0cafcd62e989a8496",
+    "outputs/research/classification_summary.csv": "ed37d9e5b30d18d267ea781fa83873c4e9a1fa8eb877e5fc94c1531ebf4a09fb"
+  }
+}
