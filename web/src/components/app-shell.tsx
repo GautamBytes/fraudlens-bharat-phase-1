@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { ServiceStatus } from "./service-status";
 
@@ -17,6 +17,18 @@ const NAVIGATION = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      menuButton.current?.focus();
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
   return (
     <div className="appFrame">
@@ -53,6 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="headerTools">
             <ServiceStatus />
             <button
+              ref={menuButton}
               className="menuButton"
               type="button"
               aria-expanded={open}

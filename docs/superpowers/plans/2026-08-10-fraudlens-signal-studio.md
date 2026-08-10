@@ -11,7 +11,8 @@
 ## Global Constraints
 
 - Preserve every FastAPI route, request limit, demo-key boundary, and Python behavior.
-- Use Signal black `#171717`, Cloud `#F7F7F5`, Paper `#FFFFFF`, Signal coral `#FF5A4F`, Review amber `#F3A712`, Evidence teal `#087F78`, Muted ink `#666A70`, and Hairline `#E2E2DE`.
+- Use Canvas black `#0E0E0E`, Raised surface `#181817`, Primary text `#F3F3EF`, Muted text `#9A9A94`, Signal coral `#FF604F`, Review amber `#F3A712`, Evidence teal `#55B9B0`, and Hairline `#2B2B29`.
+- Ship dark mode only; use small surface-luminance changes instead of white cards.
 - Use Instrument Sans for display/body and IBM Plex Mono for evidence metadata.
 - Preserve the synthetic-data, small-dataset, abstention, privacy, and human-review boundaries.
 - Support 1440, 1024, 768, and 390 pixel widths, 200% zoom, visible focus, and reduced motion.

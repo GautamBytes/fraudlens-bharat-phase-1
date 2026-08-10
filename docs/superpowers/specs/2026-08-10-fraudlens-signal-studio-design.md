@@ -31,14 +31,18 @@ illustration.
 
 ### Design tokens
 
-- Signal black: `#171717`
-- Cloud: `#F7F7F5`
-- Paper: `#FFFFFF`
-- Signal coral: `#FF5A4F`
+- Canvas black: `#0E0E0E`
+- Raised surface: `#181817`
+- Primary text: `#F3F3EF`
+- Muted text: `#9A9A94`
+- Signal coral: `#FF604F`
 - Review amber: `#F3A712`
-- Evidence teal: `#087F78`
-- Muted ink: `#666A70`
-- Hairline: `#E2E2DE`
+- Evidence teal: `#55B9B0`
+- Hairline: `#2B2B29`
+
+Dark mode is the only presentation theme for the professor website. Surfaces use
+small luminance changes instead of bright panels. Coral carries the visual identity;
+amber and teal remain reserved for uncertainty and verified evidence.
 
 Instrument Sans will carry display and body copy. IBM Plex Mono will label model
 outputs, evidence fields, and technical metadata. Removing Sora from display

@@ -20,5 +20,10 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Menu" }));
 
     expect(screen.getByRole("button", { name: "Close menu" })).toHaveAttribute("aria-expanded", "true");
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.getByRole("button", { name: "Menu" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Menu" })).toHaveFocus();
   });
 });

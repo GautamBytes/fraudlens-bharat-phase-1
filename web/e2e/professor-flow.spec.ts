@@ -33,7 +33,8 @@ test("professor can move from overview to an explainable analysis", async ({ pag
   await page.route("**/api/analyze", (route) => route.fulfill({ json: result }));
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /turn a suspicious message into evidence/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /review suspicious messages/i })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Synthetic analysis trace" })).toBeVisible();
   await expect(page.getByText("Engine ready")).toBeVisible();
 
   await page.getByRole("link", { name: /start guided evaluation/i }).click();
@@ -72,19 +73,39 @@ test("professor can seed and reset the masked relationship demo", async ({ page 
   await page.getByRole("button", { name: /build synthetic link/i }).click();
   await expect(page.getByRole("heading", { name: "2 linked cases" })).toBeVisible();
   await expect(page.getByRole("table", { name: /relationship evidence/i })).toContainText("fraud-demo.example/•••");
+  const seededResults = await new AxeBuilder({ page }).analyze();
+  expect(seededResults.violations).toEqual([]);
   await page.getByRole("button", { name: "Clear" }).click();
   await expect(page.getByText(/no repeated masked entity/i)).toBeVisible();
+});
+
+test("tablet navigation collapses without horizontal overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Menu" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
 test("mobile navigation and keyboard focus remain usable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByRole("button", { name: "Menu" }).click();
-  await expect(page.getByRole("link", { name: /research/i })).toBeVisible();
-  await page.getByRole("link", { name: /analyze/i }).click();
+  const navigation = page.getByRole("navigation", { name: "Primary navigation" });
+  await expect(navigation.getByRole("link", { name: "Research", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Menu" })).toBeFocused();
+  await page.getByRole("button", { name: "Menu" }).click();
+  await navigation.getByRole("link", { name: "Analyze", exact: true }).click();
   await expect(page.getByRole("heading", { name: /analyze fraud evidence/i })).toBeVisible();
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toBeVisible();
+});
+
+test("reduced motion disables the ambient signal animation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(page.locator(".signalField")).toBeVisible();
+  await expect(page.locator(".signalField")).toHaveCSS("animation-name", "none");
 });
 
 test("major professor routes have no automatically detectable accessibility violations", async ({ page }) => {
