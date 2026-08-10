@@ -107,10 +107,7 @@ def test_entity_graph_privacy_and_operational_contract_is_documented():
 
 
 def test_historical_and_living_docs_contextualize_current_ocr_and_graph_scope():
-    historical_paths = (
-        "docs/phase1_report.md",
-        "docs/presentation/presentation_script.md",
-    )
+    historical_paths = ("docs/phase1_report.md",)
     for relative_path in historical_paths:
         documentation = (ROOT / relative_path).read_text(encoding="utf-8")
         documentation = " ".join(

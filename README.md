@@ -40,6 +40,22 @@ checks the initialized case store. Both report version `1.0.0`. See
 
 These synthetic bootstrap results are not a production accuracy claim.
 
+## Final Capstone Package
+
+The final Phase 1 + Phase 2 meeting package is source-backed and uses the
+provided 10-slide college template:
+
+- `docs/final_capstone_report.md`: consolidated implementation and research report
+- `docs/presentation/fraudlens-bharat-final-capstone.pptx`: final 15-minute deck
+- `docs/presentation/demo_video_runbook.md`: live-demo and recording sequence
+- `outputs/presentation/`: current architecture and evaluation figures
+- `outputs/screenshots/final_*.png`: synthetic final application evidence
+
+The deck keeps the deployed calibrated runtime result separate from the
+stronger research-only character TF-IDF candidate. It states the 64-row
+synthetic, fraud-only dataset limitation and makes no production-accuracy
+claim.
+
 ## Research Benchmark
 
 The capstone now includes a same-split academic benchmark of canonical rules,
@@ -246,7 +262,12 @@ python -m fraudlens.generate_demo_cases
 
 ## Documentation Map
 
-- `docs/phase1_report.md`: main capstone report
+- `docs/final_capstone_report.md`: consolidated final Phase 1 + Phase 2 report
+- `docs/phase2_research_report.md`: detailed benchmark, literature comparison, and validity analysis
+- `docs/research_methodology.md`: frozen-split protocol and metric rationale
+- `docs/presentation/fraudlens-bharat-final-capstone.pptx`: final template-based presentation
+- `docs/presentation/demo_video_runbook.md`: recording and failure-safe demo plan
+- `docs/phase1_report.md`: historical Phase 1 progress report
 - `docs/literature_review.md`: research context and source-backed literature review
 - `docs/comparative_analysis.md`: initial-state, rule-only, hybrid, and external-model comparison
 - `docs/evaluation_plan.md`: metrics and accuracy-maintenance plan
