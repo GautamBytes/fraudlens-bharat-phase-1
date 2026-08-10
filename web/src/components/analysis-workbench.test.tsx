@@ -67,6 +67,24 @@ describe("AnalysisWorkbench", () => {
     );
   });
 
+  it("reports a missing hosted backend as a deployment configuration problem", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      Response.json(
+        { detail: "Analysis service is not configured" },
+        { status: 503 },
+      ),
+    );
+    const user = userEvent.setup();
+    render(<AnalysisWorkbench />);
+
+    await user.click(screen.getByRole("button", { name: /analyze message/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The analysis service is not connected to this website.",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent(/OCR is unavailable/i);
+  });
+
   it("gives an actionable retry message for an unexpected analysis failure", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       Response.json({ detail: "Unexpected failure" }, { status: 500 }),
