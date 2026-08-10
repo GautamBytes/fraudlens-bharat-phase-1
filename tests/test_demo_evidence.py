@@ -162,3 +162,21 @@ def test_demo_cli_prepares_json_screenshot_and_graph_database(tmp_path):
     assert len(list(output_dir.glob("*.json"))) == 4
     assert screenshot_path.is_file()
     assert DatabaseCaseStore(database_path).entity_graph().summary.case_count == 2
+
+
+def test_final_demo_screenshots_use_a_consistent_presentation_viewport():
+    expected_names = {
+        "final_dashboard_home.png",
+        "final_text_analysis.png",
+        "final_ocr_analysis.png",
+        "final_entity_graph.png",
+        "final_api_docs.png",
+        "final_api_ready.png",
+    }
+    screenshot_dir = ROOT / "outputs" / "screenshots"
+
+    for name in expected_names:
+        with Image.open(screenshot_dir / name) as image:
+            assert image.format == "PNG", name
+            assert image.mode == "RGB", name
+            assert image.size == (1600, 1200), name
