@@ -27,7 +27,9 @@ def test_render_blueprint_uses_the_hardened_container_and_secrets():
     service = blueprint["services"][0]
     assert service["type"] == "web"
     assert service["runtime"] == "docker"
+    assert service["plan"] == "free"
     assert service["healthCheckPath"] == "/ready"
+    assert "maxShutdownDelaySeconds" not in service
     env = {item["key"]: item for item in service["envVars"]}
     assert env["FRAUDLENS_HMAC_SECRET"]["generateValue"] is True
     assert env["FRAUDLENS_DEMO_API_KEY"]["generateValue"] is True

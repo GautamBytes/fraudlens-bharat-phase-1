@@ -5,7 +5,6 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     healthCheckPath: /ready
-    maxShutdownDelaySeconds: 30
     envVars:
       - key: FRAUDLENS_ENVIRONMENT
         value: production
