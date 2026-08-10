@@ -74,14 +74,14 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .signalGlow { position: absolute; width: 420px; height: 420px; background: radial-gradient(circle, rgba(255,90,79,.18), transparent 68%); filter: blur(8px); }
 .signalGlowLeft { top: -210px; left: -130px; }
 .signalGlowRight { top: -170px; right: -120px; }
-.signalNode { position: absolute; width: 9px; height: 9px; background: var(--coral); border: 3px solid rgba(255,255,255,.86); border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,90,79,.24); }
-.signalNodeOne { top: 27%; left: 17%; }
-.signalNodeTwo { top: 16%; right: 19%; }
-.signalNodeThree { top: 42%; right: 28%; }
-.signalPath { position: absolute; width: 190px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,90,79,.4), transparent); transform-origin: left; }
-.signalPathOne { top: 27%; left: 18%; transform: rotate(-12deg); }
-.signalPathTwo { top: 19%; right: 20%; transform: rotate(46deg); }
+.signalOrbitTrack { position: absolute; top: 38%; left: 50%; width: 84%; height: 72%; border: 1px solid rgba(255,90,79,.12); border-radius: 50%; box-shadow: inset 0 0 42px rgba(255,90,79,.025), 0 0 26px rgba(255,90,79,.035); transform: translate(-50%,-50%); }
+.signalNode { position: absolute; top: 0; left: 0; width: 15px; height: 15px; background: rgba(255,90,79,.14); border: 1px solid rgba(255,174,168,.95); border-radius: 50%; box-shadow: 0 0 0 4px rgba(255,90,79,.09), 0 0 22px rgba(255,90,79,.32); offset-path: ellipse(42% 36% at 50% 38%); offset-rotate: 0deg; animation: signal-orbit 11s linear infinite; will-change: offset-distance; }
+.signalNode::after { position: absolute; inset: 3px; background: var(--coral); border-radius: 50%; content: ""; }
+.signalNodeOne { offset-distance: 0%; animation-delay: 0s; }
+.signalNodeTwo { offset-distance: 33.333%; animation-delay: -3.667s; }
+.signalNodeThree { offset-distance: 66.667%; animation-delay: -7.333s; }
 @keyframes signal-breathe { from { opacity: .34; transform: scale(.98); } to { opacity: .62; transform: scale(1.02); } }
+@keyframes signal-orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
 .homePage { overflow: hidden; }
 .signalHero { position: relative; min-height: 720px; padding: 92px max(32px, calc((100vw - 1180px)/2)) 74px; }
 .signalHeroCopy { position: relative; z-index: 2; max-width: 900px; margin: 0 auto 54px; text-align: center; }
@@ -364,6 +364,8 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
   .footerContacts > span { width: 100%; }
   .pageContent { width: min(100% - 32px, 680px); padding-top: 34px; }
   .signalHero { min-height: 0; padding: 62px 16px 54px; }
+  .signalOrbitTrack { top: 38%; width: 94%; height: 44%; }
+  .signalNode { offset-path: ellipse(47% 22% at 50% 38%); }
   .signalHero h1 { font-size: clamp(47px,14vw,64px); }
   .signalHeroCopy > p:not(.heroKicker) { font-size: 16px; }
   .heroKicker { flex-direction: column; }
@@ -407,6 +409,11 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
   .metricStrip div { border-right: 0; border-bottom: 1px solid var(--line); }
   .metricStrip div:nth-child(3) { border-bottom: 1px solid var(--line); }
   .entityRow { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .signalOrbitTrack { top: 310px; width: calc(100% - 20px); height: 460px; }
+  .signalNode { offset-path: ellipse(calc(50% - 10px) 230px at 50% 310px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
