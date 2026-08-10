@@ -19,7 +19,7 @@ export function ProfessorGuide() {
       <section className="guidePath hostedPath" id="hosted">
         <p className="eyebrow">No installation</p><h2>Fastest: hosted evaluation</h2>
         <p>Open the published Vercel URL. Its server securely calls the containerized Python engine; the private key never reaches the browser.</p>
-        <p><a className="primaryButton" href="https://fraudlens-bharat.vercel.app" target="_blank" rel="noreferrer">Open hosted website</a></p>
+        <div className="guideHostedAction"><a className="primaryButton" href="https://fraudlens-bharat.vercel.app" target="_blank" rel="noreferrer">Open hosted website</a></div>
         <div className="guideSteps">
           <Step number="01" title="Open the project"><p>Start on Evaluate. The screenshot flow automatically retries one initial timeout while a sleeping analysis engine wakes.</p></Step>
           <Step number="02" title="Run prepared evidence"><p>Analyze synthetic text or a screenshot, then inspect confidence, signals and the draft.</p></Step>
