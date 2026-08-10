@@ -203,7 +203,7 @@ def test_dashboard_reads_graph_storage_only_after_an_explicit_refresh(monkeypatc
         def metric(self, *args, **kwargs):
             pass
 
-        def dataframe(self, *args, **kwargs):
+        def markdown(self, *args, **kwargs):
             pass
 
         def subheader(self, *args, **kwargs):
@@ -265,7 +265,7 @@ def test_dashboard_hides_stale_graphs_and_clears_them_after_refresh_failure(monk
         def metric(self, *args, **kwargs):
             pass
 
-        def dataframe(self, *args, **kwargs):
+        def markdown(self, *args, **kwargs):
             pass
 
         def subheader(self, *args, **kwargs):

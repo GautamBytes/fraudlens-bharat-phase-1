@@ -8,8 +8,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from fraudlens.analysis_service import (
     AnalysisInput,
-    AnalysisService,
     DatabaseCaseStore,
+    create_analysis_service,
     resolve_predictor,
 )
 from fraudlens.config import DEMO_CASES_DIR
@@ -39,10 +39,12 @@ def _dump(result):
 
 def generate_demo_cases(output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
-    predictor = resolve_predictor(Settings.from_env())
+    settings = Settings.from_env()
+    predictor = resolve_predictor(settings)
     written = []
     for name, text in DEMO_CASES.items():
-        service = AnalysisService(
+        service = create_analysis_service(
+            settings=settings,
             predictor=predictor,
             clock=lambda: _DEMO_TIMESTAMP,
             id_generator=lambda name=name: "demo-{}".format(name),
@@ -57,11 +59,13 @@ def generate_demo_cases(output_dir: Path):
 def prepare_graph_demo_database(database_path: Path):
     """Store two synthetic cases sharing one safe example-domain URL."""
 
-    predictor = resolve_predictor(Settings.from_env())
+    settings = Settings.from_env()
+    predictor = resolve_predictor(settings)
     store = DatabaseCaseStore(database_path)
     results = []
     for case_id, text in _GRAPH_DEMO_MESSAGES:
-        service = AnalysisService(
+        service = create_analysis_service(
+            settings=settings,
             predictor=predictor,
             store=store,
             id_generator=lambda case_id=case_id: case_id,
