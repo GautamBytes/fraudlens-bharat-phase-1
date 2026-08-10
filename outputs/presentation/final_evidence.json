@@ -14,6 +14,7 @@
       "Word + character",
       "Calibrated hybrid"
     ],
+    "robustness_caption": "8-row synthetic frozen test; perturbations are simulations, not a labelled OCR benchmark.",
     "robustness_conditions": [
       "clean",
       "case_and_punctuation",

@@ -79,6 +79,10 @@ def test_presentation_evidence_uses_current_runtime_and_research_metrics(tmp_pat
             "digit_masking",
             "ocr_confusion",
         ],
+        "robustness_caption": (
+            "8-row synthetic frozen test; perturbations are simulations, "
+            "not a labelled OCR benchmark."
+        ),
         "runtime_display_name": "Calibrated TF-IDF",
         "runtime_summary": (
             "8 synthetic test rows | Accuracy 0.500 | Macro-F1 0.500 | Coverage 0.875"

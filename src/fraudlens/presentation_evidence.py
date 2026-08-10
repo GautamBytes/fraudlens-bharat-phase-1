@@ -116,6 +116,10 @@ def _build_payload(repo_root: Path):
             _display_model_name(model_id) for model_id in model_ids
         ],
         "robustness_conditions": robustness_conditions,
+        "robustness_caption": (
+            f"{dataset['split_rows']['test']}-row synthetic frozen test; perturbations are simulations, "
+            "not a labelled OCR benchmark."
+        ),
         "runtime_display_name": _display_model_name(deployed_runtime["name"]),
         "runtime_summary": (
             "{} synthetic test rows | Accuracy {:.3f} | Macro-F1 {:.3f} | Coverage {:.3f}"
@@ -269,7 +273,13 @@ def _robustness_figure(payload, output_path: Path) -> Path:
     axis.set_ylabel("Research candidate")
     axis.tick_params(axis="x", rotation=28)
     axis.tick_params(axis="y", rotation=0, labelsize=9)
-    fig.text(0.08, 0.03, "Eight-row synthetic frozen test; perturbations are simulations, not a labelled OCR benchmark.", fontsize=10, color="#486581")
+    fig.text(
+        0.08,
+        0.03,
+        contract["robustness_caption"],
+        fontsize=10,
+        color="#486581",
+    )
     fig.subplots_adjust(left=0.28, right=0.94, top=0.88, bottom=0.20)
     return _save_figure(fig, output_path)
 
