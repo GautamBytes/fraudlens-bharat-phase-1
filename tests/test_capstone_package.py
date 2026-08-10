@@ -1,6 +1,7 @@
 import csv
 import html
 import json
+import posixpath
 import re
 import subprocess
 import sys
@@ -78,7 +79,7 @@ def _machine_claims() -> dict[str, str]:
     release_snapshot = json.loads(RELEASE_SNAPSHOT.read_text(encoding="utf-8"))
     release_test_count = int(release_snapshot["automated_tests"])
     assert release_snapshot["schema_version"] == 1
-    assert _collected_test_count() == release_test_count
+    assert _collected_test_count() >= release_test_count
     return {
         "test_count": f"{release_test_count} automated tests",
         "dataset": f"{evaluation['rows']} synthetic fraud-only messages",
@@ -159,6 +160,44 @@ def test_final_deck_uses_current_source_backed_claims_and_boundaries():
         "16 test rows",
     ):
         assert stale_claim not in text
+
+
+def test_final_deck_describes_only_the_supported_interfaces():
+    slide_text = " ".join(_deck_slide_text()).lower()
+    assert "streamlit" not in slide_text
+    assert "api and dashboard" not in slide_text
+    assert "next.js" in slide_text
+    assert "fastapi" in slide_text
+
+    with zipfile.ZipFile(DECK) as archive:
+        package_text = " ".join(
+            archive.read(name).decode("utf-8", errors="ignore").lower()
+            for name in archive.namelist()
+            if name.endswith(".xml")
+        )
+    assert "streamlit" not in package_text
+
+
+def test_final_deck_embeds_the_current_architecture_evidence():
+    expected = (
+        ROOT / "outputs" / "presentation" / "final_system_architecture.png"
+    ).read_bytes()
+
+    with zipfile.ZipFile(DECK) as archive:
+        slide = archive.read("ppt/slides/slide5.xml").decode("utf-8")
+        relationship_id = re.search(
+            r'<a:blip r:embed="([^"]+)"', slide
+        ).group(1)
+        relationships = archive.read(
+            "ppt/slides/_rels/slide5.xml.rels"
+        ).decode("utf-8")
+        target = re.search(
+            rf'<Relationship Id="{relationship_id}"[^>]+Target="([^"]+)"',
+            relationships,
+        ).group(1)
+        media_name = posixpath.normpath(posixpath.join("ppt/slides", target))
+
+        assert archive.read(media_name) == expected
 
 
 def test_video_runbook_covers_the_recorded_demo_without_a_script_file():

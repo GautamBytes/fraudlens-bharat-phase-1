@@ -149,7 +149,7 @@ def test_demo_cli_prepares_json_screenshot_and_graph_database(tmp_path):
 
 def test_final_demo_screenshots_use_a_consistent_presentation_viewport():
     expected_names = {
-        "final_dashboard_home.png",
+        "final_web_home.png",
         "final_text_analysis.png",
         "final_ocr_analysis.png",
         "final_entity_graph.png",
