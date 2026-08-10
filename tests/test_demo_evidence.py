@@ -16,17 +16,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_release_model_classifies_every_named_demo_as_advertised():
     service = create_analysis_service(Settings.from_env())
-    expected_labels = {
-        "Fake KYC SMS": "kyc_scam",
-        "OTP Phishing": "otp_phishing",
-        "Fake Job Scam": "fake_job",
-        "Investment Scam": "investment_scam",
-    }
 
-    for name, text in dashboard.DEMO_MESSAGES.items():
-        result = service.analyze(AnalysisInput(text=text, store_case=False))
+    for case in generate_demo_cases.DEMO_CASE_CATALOG:
+        result = service.analyze(AnalysisInput(text=case.text, store_case=False))
 
-        assert result.predicted_label == expected_labels[name], name
+        assert result.predicted_label == case.expected_label, case.button_label
         assert result.metadata["prediction_abstained"] is False
 
 
@@ -113,6 +107,8 @@ def test_graph_demo_preparation_creates_two_safely_linked_cases(tmp_path):
     )
 
     assert [result.case_id for result in results] == ["graph-demo-1", "graph-demo-2"]
+    assert [result.predicted_label for result in results] == ["kyc_scam", "courier_scam"]
+    assert all(result.metadata["prediction_abstained"] is False for result in results)
     assert all(result.metadata["stored"] is True for result in results)
     assert graph.summary.case_count == 2
     assert graph.summary.entity_count == 1

@@ -28,6 +28,7 @@ def test_presentation_evidence_uses_current_runtime_and_research_metrics(tmp_pat
     payload = json.loads((tmp_path / "final_evidence.json").read_text(encoding="utf-8"))
 
     assert {path.name for path in written} == {"final_evidence.json", *EXPECTED_IMAGES}
+    assert payload["schema_version"] == 2
     assert payload["dataset"] == {
         "rows": 64,
         "train_rows": 48,
@@ -55,6 +56,34 @@ def test_presentation_evidence_uses_current_runtime_and_research_metrics(tmp_pat
     assert payload["runtime_labels"][-1] == "unknown"
     assert len(payload["runtime_confusion_matrix"]) == 9
     assert all(len(row) == 9 for row in payload["runtime_confusion_matrix"])
+    assert payload["chart_contract"] == {
+        "classification_model_ids": [
+            "rule_only",
+            "word_tfidf_logistic_regression",
+            "character_tfidf_logistic_regression",
+            "word_character_tfidf_logistic_regression",
+            "calibrated_word_character_tfidf",
+        ],
+        "classification_model_labels": [
+            "Rules",
+            "Word TF-IDF",
+            "Character TF-IDF",
+            "Word + character",
+            "Calibrated hybrid",
+        ],
+        "robustness_conditions": [
+            "clean",
+            "case_and_punctuation",
+            "whitespace",
+            "hinglish_spelling",
+            "digit_masking",
+            "ocr_confusion",
+        ],
+        "runtime_display_name": "Calibrated TF-IDF",
+        "runtime_summary": (
+            "8 synthetic test rows | Accuracy 0.500 | Macro-F1 0.500 | Coverage 0.875"
+        ),
+    }
     assert payload["claim_boundary"] == (
         "Internal synthetic evidence only; the research candidate is not the deployed model "
         "and no production-accuracy claim is made."

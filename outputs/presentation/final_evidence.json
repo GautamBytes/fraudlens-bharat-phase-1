@@ -1,4 +1,30 @@
 {
+  "chart_contract": {
+    "classification_model_ids": [
+      "rule_only",
+      "word_tfidf_logistic_regression",
+      "character_tfidf_logistic_regression",
+      "word_character_tfidf_logistic_regression",
+      "calibrated_word_character_tfidf"
+    ],
+    "classification_model_labels": [
+      "Rules",
+      "Word TF-IDF",
+      "Character TF-IDF",
+      "Word + character",
+      "Calibrated hybrid"
+    ],
+    "robustness_conditions": [
+      "clean",
+      "case_and_punctuation",
+      "whitespace",
+      "hinglish_spelling",
+      "digit_masking",
+      "ocr_confusion"
+    ],
+    "runtime_display_name": "Calibrated TF-IDF",
+    "runtime_summary": "8 synthetic test rows | Accuracy 0.500 | Macro-F1 0.500 | Coverage 0.875"
+  },
   "claim_boundary": "Internal synthetic evidence only; the research candidate is not the deployed model and no production-accuracy claim is made.",
   "dataset": {
     "legitimate_label_present": false,
@@ -423,7 +449,7 @@
     "upi_refund_scam",
     "unknown"
   ],
-  "schema_version": 1,
+  "schema_version": 2,
   "sources": {
     "models/metrics.json": "f8b3530b3c14c0df73bb7d59cd6527e5711bc9f1830242e80025604e0af7290f",
     "outputs/phase2/evaluation.json": "6c588d52920b5a0d3b22babce1a87cf1356c7278f93cd0fdc4206285165d0adb",

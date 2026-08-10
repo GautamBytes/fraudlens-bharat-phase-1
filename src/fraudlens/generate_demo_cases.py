@@ -26,7 +26,8 @@ _GRAPH_DEMO_MESSAGES = (
     ),
     (
         "graph-demo-2",
-        "Courier release fee pending. Verify at https://fraud-demo.example/claim today.",
+        "Your courier package is detained. Pay customs delivery fee at "
+        "https://fraud-demo.example/claim to release parcel.",
     ),
 )
 

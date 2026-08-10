@@ -22,6 +22,14 @@ _ORANGE = "#F29E4C"
 _RED = "#C44536"
 _BLUE = "#2F6BFF"
 _CREAM = "#F7F9FC"
+_MODEL_DISPLAY_NAMES = {
+    "rule_only": "Rules",
+    "word_tfidf_logistic_regression": "Word TF-IDF",
+    "character_tfidf_logistic_regression": "Character TF-IDF",
+    "word_character_tfidf_logistic_regression": "Word + character",
+    "calibrated_word_character_tfidf": "Calibrated hybrid",
+    "calibrated_tfidf": "Calibrated TF-IDF",
+}
 _CLAIM_BOUNDARY = (
     "Internal synthetic evidence only; the research candidate is not the deployed model "
     "and no production-accuracy claim is made."
@@ -45,6 +53,10 @@ def _number(value: str):
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _display_model_name(model_id: str) -> str:
+    return _MODEL_DISPLAY_NAMES.get(model_id, model_id.replace("_", " ").title())
 
 
 def _build_payload(repo_root: Path):
@@ -84,8 +96,38 @@ def _build_payload(repo_root: Path):
         }
         for row in robustness_rows
     ]
+    deployed_runtime = {
+        "name": "calibrated_tfidf",
+        "accuracy": round(test_metrics["overall_accuracy_with_abstentions"], 8),
+        "macro_f1": round(test_metrics["macro_f1_all_predictions"], 8),
+        "coverage": round(test_metrics["coverage"], 8),
+        "abstention_rate": round(test_metrics["abstention_rate"], 8),
+        "accepted_accuracy": round(test_metrics["accepted_accuracy"], 8),
+    }
+    runtime_confusion_matrix = final_runtime_evaluation["confusion_matrix"]
+    model_ids = [row["model"] for row in research_candidates]
+    robustness_conditions = list(
+        dict.fromkeys(row["condition"] for row in robustness)
+    )
+    runtime_rows = sum(sum(row) for row in runtime_confusion_matrix)
+    chart_contract = {
+        "classification_model_ids": model_ids,
+        "classification_model_labels": [
+            _display_model_name(model_id) for model_id in model_ids
+        ],
+        "robustness_conditions": robustness_conditions,
+        "runtime_display_name": _display_model_name(deployed_runtime["name"]),
+        "runtime_summary": (
+            "{} synthetic test rows | Accuracy {:.3f} | Macro-F1 {:.3f} | Coverage {:.3f}"
+        ).format(
+            runtime_rows,
+            deployed_runtime["accuracy"],
+            deployed_runtime["macro_f1"],
+            deployed_runtime["coverage"],
+        ),
+    }
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "dataset": {
             "rows": dataset["rows"],
             "train_rows": dataset["split_rows"]["train"],
@@ -95,18 +137,12 @@ def _build_payload(repo_root: Path):
             "legitimate_label_present": "legitimate" not in dataset["missing_labels"],
             "phase2_target_met": dataset["phase2_target_met"],
         },
-        "deployed_runtime": {
-            "name": "calibrated_tfidf",
-            "accuracy": round(test_metrics["overall_accuracy_with_abstentions"], 8),
-            "macro_f1": round(test_metrics["macro_f1_all_predictions"], 8),
-            "coverage": round(test_metrics["coverage"], 8),
-            "abstention_rate": round(test_metrics["abstention_rate"], 8),
-            "accepted_accuracy": round(test_metrics["accepted_accuracy"], 8),
-        },
-        "runtime_confusion_matrix": final_runtime_evaluation["confusion_matrix"],
+        "deployed_runtime": deployed_runtime,
+        "runtime_confusion_matrix": runtime_confusion_matrix,
         "runtime_labels": final_runtime_evaluation["confusion_matrix_labels"],
         "research_candidates": research_candidates,
         "robustness": robustness,
+        "chart_contract": chart_contract,
         "claim_boundary": _CLAIM_BOUNDARY,
         "sources": {
             str(path.relative_to(repo_root)): _sha256(path)
@@ -182,7 +218,7 @@ def _architecture_figure(output_path: Path) -> Path:
 
 def _comparison_figure(payload, output_path: Path) -> Path:
     rows = payload["research_candidates"]
-    labels = ["Rules", "Word", "Character", "Word + char", "Calibrated hybrid"]
+    labels = payload["chart_contract"]["classification_model_labels"]
     x = np.arange(len(rows))
     width = 0.25
     fig, axis = plt.subplots(figsize=(12, 9))
@@ -208,13 +244,9 @@ def _comparison_figure(payload, output_path: Path) -> Path:
 
 
 def _robustness_figure(payload, output_path: Path) -> Path:
-    models = []
-    conditions = []
-    for row in payload["robustness"]:
-        if row["model"] not in models:
-            models.append(row["model"])
-        if row["condition"] not in conditions:
-            conditions.append(row["condition"])
+    contract = payload["chart_contract"]
+    models = contract["classification_model_ids"]
+    conditions = contract["robustness_conditions"]
     matrix = np.array([
         [
             next(row["macro_f1"] for row in payload["robustness"] if row["model"] == model and row["condition"] == condition)
@@ -222,19 +254,23 @@ def _robustness_figure(payload, output_path: Path) -> Path:
         ]
         for model in models
     ])
-    model_labels = ["Rules", "Word", "Character", "Word + char", "Calibrated hybrid"]
+    model_labels = contract["classification_model_labels"]
     condition_labels = [condition.replace("_", " ") for condition in conditions]
     fig, axis = plt.subplots(figsize=(12, 9))
     sns.heatmap(
         matrix, annot=True, fmt=".3f", cmap="YlGnBu", vmin=0, vmax=0.75,
         xticklabels=condition_labels, yticklabels=model_labels, cbar_kws={"label": "Macro-F1"}, ax=axis,
     )
-    axis.set_title("Robustness under deterministic language and OCR noise", loc="left", fontsize=20, fontweight="bold", color=_NAVY, pad=18)
+    fig.suptitle(
+        "Robustness under deterministic language and OCR noise",
+        fontsize=20, fontweight="bold", color=_NAVY, y=0.96,
+    )
     axis.set_xlabel("Condition")
     axis.set_ylabel("Research candidate")
     axis.tick_params(axis="x", rotation=28)
+    axis.tick_params(axis="y", rotation=0, labelsize=9)
     fig.text(0.08, 0.03, "Eight-row synthetic frozen test; perturbations are simulations, not a labelled OCR benchmark.", fontsize=10, color="#486581")
-    fig.subplots_adjust(left=0.20, right=0.94, top=0.88, bottom=0.20)
+    fig.subplots_adjust(left=0.28, right=0.94, top=0.88, bottom=0.20)
     return _save_figure(fig, output_path)
 
 
@@ -243,12 +279,18 @@ def _confusion_figure(payload, output_path: Path) -> Path:
     matrix = np.array(payload["runtime_confusion_matrix"])
     fig, axis = plt.subplots(figsize=(12, 9))
     sns.heatmap(matrix, annot=True, fmt="d", cmap="Blues", cbar=False, xticklabels=labels, yticklabels=labels, ax=axis, linewidths=0.5)
-    axis.set_title("Deployed calibrated runtime - frozen test confusion matrix", loc="left", fontsize=19, fontweight="bold", color=_NAVY, pad=18)
+    contract = payload["chart_contract"]
+    axis.set_title(
+        "Deployed {} - frozen test confusion matrix".format(
+            contract["runtime_display_name"]
+        ),
+        loc="left", fontsize=19, fontweight="bold", color=_NAVY, pad=18,
+    )
     axis.set_xlabel("Final prediction (abstentions are unknown overall errors)")
     axis.set_ylabel("True label")
     axis.tick_params(axis="x", rotation=34)
     axis.tick_params(axis="y", rotation=0)
-    fig.text(0.10, 0.03, "8 synthetic rows, one per fraud class | Accuracy 0.500 | Macro-F1 0.500 | Coverage 0.875", fontsize=10, color="#486581")
+    fig.text(0.10, 0.03, contract["runtime_summary"], fontsize=10, color="#486581")
     fig.subplots_adjust(left=0.22, right=0.96, top=0.87, bottom=0.25)
     return _save_figure(fig, output_path)
 
