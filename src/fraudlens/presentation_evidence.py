@@ -34,6 +34,9 @@ _CLAIM_BOUNDARY = (
     "Internal synthetic evidence only; the research candidate is not the deployed model "
     "and no production-accuracy claim is made."
 )
+_ARCHITECTURE_CONTRACT = (
+    "Text input=Next.js / FastAPI|Web + API=Result + provenance"
+)
 
 
 def _read_json(path: Path):
@@ -155,13 +158,22 @@ def _build_payload(repo_root: Path):
     }
 
 
-def _save_figure(fig, output_path: Path) -> Path:
+def _save_figure(
+    fig,
+    output_path: Path,
+    *,
+    metadata: Optional[dict[str, str]] = None,
+) -> Path:
+    figure_metadata = {
+        "Software": "FraudLens Bharat deterministic evidence generator",
+        **(metadata or {}),
+    }
     fig.savefig(
         output_path,
         dpi=160,
         facecolor="white",
         bbox_inches=None,
-        metadata={"Software": "FraudLens Bharat deterministic evidence generator"},
+        metadata=figure_metadata,
     )
     plt.close(fig)
     return output_path
@@ -217,7 +229,11 @@ def _architecture_figure(output_path: Path) -> Path:
         fontsize=10.5, fontweight="bold", color=_NAVY,
     )
     axis.text(0.7, 0.28, "Assistive local prototype - no automatic filing, GNN or production-accuracy claim", fontsize=10, color=_RED)
-    return _save_figure(fig, output_path)
+    return _save_figure(
+        fig,
+        output_path,
+        metadata={"FraudLens-Architecture-Contract": _ARCHITECTURE_CONTRACT},
+    )
 
 
 def _comparison_figure(payload, output_path: Path) -> Path:

@@ -13,6 +13,9 @@ EXPECTED_IMAGES = {
     "robustness_ablation.png",
     "runtime_confusion_matrix.png",
 }
+ARCHITECTURE_CONTRACT = (
+    "Text input=Next.js / FastAPI|Web + API=Result + provenance"
+)
 
 
 def _module():
@@ -106,9 +109,12 @@ def test_committed_presentation_manifest_matches_fresh_generation(tmp_path):
     assert (tmp_path / "final_evidence.json").read_bytes() == (
         ROOT / "outputs" / "presentation" / "final_evidence.json"
     ).read_bytes()
-    assert (tmp_path / "final_system_architecture.png").read_bytes() == (
-        ROOT / "outputs" / "presentation" / "final_system_architecture.png"
-    ).read_bytes()
+    for image_path in (
+        tmp_path / "final_system_architecture.png",
+        ROOT / "outputs" / "presentation" / "final_system_architecture.png",
+    ):
+        with Image.open(image_path) as image:
+            assert image.info["FraudLens-Architecture-Contract"] == ARCHITECTURE_CONTRACT
 
 
 def test_ci_regenerates_presentation_evidence_manifest():
