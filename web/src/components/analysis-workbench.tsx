@@ -104,7 +104,12 @@ export function AnalysisWorkbench() {
     <div className="analysisFlow">
       <EvidenceRail activeStep={result ? 4 : pending ? 2 : 1} />
 
-      <section className="inputPanel">
+      <div
+        className={result ? "analysisWorkspace analysisWorkspaceComplete" : "analysisWorkspace"}
+        data-state={result ? "complete" : pending ? "pending" : "ready"}
+        data-testid="analysis-workspace"
+      >
+        <section className="inputPanel">
         <div className="panelHeading">
           <div>
             <p className="eyebrow">Evidence intake</p>
@@ -196,9 +201,10 @@ export function AnalysisWorkbench() {
         )}
 
         {error && <div className="errorNotice" role="alert">{error}</div>}
-      </section>
+        </section>
 
-      {result && <AnalysisResultView result={result} />}
+        {result && <AnalysisResultView result={result} />}
+      </div>
     </div>
   );
 }

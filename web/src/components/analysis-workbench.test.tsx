@@ -23,6 +23,8 @@ describe("AnalysisWorkbench", () => {
     await user.click(screen.getByRole("button", { name: /analyze message/i }));
 
     expect(await screen.findByText("KYC scam")).toBeVisible();
+    expect(screen.getByTestId("analysis-workspace")).toHaveAttribute("data-state", "complete");
+    expect(screen.getByRole("heading", { name: /review decision/i })).toBeVisible();
     expect(screen.getByRole("heading", { name: /complaint draft/i })).toBeVisible();
     expect(fetch).toHaveBeenCalledWith(
       "/api/analyze",

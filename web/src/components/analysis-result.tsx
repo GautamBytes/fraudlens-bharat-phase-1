@@ -30,11 +30,17 @@ export function AnalysisResultView({ result }: { result: AnalysisResult }) {
       <div className="resultHeading">
         <div>
           <p className="eyebrow">Analysis complete</p>
-          <h2>{abstained ? "Needs manual classification" : titleCaseLabel(result.predicted_label)}</h2>
+          <h2>Review decision</h2>
         </div>
         <span className={`riskBadge risk-${result.risk_level}`}>
           {result.risk_level} risk
         </span>
+      </div>
+
+      <div className="decisionIdentity">
+        <span>{abstained ? "Model abstained" : "Suggested category"}</span>
+        <h3>{abstained ? "Needs manual classification" : titleCaseLabel(result.predicted_label)}</h3>
+        <p>{abstained ? "The calibrated confidence threshold was not met." : "Use the supporting evidence below before accepting this category."}</p>
       </div>
 
       <div className="metricStrip">
