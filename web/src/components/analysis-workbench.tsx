@@ -14,6 +14,9 @@ function errorMessage(status: number, detail?: string): string {
   if (status === 504 || detail === "Analysis service is still starting") {
     return "We are waking the analysis engine. Wait about a minute, then try again.";
   }
+  if (detail === "Analysis service is not configured") {
+    return "The analysis service is not connected to this website.";
+  }
   if (status === 413) return "The screenshot must stay under 4 MB for the hosted demo.";
   if (status === 415) return "Use a PNG or JPEG screenshot.";
   if (status === 422) return "No usable message text was found. Try a clearer screenshot.";
