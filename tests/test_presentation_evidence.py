@@ -115,3 +115,12 @@ def test_ci_regenerates_presentation_evidence_manifest():
     assert "fraudlens.presentation_evidence" in workflow
     assert 'cmp "$presentation_tmp/final_evidence.json"' in workflow
     assert '"outputs/presentation/final_evidence.json"' in workflow
+
+
+def test_architecture_labels_name_the_supported_web_and_api_interfaces():
+    source = (ROOT / "src" / "fraudlens" / "presentation_evidence.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'box(0.7, 6.6, 2.0, 1.0, "Text input", "Next.js / FastAPI", _BLUE)' in source
+    assert 'box(9.0, 6.0, 2.25, 1.15, "Web + API", "Result + provenance", _BLUE)' in source

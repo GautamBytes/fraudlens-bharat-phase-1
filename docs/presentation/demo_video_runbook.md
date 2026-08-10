@@ -20,8 +20,8 @@ during the live meeting.
 2. Install Tesseract English and Hindi language data for a direct local demo.
 3. Set a unique local `FRAUDLENS_HMAC_SECRET` without displaying it.
 4. Clear synthetic case history so the graph sequence starts empty.
-5. Start FastAPI and Streamlit on loopback only.
-6. Verify `GET /ready`, the dashboard home, and the OCR language list.
+5. Start the FastAPI service and Next.js website on loopback only.
+6. Verify `GET /ready`, the website home, and the OCR language list.
 7. Disable desktop notifications and close unrelated applications.
 8. Open these evidence fallbacks in separate tabs:
    - `outputs/screenshots/final_text_analysis.png`
@@ -34,7 +34,7 @@ during the live meeting.
 
 ### 0:00-0:15 - Title and safe default
 
-Show the Streamlit home page. Say: “FraudLens Bharat accepts pasted messages or
+Show the Next.js website home page. Say: “FraudLens Bharat accepts pasted messages or
 bounded screenshots. Local case storage starts off.” Pause over the unchecked
 storage control.
 
@@ -45,7 +45,7 @@ storage control.
 3. Click **Analyze Message**.
 4. Point to the scam category, confidence, risk band, extracted evidence,
    reasons, and complaint draft.
-5. Say that the dashboard and API use the same analysis service.
+5. Say that the website and API use the same analysis service.
 
 Expected evidence: the named demo produces its advertised category and a
 non-abstained result. Do not quote a different confidence from memory; read the
@@ -93,7 +93,7 @@ production fraud verdict or automatic filing system.”
 
 ## Failure-safe fallback
 
-If the dashboard, OCR executable, or graph state fails during the meeting:
+If the website, OCR executable, or graph state fails during the meeting:
 
 1. Stop clicking after the first failure; do not debug live.
 2. State the failed boundary in one sentence, such as “The local OCR process is

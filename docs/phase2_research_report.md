@@ -350,12 +350,12 @@ FraudLens exposes detected entities and visible risk reasons rather than asking
 the user to trust a label alone. Predictions can abstain, although the research
 thresholds accept all rows for the trainable candidates on this validation
 split. These research candidates do not replace the selected runtime model.
-The system defaults to no storage, requires explicit dashboard consent,
+The system defaults to no storage, requires explicit website consent,
 does not retain screenshot bytes, applies retention deadlines, masks graph
 labels, and uses opaque HMAC-backed entity identifiers.
 
-The release is runnable locally through FastAPI and Streamlit and has a pinned,
-non-root, read-only container configuration. Structured request logs exclude
+The release is runnable locally through the Next.js website and FastAPI and has
+a pinned, non-root, read-only container configuration. Structured request logs exclude
 bodies and concrete identifiers. These properties support the end-to-end and
 privacy contribution, but software hardening does not establish production
 accuracy.

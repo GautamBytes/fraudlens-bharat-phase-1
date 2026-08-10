@@ -35,7 +35,7 @@ and log redaction.
 
 ## Manual acceptance
 
-- Check `/health`, `/ready`, OpenAPI version `1.0.0`, and the dashboard.
+- Check `/health`, `/ready`, OpenAPI version `1.0.0`, and the website.
 - Analyze one synthetic text and one synthetic PNG/JPEG without storage; case
   history must remain empty.
 - Repeat with explicit consent; verify history, masked repeated-entity graph,

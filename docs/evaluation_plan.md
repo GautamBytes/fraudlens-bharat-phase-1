@@ -133,7 +133,7 @@ Recommended system metrics:
 - API health endpoint returns `ok`
 - `/analyze` returns a complete schema
 - `/cases` stores and lists analyzed cases
-- Dashboard loads demo messages
+- Website loads demo messages
 - Calibrated model training regenerates metrics and metadata
 - Test suite passes
 
@@ -167,7 +167,7 @@ Recommended evaluation targets:
 - Transformer comparison against TF-IDF baseline
 - URL model comparison against URL heuristics
 - Graph-linking evaluation for repeated phone, UPI, email, and URL identifiers
-- Latency measurement for API and dashboard demos
+- Latency measurement for API and website demos
 
 ## Reporting Rule
 

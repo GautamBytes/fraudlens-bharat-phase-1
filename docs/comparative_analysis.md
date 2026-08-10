@@ -26,7 +26,7 @@ Transformer comparison and GNN research remain future work.
 
 | Capability | Initial State | After Phase 1 |
 |---|---|---|
-| Input handling | Unstructured pasted text only in notes | Pasted text accepted through API and dashboard |
+| Input handling | Unstructured pasted text only in notes | Pasted text accepted through FastAPI and the Next.js website |
 | Fraud taxonomy | No reproducible taxonomy | 8 fraud classes with labeling guide |
 | Classification | Manual guesswork | Calibrated raw-normalized TF-IDF + Logistic Regression with explicit abstention |
 | Evidence extraction | Manual reading | Regex extraction for phone, URL, UPI ID, email, money, OTP-like code, urgency, threat |
@@ -81,7 +81,7 @@ The fair comparison is:
 | Best cited metric | 74.41 percent accuracy, 71.49 percent F1 | Historical marker-enhanced 1.0000 internal accuracy/F1 on 16-row synthetic test split; superseded |
 | Model type | Hinglish-adapted transformers | Current calibrated raw-normalized TF-IDF; historical markers superseded |
 | Explainability | Not the main contribution | Visible entities, risk signals, complaint draft |
-| Deployment artifact | Django REST/frontend tool | FastAPI, Streamlit, SQLite |
+| Deployment artifact | Django REST/frontend tool | FastAPI, Next.js, SQLite |
 | Best use in this project | Phase 2 benchmark target | Phase 1 baseline and workflow proof |
 
 ## Comparison With URL-Only Phishing Models
@@ -118,7 +118,7 @@ The historical marker-enhanced model outperformed the rule-only fallback on its 
 
 It is not yet better than mature transformer or graph systems on real-world external benchmarks.
 
-The strongest Phase 1 claim is workflow completeness: classification, evidence extraction, URL checks, risk scoring, API/dashboard, local storage, tests, and documentation in one prototype.
+The strongest Phase 1 claim is workflow completeness: classification, evidence extraction, URL checks, risk scoring, FastAPI, a website interface, local storage, tests, and documentation in one prototype.
 
 ## Phase 2 research benchmark
 

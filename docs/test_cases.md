@@ -13,23 +13,23 @@
 | TC-009 | Risk scoring low | Low confidence, no risky entities | Risk level `low` | Automated |
 | TC-010 | Risk scoring high | High confidence, risky URL, urgency, OTP | Risk level `high` | Automated |
 | TC-011 | Case storage | Analyze message via API | Case appears in `/cases` | Automated/manual |
-| TC-012 | Dashboard demo | Click fake job demo button | Dashboard shows prediction, entities, explanation | Manual |
+| TC-012 | Website demo | Click fake job demo button | Website shows prediction, entities, explanation | Manual |
 | TC-013 | Email/UPI separation | Text containing `hr@jobpay.example` | Email extracted, no partial `hr@jobpay` UPI false positive | Automated |
 | TC-014 | Contextual money extraction | Text containing `Invest 5000` and `2500 cashback` | Bare contextual amounts extracted as money | Automated |
 | TC-015 | Hinglish FIR ambiguity | Text containing `fir bhi` in a loan context | No digital-arrest marker is added | Automated |
 | TC-016 | Baseline training metrics | Run `python -m fraudlens.model_training` | Metrics JSON, report, and confusion matrix regenerated | Automated/manual |
 | TC-017 | Screenshot OCR analysis | Valid PNG containing English or Hindi scam text | OCR text is analyzed and image-source metadata is returned | Automated/manual |
 | TC-018 | Screenshot format rejection | WebP, GIF, mismatched media type, or multipart body | Input is rejected without starting OCR | Automated |
-| TC-019 | Screenshot size rejection | Encoded image larger than 5 MiB | API returns generic `413`; dashboard rejects before reading upload bytes | Automated |
+| TC-019 | Screenshot size rejection | Encoded image larger than 5 MiB | API returns generic `413`; website rejects before reading upload bytes | Automated |
 | TC-020 | Screenshot dimension and pixel rejection | Image over 4096 x 4096 or 16,000,000 pixels | Input is rejected by decompression and dimension guards | Automated |
 | TC-021 | Screenshot retention consent | Analyze with storage off, then with explicit storage on | Image bytes are never retained; OCR text appears only in the opted-in case | Automated |
-| TC-022 | OCR failure redaction | OCR unavailable, timeout, corrupt image, or internal OCR detail | API and dashboard return fixed safe messages without process details | Automated |
+| TC-022 | OCR failure redaction | OCR unavailable, timeout, corrupt image, or internal OCR detail | API and website return fixed safe messages without process details | Automated |
 | TC-023 | Screenshot metadata removal | PNG/JPEG containing EXIF, ICC, or text metadata | OCR receives a fresh metadata-free RGB PNG | Automated |
 | TC-024 | OCR command boundary | Valid screenshot | Tesseract runs through stdin/stdout with `eng+hin`, fixed page segmentation, timeout, and no shell | Automated |
-| TC-025 | Entity graph privacy contract | Repeated phone, UPI, email, and URL in explicitly stored cases | API exposes masked labels and HMAC-backed IDs only; dashboard shows masks but hides IDs; no raw text or raw entity values | Automated/manual |
+| TC-025 | Entity graph privacy contract | Repeated phone, UPI, email, and URL in explicitly stored cases | API exposes masked labels and HMAC-backed IDs only; website shows masks but hides IDs; no raw text or raw entity values | Automated/manual |
 | TC-026 | Entity graph retention and deletion | Delete one stored case, clear history, or expire retained cases | Removed cases no longer contribute graph links | Automated |
 | TC-027 | Entity graph API bounds and empty result | `GET /graph` defaults, out-of-range query values, and no qualifying cases | Safe defaults/bounds are enforced; empty graph is serialized without raw data | Automated |
-| TC-028 | Entity graph dashboard refresh and truncation | Change threshold, explicitly refresh, and exceed a display limit | No graph query before refresh; stale views are hidden and truncation is disclosed | Automated/manual |
+| TC-028 | Entity graph website refresh and truncation | Change threshold, explicitly refresh, and exceed a display limit | No graph query before refresh; stale views are hidden and truncation is disclosed | Automated/manual |
 | TC-029 | Release identity and readiness | Read OpenAPI, `GET /health`, and `GET /ready` | Package/API version is `1.0.0`; readiness checks storage and returns a generic `503` on failure | Automated |
 | TC-030 | Privacy-safe request observability | Analyze sensitive text and request a concrete case path | Logs contain generated request ID, method, route template, and status only; sensitive request data is absent | Automated |
 | TC-031 | Hardened container boundary | Build and inspect the production image | Pinned base and hashed runtime dependencies install; process is UID 10001; pip, setuptools, and pytest are absent; English/Hindi OCR is present | Automated |

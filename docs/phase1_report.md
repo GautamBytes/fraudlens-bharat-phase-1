@@ -6,6 +6,8 @@
 > now exist. Transformer fine-tuning and GNNs remain out of scope. `README.md`
 > is the current status source.
 
+> Current-scope note (2026-08-10): Phase 1 used a Streamlit demonstration interface. That interface is retired; the supported final product uses the Next.js website and FastAPI.
+
 **Project Title:** FraudLens Bharat: AI-Based Hinglish Cyber-Fraud Detection and Complaint Triage System  
 **Student Name:** Gautam Manchandani  
 **Student ID:** 2023EBCS209  
@@ -41,7 +43,7 @@ Appendix
 | Fig. 2 | Data Flow Diagram |
 | Fig. 3 | Module Interaction Diagram |
 | Fig. 4 | Confusion Matrix |
-| Fig. 5 | Dashboard Analysis Result |
+| Fig. 5 | Historical Analysis Result |
 
 # List of Tables
 
@@ -204,9 +206,6 @@ Input: suspicious message text
 
 The following Phase 1 screenshots are stored in `outputs/screenshots/`:
 
-- `dashboard_home.png`: dashboard home screen
-- `dashboard_analysis_result.png`: KYC scam analysis result with extracted evidence
-- `dashboard_otp_demo.png`: OTP phishing demo result
 - `api_docs.png`: FastAPI documentation page
 - `api_health.png`: API health endpoint response
 - `metrics_summary.png`: baseline model metrics summary
@@ -317,14 +316,15 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .
 python -m fraudlens.model_training
-uvicorn fraudlens.api:app --reload
-streamlit run src/fraudlens/dashboard.py
+uvicorn fraudlens.api:app --host 127.0.0.1 --port 8000
 pytest
 ```
 
 ## Demo Screenshots
 
-Demo screenshots are stored in `outputs/screenshots/`, especially `dashboard_home.png`, `dashboard_analysis_result.png`, `dashboard_otp_demo.png`, `api_docs.png`, and `api_health.png`.
+Historical Phase 1 screenshot references are retained only through the
+non-interface evidence such as `api_docs.png` and `api_health.png`; the retired
+interface captures are not part of the supported final evidence set.
 
 ## Demo Video Link
 

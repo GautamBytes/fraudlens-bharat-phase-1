@@ -93,7 +93,7 @@ This supports the Phase 1 choice: use a simple, reproducible baseline before mov
 
 Most published systems focus on a single technical task such as classification, URL detection, or graph fraud modeling.
 
-FraudLens Bharat combines a small classifier, entity extraction, URL checks, risk scoring, local storage, API access, and a dashboard into one reproducible student prototype.
+FraudLens Bharat combines a small classifier, entity extraction, URL checks, risk scoring, local storage, FastAPI access, and a Next.js website into one reproducible student prototype.
 
 The contribution is not state-of-the-art model performance. The contribution is an explainable end-to-end triage workflow for Indian Hinglish cyber-fraud messages.
 
