@@ -47,7 +47,6 @@ provided 10-slide college template:
 
 - `docs/final_capstone_report.md`: consolidated implementation and research report
 - `docs/presentation/fraudlens-bharat-final-capstone.pptx`: final 15-minute deck
-- `docs/presentation/final_presentation_script.md`: timed speaker script
 - `docs/presentation/demo_video_runbook.md`: live-demo and recording sequence
 - `outputs/presentation/`: current architecture and evaluation figures
 - `outputs/screenshots/final_*.png`: synthetic final application evidence
@@ -267,7 +266,6 @@ python -m fraudlens.generate_demo_cases
 - `docs/phase2_research_report.md`: detailed benchmark, literature comparison, and validity analysis
 - `docs/research_methodology.md`: frozen-split protocol and metric rationale
 - `docs/presentation/fraudlens-bharat-final-capstone.pptx`: final template-based presentation
-- `docs/presentation/final_presentation_script.md`: timed 15-minute narration
 - `docs/presentation/demo_video_runbook.md`: recording and failure-safe demo plan
 - `docs/phase1_report.md`: historical Phase 1 progress report
 - `docs/literature_review.md`: research context and source-backed literature review

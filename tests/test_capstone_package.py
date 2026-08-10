@@ -11,7 +11,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DECK = ROOT / "docs" / "presentation" / "fraudlens-bharat-final-capstone.pptx"
-SCRIPT = ROOT / "docs" / "presentation" / "final_presentation_script.md"
 RUNBOOK = ROOT / "docs" / "presentation" / "demo_video_runbook.md"
 FINAL_REPORT = ROOT / "docs" / "final_capstone_report.md"
 
@@ -98,11 +97,12 @@ def test_final_deck_fills_the_ten_slide_college_template():
     assert not (
         ROOT / "docs" / "presentation" / "fraudlens-bharat-phase-1-pitch.pptx"
     ).exists()
-    historical_script = (
+    assert not (
+        ROOT / "docs" / "presentation" / "final_presentation_script.md"
+    ).exists()
+    assert not (
         ROOT / "docs" / "presentation" / "presentation_script.md"
-    ).read_text(encoding="utf-8")
-    assert "Historical Phase 1 Presentation Script" in historical_script
-    assert "Use `final_presentation_script.md`" in historical_script
+    ).exists()
     for title in (
         "Problem Statement",
         "Objectives & Scope",
@@ -156,23 +156,14 @@ def test_final_deck_uses_current_source_backed_claims_and_boundaries():
         assert stale_claim not in text
 
 
-def test_final_script_and_video_runbook_cover_a_fifteen_minute_demo():
-    script = SCRIPT.read_text(encoding="utf-8")
+def test_video_runbook_covers_the_recorded_demo_without_a_script_file():
     runbook = RUNBOOK.read_text(encoding="utf-8")
 
-    assert "Target duration: 15 minutes" in script
-    assert "Speaking target: 14 minutes" in script
-    assert "60 seconds" in script
-    for slide_number in range(1, 11):
-        assert f"## Slide {slide_number}" in script
-    assert "## Timed rehearsal checklist" in script
-    assert "12:30-14:00" in script
     assert "## Recording sequence" in runbook
     assert "## Failure-safe fallback" in runbook
     assert "outputs/screenshots/final_ocr_analysis.png" in runbook
     assert "outputs/screenshots/final_entity_graph.png" in runbook
-    assert "Fake KYC SMS" in script and "Fake KYC SMS" in runbook
-    assert "OTP phishing demo" not in script
+    assert "Fake KYC SMS" in runbook
 
 
 def test_final_report_and_readme_point_to_the_defensible_evidence_package():
@@ -183,7 +174,6 @@ def test_final_report_and_readme_point_to_the_defensible_evidence_package():
         encoding="utf-8"
     )
     supervisor_normalized = " ".join(supervisor.split())
-    script = SCRIPT.read_text(encoding="utf-8")
     runbook = RUNBOOK.read_text(encoding="utf-8")
     claims = _machine_claims()
 
@@ -204,7 +194,7 @@ def test_final_report_and_readme_point_to_the_defensible_evidence_package():
     assert "not a shared leaderboard" in report
     assert "docs/presentation/fraudlens-bharat-final-capstone.pptx" in readme
     assert "docs/final_capstone_report.md" in readme
-    for document in (report, script, runbook, weekly):
+    for document in (report, runbook, weekly):
         assert claims["test_count"] in document
     assert "Phase 2" in weekly
     assert "does not represent supervisor feedback" in weekly

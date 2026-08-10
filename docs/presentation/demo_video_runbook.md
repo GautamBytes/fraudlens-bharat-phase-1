@@ -1,8 +1,7 @@
 # FraudLens Bharat Demo Video Runbook
 
-Use this runbook for the final 3 to 4 minute product recording. The 15-minute
-presentation script controls the meeting; this file controls the separate demo
-video and provides a fallback during the live meeting.
+Use this runbook for the final 3 to 4 minute product recording and as a fallback
+during the live meeting.
 
 ## Recording principles
 
@@ -101,7 +100,7 @@ If the dashboard, OCR executable, or graph state fails during the meeting:
    unavailable on this machine.”
 3. Switch to the corresponding committed screenshot.
 4. Show the API readiness screenshot and the relevant automated-test evidence.
-5. Continue the script without changing any result or metric.
+5. Continue the recording without changing any result or metric.
 
 The screenshot fallback is valid because PR 1 captured the final application
 with synthetic fixtures and checked the same paths in the full suite and

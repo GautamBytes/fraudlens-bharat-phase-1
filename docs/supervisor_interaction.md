@@ -19,4 +19,4 @@ supervisor feedback.
 | Phase 2 scope review | OCR, selective inference, privacy-safe graph, and release-hardening evidence | Not yet recorded |
 | Research review | Same-split lightweight benchmark with external results marked not directly comparable | Not yet recorded |
 | Evidence review | Current text, OCR, graph, API, architecture, and model-comparison evidence | Not yet recorded |
-| Final review | Final Phase 1 + Phase 2 deck, report, timed script, and demo runbook | Pending meeting; no supervisor feedback recorded |
+| Final review | Final Phase 1 + Phase 2 deck, report, and demo runbook | Pending meeting; no supervisor feedback recorded |
