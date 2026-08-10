@@ -23,7 +23,7 @@ Phase 1 established the text-analysis pipeline, FastAPI, a retired Phase 1
 demonstration interface, SQLite storage, tests, and documentation. Phase 2
 added calibrated inference with abstention, screenshot OCR, privacy-safe entity
 relationships, reproducible model research, release hardening, and final
-presentation evidence. The completed codebase has 355 automated tests and runs
+presentation evidence. The completed codebase has 358 automated tests and runs
 through the Next.js website and FastAPI, including a hardened local container
 path.
 
@@ -237,7 +237,7 @@ and one abstention. The deck and demo keep these models separate.
 
 ## Software Verification
 
-The final local suite contains 355 automated tests across preprocessing,
+The final local suite contains 358 automated tests across preprocessing,
 training, inference trust boundaries, evaluation, research reproducibility,
 entities, URL signals, risk, API, OCR, image policies, storage, retention,
 privacy, graph analysis, website integration, deployment, and presentation

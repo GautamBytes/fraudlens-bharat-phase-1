@@ -79,7 +79,7 @@ def _machine_claims() -> dict[str, str]:
     release_snapshot = json.loads(RELEASE_SNAPSHOT.read_text(encoding="utf-8"))
     release_test_count = int(release_snapshot["automated_tests"])
     assert release_snapshot["schema_version"] == 1
-    assert _collected_test_count() >= release_test_count
+    assert _collected_test_count() == release_test_count
     return {
         "test_count": f"{release_test_count} automated tests",
         "dataset": f"{evaluation['rows']} synthetic fraud-only messages",
@@ -266,6 +266,7 @@ def test_final_report_and_readme_point_to_the_defensible_evidence_package():
     assert "docs/final_capstone_report.md" in readme
     for document in (report, runbook, weekly):
         assert claims["test_count"] in document
+        assert "355 automated tests" not in document
     assert "Phase 2" in weekly
     assert "does not represent supervisor feedback" in weekly
     assert "Phase 2" in supervisor_normalized and "Final review" in supervisor_normalized
