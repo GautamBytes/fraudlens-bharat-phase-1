@@ -1,6 +1,6 @@
 import os
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import log2
 from pathlib import Path
 from typing import Mapping, Optional, Tuple
@@ -58,6 +58,7 @@ class Settings:
     store_cases_by_default: bool
     environment: str
     allowed_hosts: Tuple[str, ...]
+    demo_api_key: Optional[str] = field(default=None, repr=False)
 
     @classmethod
     def from_env(cls, environ: Optional[Mapping[str, str]] = None) -> "Settings":
@@ -77,6 +78,14 @@ class Settings:
         allowed_hosts = tuple(
             host for host in (item.strip() for item in values.get("FRAUDLENS_ALLOWED_HOSTS", "").split(",")) if host
         )
+        configured_demo_api_key = values.get("FRAUDLENS_DEMO_API_KEY")
+        demo_api_key = (
+            configured_demo_api_key.strip() if configured_demo_api_key else None
+        )
+        if demo_api_key is not None and not _is_strong_production_secret(demo_api_key):
+            raise ValueError(
+                "FRAUDLENS_DEMO_API_KEY must be a strong non-default secret when set"
+            )
 
         configured_secret = values.get("FRAUDLENS_HMAC_SECRET")
         if environment == "production":
@@ -100,6 +109,7 @@ class Settings:
             store_cases_by_default=store_cases_by_default,
             environment=environment,
             allowed_hosts=allowed_hosts,
+            demo_api_key=demo_api_key,
         )
 
 
