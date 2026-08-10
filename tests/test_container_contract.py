@@ -49,7 +49,8 @@ def test_web_container_is_non_root_and_uses_standalone_output():
     assert "USER 10001:10001" in dockerfile
     assert "HEALTHCHECK" in dockerfile
     assert 'CMD ["node", "server.js"]' in dockerfile
-    assert 'output: "standalone"' in next_config
+    assert 'const isVercel = process.env.VERCEL === "1";' in next_config
+    assert 'output: isVercel ? undefined : "standalone"' in next_config
     assert "FRAUDLENS_DEMO_API_KEY" not in dockerfile
 
 
