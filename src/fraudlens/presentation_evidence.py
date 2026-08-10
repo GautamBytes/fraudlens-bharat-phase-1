@@ -189,7 +189,7 @@ def _architecture_figure(output_path: Path) -> Path:
 
     axis.text(0.6, 8.5, "FraudLens Bharat - Final Phase 1 + Phase 2 Architecture", fontsize=21, fontweight="bold", color=_NAVY)
     axis.text(0.6, 8.12, "One shared analysis path; storage is optional and privacy-bounded", fontsize=11, color="#486581")
-    box(0.7, 6.6, 2.0, 1.0, "Text input", "FastAPI / Streamlit", _BLUE)
+    box(0.7, 6.6, 2.0, 1.0, "Text input", "FastAPI", _BLUE)
     box(0.7, 4.9, 2.0, 1.0, "Screenshot", "PNG/JPEG, bounded", _TEAL)
     box(3.35, 4.9, 2.15, 1.0, "Local OCR", "Tesseract eng+hin", _TEAL)
     box(3.35, 6.6, 2.15, 1.0, "Preprocess", "Normalize text", _BLUE)

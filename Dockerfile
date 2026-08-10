@@ -25,7 +25,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONPATH=/app/src \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false \
     FRAUDLENS_DB_PATH=/data/cases.sqlite3
 
 RUN apt-get update \

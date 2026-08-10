@@ -148,7 +148,6 @@ def test_dependency_and_ci_security_baseline():
 
     for dependency in (
         "fastapi==0.141.1",
-        "streamlit==1.54.0",
         "python-multipart==0.0.31",
         "Pillow==12.3.0",
     ):
