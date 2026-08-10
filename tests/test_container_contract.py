@@ -36,9 +36,21 @@ def test_compose_enforces_production_boundaries_for_both_services():
     assert compose.count("no-new-privileges:true") == 2
     assert compose.count("cap_drop:") == 2
     assert "127.0.0.1:8000:8000" in compose
-    assert "127.0.0.1:8501:8501" in compose
+    assert "127.0.0.1:3000:3000" in compose
     assert "fraudlens-data:/data" in compose
-    assert "_stcore/health" in compose
+    assert "FRAUDLENS_API_URL: http://api:8000" in compose
+
+
+def test_web_container_is_non_root_and_uses_standalone_output():
+    dockerfile = (ROOT / "web" / "Dockerfile").read_text(encoding="utf-8")
+    next_config = (ROOT / "web" / "next.config.ts").read_text(encoding="utf-8")
+
+    assert "npm ci --ignore-scripts" in dockerfile
+    assert "USER 10001:10001" in dockerfile
+    assert "HEALTHCHECK" in dockerfile
+    assert 'CMD ["node", "server.js"]' in dockerfile
+    assert 'output: "standalone"' in next_config
+    assert "FRAUDLENS_DEMO_API_KEY" not in dockerfile
 
 
 def test_build_context_excludes_local_and_sensitive_runtime_state():
@@ -65,7 +77,7 @@ def test_example_environment_contains_no_secret_value():
     )
 
     assert values["FRAUDLENS_HMAC_SECRET"] == ""
-    assert values["FRAUDLENS_ALLOWED_HOSTS"] == "localhost,127.0.0.1"
+    assert values["FRAUDLENS_ALLOWED_HOSTS"] == "localhost,127.0.0.1,api"
 
 
 def test_local_environment_files_are_git_ignored_but_the_blank_example_is_kept():
@@ -81,8 +93,10 @@ def test_ci_builds_and_smokes_the_hardened_container():
 
     assert "container-smoke:" in workflow
     assert "docker build --tag fraudlens-bharat:ci ." in workflow
+    assert "docker build --tag fraudlens-bharat-web:ci ./web" in workflow
     assert "--read-only" in workflow
     assert "--cap-drop ALL" in workflow
     assert "tesseract --list-langs" in workflow
     assert "CI-PRIVATE-MARKER" in workflow
     assert "docker logs fraudlens-ci" in workflow
+    assert "http://127.0.0.1:13000/api/analyze" in workflow

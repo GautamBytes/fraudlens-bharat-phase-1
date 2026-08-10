@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: fraudlens-bharat-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /ready
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: FRAUDLENS_ENVIRONMENT
+        value: production
+      - key: FRAUDLENS_ALLOWED_HOSTS
+        value: localhost,127.0.0.1,fraudlens-bharat-api.onrender.com
+      - key: FRAUDLENS_STORE_CASES
+        value: "false"
+      - key: FRAUDLENS_RETENTION_DAYS
+        value: "1"
+      - key: FRAUDLENS_HMAC_SECRET
+        generateValue: true
+      - key: FRAUDLENS_DEMO_API_KEY
+        generateValue: true

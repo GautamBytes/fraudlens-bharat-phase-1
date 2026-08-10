@@ -8,6 +8,34 @@ permissions:
   contents: read
 
 jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.18.0
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install locked web dependencies
+        run: npm ci
+      - name: Test, lint, typecheck, and build web
+        run: |
+          npm test -- --run
+          npm run lint
+          npm run typecheck
+          npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run professor flow
+        run: npm run test:e2e
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -128,7 +156,7 @@ jobs:
           done
 
   container-smoke:
-    needs: test
+    needs: [test, web]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -136,12 +164,16 @@ jobs:
         with:
           persist-credentials: false
       - name: Build pinned production image
-        run: docker build --tag fraudlens-bharat:ci .
+        run: |
+          docker build --tag fraudlens-bharat:ci .
+          docker build --tag fraudlens-bharat-web:ci ./web
       - name: Validate Compose and start restricted API
         run: |
           smoke_secret="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
           FRAUDLENS_HMAC_SECRET="$smoke_secret" docker compose config --quiet
+          docker network create fraudlens-ci-network
           docker run --detach --name fraudlens-ci \
+            --network fraudlens-ci-network \
             --publish 127.0.0.1:18000:8000 \
             --read-only \
             --tmpfs /tmp:rw,noexec,nosuid,nodev \
@@ -150,8 +182,17 @@ jobs:
             --security-opt no-new-privileges \
             --env FRAUDLENS_ENVIRONMENT=production \
             --env FRAUDLENS_HMAC_SECRET="$smoke_secret" \
-            --env FRAUDLENS_ALLOWED_HOSTS=localhost,127.0.0.1 \
+            --env FRAUDLENS_ALLOWED_HOSTS=localhost,127.0.0.1,fraudlens-ci \
             fraudlens-bharat:ci
+          docker run --detach --name fraudlens-web-ci \
+            --network fraudlens-ci-network \
+            --publish 127.0.0.1:13000:3000 \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,nodev \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --env FRAUDLENS_API_URL=http://fraudlens-ci:8000 \
+            fraudlens-bharat-web:ci
       - name: Verify runtime, readiness, model, OCR, and safe logs
         run: |
           ready=false
@@ -171,8 +212,17 @@ jobs:
             --data '{"text":"CI-PRIVATE-MARKER urgent KYC verification now","store_case":false}' \
             http://127.0.0.1:18000/analyze > /tmp/analyze.json
           python3 -c "import json; payload=json.load(open('/tmp/analyze.json')); assert payload['metadata']['stored'] is False; assert payload['predicted_label']"
+          curl --fail --silent http://127.0.0.1:13000 > /tmp/professor-web.html
+          grep --fixed-strings 'FraudLens Bharat' /tmp/professor-web.html
+          curl --fail --silent \
+            --header 'Content-Type: application/json' \
+            --data '{"text":"Synthetic courier hold release fee now","store_case":false}' \
+            http://127.0.0.1:13000/api/analyze > /tmp/web-analyze.json
+          python3 -c "import json; payload=json.load(open('/tmp/web-analyze.json')); assert payload['metadata']['stored'] is False; assert payload['predicted_label']"
           test "$(docker exec fraudlens-ci id -u)" = 10001
           test "$(docker inspect --format '{{.Config.User}}' fraudlens-ci)" = 10001:10001
+          test "$(docker exec fraudlens-web-ci id -u)" = 10001
+          test "$(docker inspect --format '{{.Config.User}}' fraudlens-web-ci)" = 10001:10001
           docker exec fraudlens-ci python -c "import importlib.util; assert all(importlib.util.find_spec(name) is None for name in ('pip', 'setuptools', 'pytest'))"
           docker exec fraudlens-ci tesseract --list-langs > /tmp/tesseract-languages.txt
           grep --fixed-strings --line-regexp eng /tmp/tesseract-languages.txt
@@ -188,4 +238,6 @@ jobs:
           cat /tmp/fraudlens-ci.log
       - name: Remove smoke container
         if: always()
-        run: docker rm --force fraudlens-ci || true
+        run: |
+          docker rm --force fraudlens-web-ci fraudlens-ci || true
+          docker network rm fraudlens-ci-network || true

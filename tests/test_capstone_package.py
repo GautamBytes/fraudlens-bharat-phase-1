@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DECK = ROOT / "docs" / "presentation" / "fraudlens-bharat-final-capstone.pptx"
 RUNBOOK = ROOT / "docs" / "presentation" / "demo_video_runbook.md"
 FINAL_REPORT = ROOT / "docs" / "final_capstone_report.md"
+RELEASE_SNAPSHOT = ROOT / "docs" / "presentation" / "release_snapshot.json"
 
 
 def _deck_slide_text() -> list[str]:
@@ -74,8 +75,12 @@ def _machine_claims() -> dict[str, str]:
     assert int(character["estimated_model_bytes"]) < int(
         hybrid["estimated_model_bytes"]
     )
+    release_snapshot = json.loads(RELEASE_SNAPSHOT.read_text(encoding="utf-8"))
+    release_test_count = int(release_snapshot["automated_tests"])
+    assert release_snapshot["schema_version"] == 1
+    assert _collected_test_count() >= release_test_count
     return {
-        "test_count": f"{_collected_test_count()} automated tests",
+        "test_count": f"{release_test_count} automated tests",
         "dataset": f"{evaluation['rows']} synthetic fraud-only messages",
         "research_accuracy": f"{float(character['accuracy']) * 100:.1f}% accuracy",
         "research_macro_f1": (

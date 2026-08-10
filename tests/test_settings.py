@@ -16,6 +16,7 @@ def test_from_env_uses_secure_development_defaults(monkeypatch):
         "FRAUDLENS_STORE_CASES",
         "FRAUDLENS_ENVIRONMENT",
         "FRAUDLENS_ALLOWED_HOSTS",
+        "FRAUDLENS_DEMO_API_KEY",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -28,6 +29,28 @@ def test_from_env_uses_secure_development_defaults(monkeypatch):
     assert settings.store_cases_by_default is False
     assert settings.environment == "development"
     assert settings.allowed_hosts == ()
+    assert settings.demo_api_key is None
+
+
+def test_from_env_accepts_strong_optional_demo_key_without_repr_exposure(monkeypatch):
+    demo_key = "d7Nw5vR2_yQ8mK4pL9sX1cF6hJ3uT0zB7eG5aI"
+    monkeypatch.setenv("FRAUDLENS_DEMO_API_KEY", demo_key)
+
+    settings = from_env()
+
+    assert settings.demo_api_key == demo_key
+    assert demo_key not in repr(settings)
+
+
+@pytest.mark.parametrize(
+    "demo_key",
+    ["too-short", "change-me-to-a-real-production-secret", "a" * 40],
+)
+def test_from_env_rejects_weak_demo_key_when_configured(monkeypatch, demo_key):
+    monkeypatch.setenv("FRAUDLENS_DEMO_API_KEY", demo_key)
+
+    with pytest.raises(ValueError, match="FRAUDLENS_DEMO_API_KEY"):
+        from_env()
 
 
 def test_from_env_parses_explicit_runtime_values(monkeypatch, tmp_path):

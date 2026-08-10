@@ -4,10 +4,11 @@
 
 The supplied Compose deployment is intended for a single trusted host, a
 capstone demonstration, or a private service behind an authenticated gateway.
-It uses SQLite and deliberately binds the API and dashboard to loopback. The
-application does not include user authentication, authorization, or distributed
-rate limiting. This deployment does not establish production accuracy. Do not
-expose either port directly to the public internet.
+It uses SQLite and deliberately binds the API and modern Next.js website to
+loopback. The hosted capstone demo uses a separate Vercel website and Render
+API protected by a private demo key. This is not multi-user authentication or
+distributed rate limiting, and this deployment does not establish production accuracy.
+Do not expose the local API port directly to the public internet.
 
 For remote access, place an authenticated gateway or reverse proxy in front,
 terminate TLS there, restrict network access, and set
@@ -22,8 +23,9 @@ evaluation remains a small synthetic bootstrap.
 2. Generate a unique secret with
    `python3 -c "import secrets; print(secrets.token_urlsafe(48))"` and set it as
    `FRAUDLENS_HMAC_SECRET`.
-3. Keep `FRAUDLENS_ALLOWED_HOSTS=localhost,127.0.0.1` for the default local
-   deployment. Use only explicit host names; wildcards are rejected.
+3. Keep `FRAUDLENS_ALLOWED_HOSTS=localhost,127.0.0.1,api` for the default local
+   deployment. `api` is the internal Compose service host. Use only explicit
+   host names; wildcards are rejected.
 4. Validate and launch:
 
 ```bash
@@ -33,11 +35,38 @@ curl --fail http://127.0.0.1:8000/health
 curl --fail http://127.0.0.1:8000/ready
 ```
 
-The image is based on a digest-pinned Python 3.11.15 image and a
-hash-validated production dependency lock. API and dashboard processes run as
-the non-root UID 10001. Compose uses a read-only root filesystem, drops all
-Linux capabilities, sets `no-new-privileges`, and gives only `/tmp` and the
-`/data` volume write access. English and Hindi Tesseract data are installed.
+The Python image is based on digest-pinned Python 3.11.15 and a hash-validated
+runtime lock. The web image uses Node 22 and a standalone Next.js production
+build. Both services run as non-root UID 10001. Compose uses read-only root
+filesystems, drops all Linux capabilities, sets `no-new-privileges`, and gives
+only `/tmp` and the API `/data` volume write access. English and Hindi
+Tesseract data are installed in the API image.
+
+## Hosted capstone deployment
+
+`render.yaml` provisions the hardened API container with `/ready` health
+checks and generated secrets. After Render creates the service, confirm its
+final hostname matches `FRAUDLENS_ALLOWED_HOSTS`; update that exact value if
+Render assigned a suffix, while retaining the loopback entries used by health
+checks. Copy the generated `FRAUDLENS_DEMO_API_KEY` securely.
+
+Create a Vercel project with **Root Directory** set to `web`, then set the
+server-only environment values `FRAUDLENS_API_URL` (the HTTPS Render origin)
+and `FRAUDLENS_DEMO_API_KEY` (the matching secret). Do not add `NEXT_PUBLIC_`
+to either name. The browser calls only same-origin `/api/*` handlers, so the
+backend address and key remain on the Vercel server boundary. The repository's
+`web/vercel.json` selects the Next.js framework using Vercel's current static
+configuration schema and gives the bounded proxy routes the Hobby tier's
+60-second maximum duration. The screenshot proxy aborts upstream work before
+that platform deadline.
+
+The free Render filesystem is ephemeral. This is acceptable for the controlled
+professor relationship demo, but it is not a durable evidence store. See
+`professor_testing_guide.md` for the expected evaluation and reset sequence.
+The public website is not an end-user authentication system: it intentionally
+offers analysis, a masked relationship graph, and synthetic-demo reset. It does
+not proxy the backend case-list or case-detail read endpoints. Use only
+synthetic inputs and do not adapt this shared demo for real records.
 
 Case storage remains off by default. Explicit user consent is still required
 to retain analysis text, and source screenshot bytes are never retained.
@@ -88,9 +117,9 @@ rotation/backup procedure before external deployment.
 ## Update and rollback
 
 Before an update, record the current image digest, take and verify a database
-backup, and confirm the new commit's CI `container-smoke` job is green. Deploy
-the new immutable tag, then check `/ready`, a non-sensitive analysis, dashboard
-load, and logs.
+backup, and confirm the new commit's CI web and `container-smoke` jobs are
+green. Deploy the new immutable tag, then check `/ready`, a non-sensitive
+analysis, website load, and logs.
 
 For an application rollback, restore the previous immutable image tag and run
 `docker compose up --detach --no-build`. Recheck `/health` and `/ready`. Database

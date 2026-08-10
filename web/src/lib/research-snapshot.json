@@ -1,0 +1,16 @@
+{
+  "source": "outputs/presentation/final_evidence.json",
+  "dataset": {
+    "rows": 64,
+    "test_rows": 8,
+    "synthetic_only": true,
+    "legitimate_label_present": false
+  },
+  "models": {
+    "rule_only": { "accuracy": 0.25, "macro_f1": 0.25, "coverage": 0.25, "estimated_model_bytes": 0 },
+    "word_tfidf_logistic_regression": { "accuracy": 0.375, "macro_f1": 0.33333333, "coverage": 1.0, "estimated_model_bytes": 85083 },
+    "character_tfidf_logistic_regression": { "accuracy": 0.75, "macro_f1": 0.66666667, "coverage": 1.0, "estimated_model_bytes": 331415 },
+    "word_character_tfidf_logistic_regression": { "accuracy": 0.75, "macro_f1": 0.66666667, "coverage": 1.0, "estimated_model_bytes": 415954 },
+    "deployed_runtime": { "accuracy": 0.5, "macro_f1": 0.5, "coverage": 0.875, "artifact_bytes": 215722 }
+  }
+}

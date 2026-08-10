@@ -1,11 +1,13 @@
 """HTTP application boundary for FraudLens Bharat."""
 
 from contextlib import asynccontextmanager
+from secrets import compare_digest
 from typing import AsyncIterable, Optional
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 from fraudlens.analysis_service import (
@@ -148,6 +150,22 @@ def create_app(
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["Cache-Control"] = "no-store"
         return response
+
+    @application.middleware("http")
+    async def authenticate_hosted_demo(request: Request, call_next):
+        expected_key = resolved_settings.demo_api_key
+        if expected_key and request.url.path not in {"/health", "/ready"}:
+            supplied_key = request.headers.get("X-FraudLens-Demo-Key", "")
+            if not compare_digest(supplied_key, expected_key):
+                return JSONResponse(
+                    status_code=401,
+                    content={"detail": "Unauthorized"},
+                    headers={
+                        "Cache-Control": "no-store",
+                        "X-Content-Type-Options": "nosniff",
+                    },
+                )
+        return await call_next(request)
 
     @application.get("/health")
     def health() -> dict:

@@ -99,7 +99,7 @@ class _OcrService:
         )
 
 
-def _settings(store_cases_by_default=False, allowed_hosts=()):
+def _settings(store_cases_by_default=False, allowed_hosts=(), demo_api_key=None):
     return Settings(
         model_backend="tfidf",
         database_path=None,
@@ -108,6 +108,7 @@ def _settings(store_cases_by_default=False, allowed_hosts=()):
         store_cases_by_default=store_cases_by_default,
         environment="test",
         allowed_hosts=allowed_hosts,
+        demo_api_key=demo_api_key,
     )
 
 
@@ -139,9 +140,15 @@ def _graph_result():
     )
 
 
-def _client(store_cases_by_default=False, store=None, allowed_hosts=(), ocr_service=None):
+def _client(
+    store_cases_by_default=False,
+    store=None,
+    allowed_hosts=(),
+    ocr_service=None,
+    demo_api_key=None,
+):
     app = api.create_app(
-        settings=_settings(store_cases_by_default, allowed_hosts),
+        settings=_settings(store_cases_by_default, allowed_hosts, demo_api_key),
         predictor=_StubPredictor(Prediction("kyc_scam", 0.91, "test", "test-v1", False)),
         store=store or _Store(),
         ocr_service=ocr_service,
@@ -156,6 +163,32 @@ def test_health_endpoint():
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
         assert app.state.analysis_service is not None
+
+
+def test_hosted_demo_key_protects_data_routes_but_not_health_or_readiness():
+    demo_key = "d7Nw5vR2_yQ8mK4pL9sX1cF6hJ3uT0zB7eG5aI"
+    _, test_client = _client(demo_api_key=demo_key)
+
+    with test_client:
+        assert test_client.get("/health").status_code == 200
+        assert test_client.get("/ready").status_code == 200
+        assert test_client.post(
+            "/analyze", json={"text": "Urgent fake KYC update"}
+        ).status_code == 401
+        assert test_client.post(
+            "/analyze",
+            headers={"X-FraudLens-Demo-Key": "wrong-key"},
+            json={"text": "Urgent fake KYC update"},
+        ).status_code == 401
+
+        response = test_client.post(
+            "/analyze",
+            headers={"X-FraudLens-Demo-Key": demo_key},
+            json={"text": "Urgent fake KYC update"},
+        )
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
 
 
 def test_analyze_endpoint_returns_complete_result():
