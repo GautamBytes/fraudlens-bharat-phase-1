@@ -1,0 +1,11 @@
+const Step = ({ number, title, children }: { number: string; title: string; children: React.ReactNode }) => <article className="guideStep"><span>{number}</span><div><h3>{title}</h3>{children}</div></article>;
+
+export function ProfessorGuide() {
+  return (
+    <div className="guideStack">
+      <section className="guidePath hostedPath"><p className="eyebrow">No installation</p><h2>Fastest: hosted evaluation</h2><p>Open the published Vercel URL in a current browser. The web app securely calls the containerized Python analysis engine; its private key never reaches the browser.</p><div className="guideSteps"><Step number="01" title="Check engine status"><p>Wait for “Engine ready.” A free backend can need about a minute after inactivity.</p></Step><Step number="02" title="Run prepared evidence"><p>Use synthetic examples on Analyze, then review category, confidence, signals and complaint draft.</p></Step><Step number="03" title="Inspect a campaign"><p>Build the synthetic link on Relationships and confirm the shared value is masked.</p></Step><Step number="04" title="Audit the claims"><p>Use Research to compare models and read the dataset limitation before interpreting scores.</p></Step></div></section>
+      <section className="guidePath dockerPath"><p className="eyebrow">Full reproducibility</p><h2>Complete: Docker evaluation</h2><p>This path includes the web UI, FastAPI, calibrated model, SQLite case store, and English/Hindi Tesseract OCR.</p><pre><code><span>cp .env.example .env</span>{"\n"}<span>docker compose up --build</span></code></pre><p>Then open <code>http://localhost:3000</code>. Stop with <code>docker compose down</code>; add <code>-v</code> only if you intentionally want to remove the demo volume.</p></section>
+      <section className="guideChecklist"><div className="sectionIntro"><p className="eyebrow">Assessment boundary</p><h2>Use safe evaluation data</h2></div><ul><li>Use synthetic examples only; never submit a real victim message or personal screenshot.</li><li>Storage is off by default and must be explicitly enabled for relationship analysis.</li><li>Uploaded image bytes are analyzed in memory and are not retained.</li><li>The tool supports triage and complaint preparation; it does not replace police, bank, or cybercrime reporting decisions.</li></ul></section>
+    </div>
+  );
+}
