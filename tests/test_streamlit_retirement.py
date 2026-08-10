@@ -57,10 +57,9 @@ def test_streamlit_is_absent_from_the_active_runtime():
 def test_active_documentation_supports_only_nextjs_and_fastapi():
     for relative_path in ACTIVE_DOCUMENTS:
         text = (ROOT / relative_path).read_text(encoding="utf-8").lower()
+        assert "streamlit" not in text, relative_path
         assert "streamlit run" not in text, relative_path
         assert "legacy streamlit dashboard retained" not in text, relative_path
-        if "streamlit" in text:
-            assert RETIREMENT_NOTE.lower() in text, relative_path
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "modern Next.js professor website" in readme
@@ -91,6 +90,7 @@ def test_active_documentation_supports_only_nextjs_and_fastapi():
         "Analyze message",
         "Analyze screenshot",
         "Build synthetic link",
+        "clears earlier synthetic cases and seeds the synthetic KYC and courier cases",
         "Refresh",
     ):
         assert expected in documentation

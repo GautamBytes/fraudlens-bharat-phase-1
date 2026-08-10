@@ -6,7 +6,8 @@ during the live meeting.
 ## Recording principles
 
 - Use only the committed synthetic demo messages and screenshot.
-- Keep storage off until the prepared graph sequence.
+- Keep storage off for normal analysis; the relationship step uses its own
+  controlled synthetic seed action.
 - Do not show terminals containing secrets, local paths, browser history, or
   notifications.
 - Do not claim that a prediction proves fraud or that the system files a case.
@@ -19,7 +20,8 @@ during the live meeting.
    environment.
 2. Install Tesseract English and Hindi language data for a direct local demo.
 3. Set a unique local `FRAUDLENS_HMAC_SECRET` without displaying it.
-4. Clear synthetic case history so the graph sequence starts empty.
+4. The graph action resets and seeds its own synthetic cases; no manual case
+   history preparation is required.
 5. Start the FastAPI service and Next.js website on loopback only.
 6. Verify `GET /ready`, the website home, and the OCR language list.
 7. Disable desktop notifications and close unrelated applications.
@@ -70,14 +72,10 @@ with a real victim screenshot.
 
 ### 2:00-3:05 - Consented repeated-entity graph
 
-1. Return to **Analyze** (`/analyze`) and select **Message text**.
-2. Select **Store this synthetic analysis** for the prepared synthetic graph
-   cases only.
-3. Analyze the KYC and courier fixtures that share
-   `fraud-demo.example`.
-4. Open **Relationships** (`/relationships`), keep the minimum case count at 2, click **Build
-   synthetic link**, then use **Refresh** only to rerun the graph read.
-5. Point to the two incidents and the masked shared host.
+1. Open **Relationships** (`/relationships`) and keep the minimum case count at 2.
+2. Click **Build synthetic link**. It clears earlier synthetic cases and seeds the synthetic KYC and courier cases that share `fraud-demo.example`, then loads the graph.
+3. Point to the two incidents and the masked shared host. Use **Refresh** only
+   when rerunning the graph read.
 
 Say: “The graph reads only unexpired cases that I chose to retain. It uses
 opaque HMAC identifiers and masked labels. It does not change a prediction and

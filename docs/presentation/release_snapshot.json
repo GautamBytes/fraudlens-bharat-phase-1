@@ -1,6 +1,7 @@
 {
   "automated_tests": 355,
-  "captured_at_commit": "4484a2272cefa6d660e0f1a1afedca61bec8d21c",
+  "captured_at_commit": "0527530a8670337a04a9c235ac312c6cdfd15679",
+  "capture_basis": "Task 1 retirement baseline; 355 collected tests reverified during Task 2 documentation review",
   "captured_on": "2026-08-10",
   "scope": "Final Phase 1 and Phase 2 capstone presentation package",
   "schema_version": 1

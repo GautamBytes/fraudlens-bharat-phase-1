@@ -19,15 +19,13 @@ identifiers, checks URLs, explains a risk score, and creates a complaint draft.
 It can read bounded PNG/JPEG screenshots through local Tesseract OCR and show
 repeated masked entities across cases that the user chose to retain.
 
-Phase 1 established the text-analysis pipeline, FastAPI, a Streamlit
+Phase 1 established the text-analysis pipeline, FastAPI, a retired Phase 1
 demonstration interface, SQLite storage, tests, and documentation. Phase 2
 added calibrated inference with abstention, screenshot OCR, privacy-safe entity
 relationships, reproducible model research, release hardening, and final
 presentation evidence. The completed codebase has 355 automated tests and runs
 through the Next.js website and FastAPI, including a hardened local container
 path.
-
-> Current-scope note (2026-08-10): Phase 1 used a Streamlit demonstration interface. That interface is retired; the supported final product uses the Next.js website and FastAPI.
 
 The research result remains limited. The frozen dataset contains 64 synthetic
 fraud-only messages, no legitimate class, and one test message per scam class.
@@ -78,7 +76,7 @@ Phase 1 produced the first complete vertical slice:
 - auditable URL and identifier rules;
 - explainable low, medium, or high risk scoring;
 - a complaint-draft template;
-- FastAPI endpoints, the now-retired Streamlit demonstration interface, SQLite
+- FastAPI endpoints, the now-retired Phase 1 demonstration interface, SQLite
   history, tests, and installation documentation.
 
 The Phase 1 API and demonstration interface used the same analysis service.
