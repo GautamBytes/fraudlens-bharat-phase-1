@@ -1,12 +1,12 @@
 {
-  "case_id": "12e652e0-2399-41dd-8c36-fd15e0304c4e",
-  "created_at": "2026-06-11T12:01:54.512061",
+  "case_id": "demo-fake_job_scam",
+  "created_at": "2026-08-10T12:00:00",
   "original_text": "Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.",
   "cleaned_text": "work from home job hai, salary 45000 monthly. joining kit fee rs 999 send karo to hr@jobpay.example.",
   "predicted_label": "fake_job",
-  "confidence": 0.9,
+  "confidence": 0.7573,
   "risk_level": "medium",
-  "risk_score": 41.5,
+  "risk_score": 36.51,
   "entities": [
     {
       "type": "email",
@@ -30,8 +30,8 @@
   "risk_signals": [
     {
       "name": "classifier_confidence",
-      "score": 31.5,
-      "reason": "Classifier predicts fake_job with confidence 0.90",
+      "score": 26.51,
+      "reason": "Classifier predicts fake_job with confidence 0.76",
       "evidence": null
     },
     {
@@ -42,12 +42,15 @@
     }
   ],
   "explanation": [
-    "Classifier predicts fake_job with confidence 0.90",
+    "Classifier predicts fake_job with confidence 0.76",
     "Message asks for or references money"
   ],
   "complaint_draft": "Suspected fraud type: fake_job\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected email: hr@jobpay.example\nDetected money: rs 999, 45000\nOriginal message: Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
-    "prediction_source": "baseline_model_with_rule_agreement",
-    "user_notes": null
+    "prediction_source": "tfidf_calibrated",
+    "prediction_model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
+    "prediction_abstained": false,
+    "user_notes": null,
+    "stored": false
   }
 }

@@ -262,6 +262,8 @@ def create_analysis_service(
     predictor: Optional[Predictor] = None,
     store: Optional[CaseStore] = None,
     predictor_registry: Optional[PredictorRegistry] = None,
+    clock: Callable[[], datetime] = datetime.utcnow,
+    id_generator: Callable[[], object] = uuid4,
 ) -> AnalysisService:
     resolved_settings = settings or Settings.from_env()
     return AnalysisService(
@@ -275,4 +277,6 @@ def create_analysis_service(
                 retention_days=resolved_settings.retention_days,
             )
         ),
+        clock=clock,
+        id_generator=id_generator,
     )

@@ -1,3 +1,5 @@
+import inspect
+
 import pytest
 
 from fraudlens.ocr import (
@@ -8,6 +10,40 @@ from fraudlens.ocr import (
     OcrTimeoutError,
     OcrUnavailableError,
 )
+
+
+def test_dashboard_uses_escaped_tables_without_pyarrow_dataframe_conversion():
+    from fraudlens import dashboard
+
+    render_table = getattr(dashboard, "_render_records_table", None)
+
+    assert render_table is not None
+    source = inspect.getsource(dashboard)
+    assert "st.dataframe" not in source
+    assert "import pandas" not in source
+
+
+def test_dashboard_table_escapes_untrusted_cell_syntax(monkeypatch):
+    from fraudlens import dashboard
+
+    rendered = []
+
+    class _Streamlit:
+        @staticmethod
+        def markdown(value, **kwargs):
+            rendered.append((value, kwargs))
+
+    monkeypatch.setattr(dashboard, "st", _Streamlit())
+    dashboard._render_records_table(
+        [{"Evidence": "x|y\n<script>alert(1)</script>", "Score": None}]
+    )
+
+    assert rendered == [(
+        "<table><thead><tr><th>Evidence</th><th>Score</th></tr></thead>"
+        "<tbody><tr><td>x|y / &lt;script&gt;alert(1)&lt;/script&gt;</td>"
+        "<td></td></tr></tbody></table>",
+        {"unsafe_allow_html": True},
+    )]
 
 
 class _ImageAnalysisService:
