@@ -1,5 +1,9 @@
 # FraudLens Bharat Modern Professor Web Design
 
+> Status note (2026-08-10): This document records the parity-migration design.
+> The legacy Streamlit interface described below was retired after parity was
+> verified; the supported final product uses the Next.js website and FastAPI.
+
 ## Objective
 
 Replace the Streamlit-first professor experience with a polished web application

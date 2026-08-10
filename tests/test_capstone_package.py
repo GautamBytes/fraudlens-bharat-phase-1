@@ -200,6 +200,32 @@ def test_final_deck_embeds_the_current_architecture_evidence():
         assert archive.read(media_name) == expected
 
 
+def test_final_deck_embeds_the_current_website_demo_evidence():
+    expected_paths = (
+        ROOT / "outputs" / "screenshots" / "final_text_analysis.png",
+        ROOT / "outputs" / "screenshots" / "final_ocr_analysis.png",
+        ROOT / "outputs" / "screenshots" / "final_entity_graph.png",
+    )
+
+    with zipfile.ZipFile(DECK) as archive:
+        slide = archive.read("ppt/slides/slide7.xml").decode("utf-8")
+        relationship_ids = re.findall(r'<a:blip r:embed="([^"]+)"', slide)
+        relationships = archive.read(
+            "ppt/slides/_rels/slide7.xml.rels"
+        ).decode("utf-8")
+
+        assert len(relationship_ids) == len(expected_paths)
+        for relationship_id, expected_path in zip(
+            relationship_ids, expected_paths, strict=True
+        ):
+            target = re.search(
+                rf'<Relationship Id="{relationship_id}"[^>]+Target="([^"]+)"',
+                relationships,
+            ).group(1)
+            media_name = posixpath.normpath(posixpath.join("ppt/slides", target))
+            assert archive.read(media_name) == expected_path.read_bytes()
+
+
 def test_video_runbook_covers_the_recorded_demo_without_a_script_file():
     runbook = RUNBOOK.read_text(encoding="utf-8")
 

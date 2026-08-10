@@ -53,6 +53,14 @@ def test_streamlit_is_absent_from_the_active_runtime():
     for source in (ROOT / "src" / "fraudlens").glob("*.py"):
         assert "streamlit" not in source.read_text(encoding="utf-8").lower(), source
 
+    for relative_path in (
+        "outputs/screenshots/dashboard_home.png",
+        "outputs/screenshots/dashboard_analysis_result.png",
+        "outputs/screenshots/dashboard_otp_demo.png",
+        "outputs/screenshots/final_dashboard_home.png",
+    ):
+        assert not (ROOT / relative_path).exists(), relative_path
+
 
 def test_active_documentation_supports_only_nextjs_and_fastapi():
     for relative_path in ACTIVE_DOCUMENTS:
