@@ -30,6 +30,9 @@ describe("RelationshipWorkbench", () => {
     render(<RelationshipWorkbench initialGraph={linkedGraph} />);
 
     expect(screen.getByText("2 linked cases")).toBeVisible();
+    const metrics = screen.getByRole("region", { name: "Bounded cluster metrics" });
+    const signalMap = screen.getByRole("region", { name: "Relationship signal map" });
+    expect(metrics.compareDocumentPosition(signalMap) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getAllByText("fraud-demo.example/•••")).toHaveLength(3);
     expect(screen.getByRole("table", { name: /relationship evidence/i })).toBeVisible();
     expect(screen.queryByText(/https:\/\//i)).not.toBeInTheDocument();

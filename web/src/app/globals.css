@@ -377,32 +377,34 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 }
 
 /* Relationship investigation */
+.relationshipPage { width: min(1180px, calc(100% - 64px)); }
 .relationshipStack, .researchStack, .guideStack { display: grid; gap: 28px; }
-.relationshipControls { display: flex; align-items: end; justify-content: space-between; gap: 32px; padding: 30px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+.relationshipControls { display: flex; align-items: end; justify-content: space-between; gap: 32px; padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .relationshipControls > div:first-child { max-width: 720px; }
 .relationshipControls h2 { margin: 4px 0 8px; font: 700 clamp(1.45rem, 2.5vw, 2.2rem)/1.1 var(--font-display); }
 .relationshipControls p:last-child { margin: 0; color: var(--slate); }
 .controlButtons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .relationshipActions { display: grid; gap: 12px; justify-items: end; }
 .relationshipActions label { display: flex; gap: 10px; align-items: center; color: var(--slate); font-size: .78rem; }
-.relationshipActions select { min-height: 38px; padding: 0 30px 0 10px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); }
-.secondaryButton, .textButton { padding: 11px 16px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); cursor: pointer; font: 650 .88rem var(--font-body); }
+.relationshipActions select { min-height: 38px; padding: 0 30px 0 10px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 9px; }
+.secondaryButton, .textButton { padding: 11px 16px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font: 650 .88rem var(--font-body); }
 .textButton { color: #b42331; border-color: transparent; }
 .primaryButton:disabled, .secondaryButton:disabled, .textButton:disabled { cursor: wait; opacity: .55; }
-.graphCanvas { overflow: hidden; min-height: 350px; padding: 28px; border: 1px solid var(--line); background: radial-gradient(circle at 75% 50%, rgba(8,127,120,.08), transparent 30%), linear-gradient(rgba(24,32,39,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(24,32,39,.035) 1px, transparent 1px), var(--surface); background-size: auto, 24px 24px, 24px 24px, auto; }
+.graphCanvas { overflow: hidden; min-height: 350px; padding: 24px 28px 28px; border: 1px solid var(--line); border-radius: 16px; background: radial-gradient(circle at 75% 50%, rgba(255,90,79,.08), transparent 30%), radial-gradient(circle, rgba(23,23,23,.08) 1px, transparent 1.2px), var(--surface); background-size: auto, 18px 18px, auto; }
+.graphCaption { display: flex; justify-content: space-between; padding-bottom: 16px; color: var(--slate); font: 560 9px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
 .relationshipGraph { display: block; width: 100%; min-width: 650px; height: 290px; }
-.graphEdge { stroke: #9ab3b0; stroke-width: 2; stroke-dasharray: 5 7; }
-.caseNode { fill: #fffdf7; stroke: #d8d4c7; stroke-width: 1.5; }
+.graphEdge { stroke: #e4a19c; stroke-width: 2; stroke-dasharray: 5 7; }
+.caseNode { fill: #fff; stroke: #d8d4d0; stroke-width: 1.5; }
 .nodeTitle, .entityValue { fill: var(--ink); font: 650 14px var(--font-body); text-transform: capitalize; }
 .nodeMeta, .entityMeta { fill: #68746f; font: 11px var(--font-mono); }
-.entityType { fill: #d7fffa; font: 600 10px var(--font-mono); letter-spacing: .11em; }
+.entityType { fill: #fff2f0; font: 600 10px var(--font-mono); letter-spacing: .11em; }
 .entityValue { fill: white; font-size: 13px; }
-.entityMeta { fill: #c3ebe6; }
+.entityMeta { fill: #ffe0dd; }
 .emptyGraph { min-height: 290px; display: grid; place-items: center; color: var(--slate); font-weight: 600; text-align: center; }
-.relationshipTableSection { padding-top: 8px; }
+.relationshipTableSection { padding: 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
 .clusterMetrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-.clusterMetrics article { display: grid; gap: 5px; padding: 16px 18px; background: var(--teal-soft); border-left: 3px solid var(--teal); }
-.clusterMetrics span { color: var(--teal); font: 600 .7rem var(--font-mono); text-transform: uppercase; }
+.clusterMetrics article { display: grid; gap: 5px; padding: 18px; background: var(--coral-soft); border: 1px solid #ffd1cd; border-radius: 13px; }
+.clusterMetrics span { color: #9a3b34; font: 600 .7rem var(--font-mono); text-transform: uppercase; }
 .clusterMetrics strong { font-size: .9rem; }
 .clusterMetrics small { color: var(--slate); }
 
@@ -470,6 +472,7 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
   .guideSteps { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 760px) {
+  .relationshipPage { width: min(100% - 32px,680px); }
   .relationshipControls { align-items: stretch; flex-direction: column; }
   .relationshipActions { justify-items: stretch; }
   .controlButtons { justify-content: stretch; }
