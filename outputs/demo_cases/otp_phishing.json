@@ -1,28 +1,22 @@
 {
-  "case_id": "45357841-fda4-47cd-b392-9adafd148870",
-  "created_at": "2026-06-11T12:01:54.510699",
-  "original_text": "Login attempt detected. Send OTP code 482913 to verify ur identity or account delete ho jayega.",
-  "cleaned_text": "login attempt detected. send otp code 482913 to verify ur identity or account delete ho jayega.",
+  "case_id": "demo-otp_phishing",
+  "created_at": "2026-08-10T12:00:00",
+  "original_text": "Security alert: email login blocked. Reply with OTP and password to prove ownership.",
+  "cleaned_text": "security alert: email login blocked. reply with otp and password to prove ownership.",
   "predicted_label": "otp_phishing",
-  "confidence": 0.69,
+  "confidence": 0.718,
   "risk_level": "medium",
-  "risk_score": 58.15,
+  "risk_score": 37.13,
   "entities": [
     {
-      "type": "money",
-      "value": "482913",
-      "confidence": 1.0,
-      "source": "regex"
-    },
-    {
-      "type": "otp_like_code",
-      "value": "482913",
-      "confidence": 0.85,
-      "source": "regex"
+      "type": "threat_phrase",
+      "value": "block",
+      "confidence": 0.8,
+      "source": "keyword"
     },
     {
       "type": "threat_phrase",
-      "value": "delete",
+      "value": "blocked",
       "confidence": 0.8,
       "source": "keyword"
     }
@@ -30,38 +24,27 @@
   "risk_signals": [
     {
       "name": "classifier_confidence",
-      "score": 24.15,
-      "reason": "Classifier predicts otp_phishing with confidence 0.69",
-      "evidence": null
-    },
-    {
-      "name": "money_present",
-      "score": 10.0,
-      "reason": "Message asks for or references money",
-      "evidence": null
-    },
-    {
-      "name": "otp_signal",
-      "score": 18.0,
-      "reason": "Message references OTP/PIN/code details",
+      "score": 25.13,
+      "reason": "Classifier predicts otp_phishing with confidence 0.72",
       "evidence": null
     },
     {
       "name": "threat_language",
-      "score": 6.0,
+      "score": 12.0,
       "reason": "Threat or coercion language detected",
       "evidence": null
     }
   ],
   "explanation": [
-    "Classifier predicts otp_phishing with confidence 0.69",
-    "Message references OTP/PIN/code details",
-    "Message asks for or references money",
+    "Classifier predicts otp_phishing with confidence 0.72",
     "Threat or coercion language detected"
   ],
-  "complaint_draft": "Suspected fraud type: otp_phishing\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected money: 482913\nDetected otp_like_code: 482913\nDetected threat_phrase: delete\nOriginal message: Login attempt detected. Send OTP code 482913 to verify ur identity or account delete ho jayega.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
+  "complaint_draft": "Suspected fraud type: otp_phishing\nRisk level: medium\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected threat_phrase: block, blocked\nOriginal message: Security alert: email login blocked. Reply with OTP and password to prove ownership.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
-    "prediction_source": "baseline_model_with_rule_agreement",
-    "user_notes": null
+    "prediction_source": "tfidf_calibrated",
+    "prediction_model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
+    "prediction_abstained": false,
+    "user_notes": null,
+    "stored": false
   }
 }

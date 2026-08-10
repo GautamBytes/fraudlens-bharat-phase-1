@@ -3,18 +3,14 @@ import streamlit as st
 
 from fraudlens.analysis_service import AnalysisInput, DatabaseCaseStore, create_analysis_service
 from fraudlens.dashboard_workflow import analyze_uploaded_file
+from fraudlens.demo_cases import DEMO_CASES
 from fraudlens.graph_dashboard import build_graph_view
 from fraudlens.image_analysis import ImageAnalysisService
 from fraudlens.ocr import OcrService
 from fraudlens.settings import Settings
 
 
-DEMO_MESSAGES = {
-    "Fake KYC SMS": "Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.",
-    "OTP Phishing": "Login attempt detected. Send OTP code 482913 to verify ur identity or account delete ho jayega.",
-    "Fake Job Scam": "Work from home job hai, salary 45000 monthly. Joining kit fee Rs 999 send karo to hr@jobpay.example.",
-    "Investment Scam": "Join crypto VIP group. Guaranteed 15 percent profit daily. Invest 5000 now and double in 7 days.",
-}
+DEMO_MESSAGES = {case.button_label: case.text for case in DEMO_CASES}
 
 
 def _result_to_dict(result):
@@ -150,7 +146,7 @@ def _render_entity_graph_tab(case_store):
 def main():
     st.set_page_config(page_title="FraudLens Bharat", page_icon="FL", layout="wide")
     st.title("FraudLens Bharat")
-    st.caption("Phase 1 baseline prototype for Hinglish cyber-fraud triage")
+    st.caption("Final Phase 1 + Phase 2 Hinglish cyber-fraud triage prototype")
 
     if "message_text" not in st.session_state:
         st.session_state.message_text = DEMO_MESSAGES["Fake KYC SMS"]

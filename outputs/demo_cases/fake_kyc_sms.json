@@ -1,10 +1,10 @@
 {
-  "case_id": "defa6cf9-d0a2-4f90-9b6d-6812a40f11f4",
-  "created_at": "2026-06-11T12:01:54.508784",
+  "case_id": "demo-fake_kyc_sms",
+  "created_at": "2026-08-10T12:00:00",
   "original_text": "Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.",
   "cleaned_text": "dear customer your bank kyc is expired. update pan at http://bank-kyc-verify.example/login or account will block today.",
   "predicted_label": "kyc_scam",
-  "confidence": 0.69,
+  "confidence": 0.76,
   "risk_level": "high",
   "risk_score": 100.0,
   "entities": [
@@ -66,8 +66,8 @@
     },
     {
       "name": "classifier_confidence",
-      "score": 24.15,
-      "reason": "Classifier predicts kyc_scam with confidence 0.69",
+      "score": 26.6,
+      "reason": "Classifier predicts kyc_scam with confidence 0.76",
       "evidence": null
     },
     {
@@ -90,7 +90,7 @@
     }
   ],
   "explanation": [
-    "Classifier predicts kyc_scam with confidence 0.69",
+    "Classifier predicts kyc_scam with confidence 0.76",
     "URL does not use HTTPS",
     "URL contains suspicious keyword 'kyc'",
     "URL contains suspicious keyword 'login'",
@@ -99,7 +99,10 @@
   ],
   "complaint_draft": "Suspected fraud type: kyc_scam\nRisk level: high\nIncident summary: The user received a suspicious message that appears to request sensitive action, payment, verification, or credentials.\nDetected threat_phrase: block\nDetected urgency_phrase: expire, today\nDetected url: http://bank-kyc-verify.example/login\nOriginal message: Dear customer your bank KYC is expired. Update PAN at http://bank-kyc-verify.example/login or account will block today.\nRecommended manual action: preserve screenshots, do not share OTP/PIN/password, contact 1930 if money was lost, and file a report on NCRP if applicable.",
   "metadata": {
-    "prediction_source": "baseline_model_with_rule_agreement",
-    "user_notes": null
+    "prediction_source": "tfidf_calibrated",
+    "prediction_model_version": "tfidf-calibrated-d761cc086d6d-be839d256e7f-cb78757b5ccd",
+    "prediction_abstained": false,
+    "user_notes": null,
+    "stored": false
   }
 }

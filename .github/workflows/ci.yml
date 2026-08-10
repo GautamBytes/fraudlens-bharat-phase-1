@@ -46,6 +46,19 @@ jobs:
           done
       - name: Run tests
         run: python -m pytest
+      - name: Verify deterministic demo evidence
+        if: matrix.python-version == '3.11.15'
+        run: |
+          demo_tmp=$(mktemp -d)
+          python -m fraudlens.generate_demo_cases --output "$demo_tmp"
+          for artifact in \
+            fake_kyc_sms.json \
+            otp_phishing.json \
+            fake_job_scam.json \
+            investment_scam.json
+          do
+            cmp "$demo_tmp/$artifact" "outputs/demo_cases/$artifact"
+          done
       - name: Validate dataset and provenance contract
         run: >-
           python -c "from fraudlens.data_contract import load_phase2_dataset;
