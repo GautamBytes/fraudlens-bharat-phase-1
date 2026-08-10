@@ -8,10 +8,11 @@ services:
     environment: &fraudlens-environment
       FRAUDLENS_ENVIRONMENT: production
       FRAUDLENS_HMAC_SECRET: ${FRAUDLENS_HMAC_SECRET:?Set FRAUDLENS_HMAC_SECRET to a strong random value}
-      FRAUDLENS_ALLOWED_HOSTS: ${FRAUDLENS_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      FRAUDLENS_ALLOWED_HOSTS: ${FRAUDLENS_ALLOWED_HOSTS:-localhost,127.0.0.1,api}
       FRAUDLENS_DB_PATH: /data/cases.sqlite3
       FRAUDLENS_RETENTION_DAYS: ${FRAUDLENS_RETENTION_DAYS:-30}
       FRAUDLENS_STORE_CASES: "false"
+      FRAUDLENS_DEMO_API_KEY: ${FRAUDLENS_DEMO_API_KEY:-}
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -24,26 +25,20 @@ services:
     cap_drop:
       - ALL
 
-  dashboard:
-    image: fraudlens-bharat:1.0.0
+  web:
+    build:
+      context: ./web
+    image: fraudlens-bharat-web:1.0.0
     init: true
     restart: unless-stopped
     depends_on:
       api:
         condition: service_healthy
-    command:
-      - streamlit
-      - run
-      - src/fraudlens/dashboard.py
-      - --server.address=0.0.0.0
-      - --server.port=8501
-      - --server.headless=true
-      - --server.maxUploadSize=5
-    environment: *fraudlens-environment
+    environment:
+      FRAUDLENS_API_URL: http://api:8000
+      FRAUDLENS_DEMO_API_KEY: ${FRAUDLENS_DEMO_API_KEY:-}
     ports:
-      - "127.0.0.1:8501:8501"
-    volumes:
-      - fraudlens-data:/data
+      - "127.0.0.1:3000:3000"
     read_only: true
     tmpfs:
       - /tmp:size=64m,noexec,nosuid,nodev
@@ -51,12 +46,6 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3).read()"]
-      interval: 30s
-      timeout: 5s
-      start_period: 20s
-      retries: 3
 
 volumes:
   fraudlens-data:

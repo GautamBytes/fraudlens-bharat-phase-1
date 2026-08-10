@@ -11,7 +11,8 @@ describe("ResearchEvidence", () => {
     expect(screen.getByText("75.0%", { selector: "strong" })).toBeVisible();
     expect(screen.getByRole("heading", { name: /deployed calibrated model/i })).toBeVisible();
     expect(screen.getByText("50.0%", { selector: "strong" })).toBeVisible();
-    expect(screen.getByText(/8 synthetic test rows/i)).toBeVisible();
+    expect(screen.getByText(/64-row synthetic fraud-only bootstrap; 8 test rows/i)).toBeVisible();
+    expect(screen.getByText(/committed artifact bundle · 211 KB/i)).toBeVisible();
     expect(screen.getByText(/not a production accuracy claim/i)).toBeVisible();
   });
 

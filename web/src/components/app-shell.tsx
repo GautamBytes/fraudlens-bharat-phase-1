@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="railVersion">Release 1.0.0 · Phase 1 + 2</div>
       </aside>
       <div className="pageSurface">
-        <div className="safetyBanner">
+        <div className="safetyBanner" role="region" aria-label="Safety notice">
           <strong>Synthetic evaluation environment</strong>
           <span>Do not enter real personal, banking or victim information.</span>
         </div>

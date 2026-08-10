@@ -13,7 +13,7 @@ for the API and dashboard. This release designation means the planned software
 scope is integrated and release-tested; it does not turn the synthetic
 evaluation into a production accuracy claim.
 
-For a local production-style launch:
+For a local production-style launch of the modern professor web experience:
 
 ```bash
 cp .env.example .env
@@ -21,10 +21,11 @@ cp .env.example .env
 docker compose up --build --detach
 ```
 
-The API is available at `http://127.0.0.1:8000` and the dashboard at
-`http://127.0.0.1:8501`. `GET /health` is process liveness; `GET /ready` also
+The API is available at `http://127.0.0.1:8000` and the website at
+`http://127.0.0.1:3000`. `GET /health` is process liveness; `GET /ready` also
 checks the initialized case store. Both report version `1.0.0`. See
-`docs/deployment_guide.md` before changing the loopback-only exposure and use
+`docs/professor_testing_guide.md` for the recommended hosted and local test
+sequence, see `docs/deployment_guide.md` before changing exposure, and use
 `docs/release_checklist.md` for the release gate.
 
 ## Current Phase 2 Evaluation Evidence
@@ -35,7 +36,7 @@ checks the initialized case store. Both report version `1.0.0`. See
 - Rule-only evidence calls the canonical runtime fallback for every frozen row. Its runtime acceptance is `label != unknown`; it does not receive an evaluator-tuned threshold or calibration score.
 - The Phase 2 target is not met: the bootstrap is below 200 examples per label and lacks the `legitimate` label
 - Rule fallback: used only if calibrated artifacts are unavailable or corrupt, and abstains on weak generic keyword matches
-- Interfaces: FastAPI backend and Streamlit dashboard
+- Interfaces: modern Next.js professor website, FastAPI backend, and retained legacy Streamlit dashboard
 - Evidence outputs: calibrated artifact metadata, metrics JSON, demo cases, screenshots, and pitch deck
 
 These synthetic bootstrap results are not a production accuracy claim.
@@ -84,7 +85,8 @@ concise.
 - Entity extraction for phone numbers, UPI IDs, URLs, emails, money amounts, OTP-like codes, urgency phrases, and threat phrases
 - URL and identifier risk scoring
 - FastAPI backend
-- Streamlit dashboard with text and screenshot input
+- Modern responsive professor website with text and screenshot analysis, relationship evidence, research comparison, and an in-app run guide
+- Legacy Streamlit dashboard retained as a compatibility interface, not the primary experience
 - Local Tesseract OCR for English and Hindi screenshot text
 - Optional SQLite case history. API and compatibility callers default to off unless `FRAUDLENS_STORE_CASES=true` is configured; the dashboard always requires explicit consent.
 - Privacy-safe, observational entity relationship graph for repeated evidence in stored cases

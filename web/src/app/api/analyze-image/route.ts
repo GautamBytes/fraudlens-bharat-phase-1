@@ -23,6 +23,6 @@ export async function POST(request: Request): Promise<Response> {
   return fraudlensRequest(
     `/analyze-image?store_case=${storeCase}`,
     { method: "POST", headers: { "content-type": mediaType }, body },
-    65_000,
+    55_000,
   );
 }

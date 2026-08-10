@@ -1,9 +1,13 @@
+import snapshot from "./research-snapshot.json";
+
+export const RESEARCH_SNAPSHOT = snapshot;
+
 export const RESEARCH_MODELS = [
-  { name: "Rule baseline", role: "Reference", accuracy: 0.25, macroF1: 0.25, coverage: 0.25, weakness: "High precision on explicit patterns, but misses paraphrases and unseen wording." },
-  { name: "Word TF–IDF + logistic regression", role: "Baseline", accuracy: 0.375, macroF1: 0.3333, coverage: 1, weakness: "Readable word features, but brittle to spelling and transliterated variants." },
-  { name: "Character TF–IDF + logistic regression", role: "Experimental candidate", accuracy: 0.75, macroF1: 0.6667, coverage: 1, weakness: "Best internal score, but not selected for runtime calibration and abstention behavior." },
-  { name: "Word + character TF–IDF", role: "Experimental candidate", accuracy: 0.75, macroF1: 0.6667, coverage: 1, weakness: "Matches the character candidate on this very small split; more evidence is needed to distinguish them." },
-  { name: "Calibrated word + character runtime", role: "Deployed", accuracy: 0.5, macroF1: 0.5, coverage: 0.875, weakness: "Lower headline score, but exposes uncertainty and abstains instead of forcing every decision." },
+  { name: "Rule baseline", role: "Reference", ...snapshot.models.rule_only, weakness: "High precision on explicit patterns, but misses paraphrases and unseen wording." },
+  { name: "Word TF–IDF + logistic regression", role: "Baseline", ...snapshot.models.word_tfidf_logistic_regression, weakness: "Readable word features, but brittle to spelling and transliterated variants." },
+  { name: "Character TF–IDF + logistic regression", role: "Experimental candidate", ...snapshot.models.character_tfidf_logistic_regression, weakness: "Best internal score, but not selected for runtime calibration and abstention behavior." },
+  { name: "Word + character TF–IDF", role: "Experimental candidate", ...snapshot.models.word_character_tfidf_logistic_regression, weakness: "Matches the character candidate on this very small split; more evidence is needed to distinguish them." },
+  { name: "Calibrated TF–IDF runtime", role: "Deployed", ...snapshot.models.deployed_runtime, weakness: "Lower headline score, but exposes uncertainty and abstains instead of forcing every decision." },
 ] as const;
 
 export const RESEARCH_PARAMETERS = [

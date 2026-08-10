@@ -17,6 +17,7 @@ async function readServiceState(): Promise<State> {
 
 export function ServiceStatus() {
   const [state, setState] = useState<State>("checking");
+  const [retryCycle, setRetryCycle] = useState(0);
 
   const retry = () => {
     setState("checking");
@@ -33,10 +34,21 @@ export function ServiceStatus() {
     };
   }, []);
 
+  useEffect(() => {
+    if (state !== "waking") return;
+    const timer = window.setTimeout(() => {
+      void readServiceState().then((nextState) => {
+        setState(nextState);
+        if (nextState === "waking") setRetryCycle((cycle) => cycle + 1);
+      });
+    }, 10_000);
+    return () => window.clearTimeout(timer);
+  }, [state, retryCycle]);
+
   const copy = {
     checking: ["Checking engine", "Connecting to the analysis service"],
     ready: ["Engine ready", "Model, storage and OCR boundary available"],
-    waking: ["Engine waking", "Free hosting can take about a minute to start"],
+    waking: ["Engine waking", "Free hosting can take about a minute · retrying automatically in 10 seconds"],
     offline: ["Engine unavailable", "Use the retry or Docker fallback in Run guide"],
   }[state];
 

@@ -8,7 +8,11 @@ describe("ProfessorGuide", () => {
     render(<ProfessorGuide />);
     expect(screen.getByRole("heading", { name: /fastest: hosted evaluation/i })).toBeVisible();
     expect(screen.getByRole("heading", { name: /complete: docker evaluation/i })).toBeVisible();
-    expect(screen.getByText("docker compose up --build")).toBeVisible();
+    expect(screen.getByText(/docker compose up --build/)).toBeVisible();
+    expect(screen.getByText("FRAUDLENS_API_URL")).toBeVisible();
+    expect(screen.getByText(/curl --fail http:\/\/127\.0\.0\.1:8000\/ready/i)).toBeVisible();
+    expect(screen.getByText(/npm test -- --run/)).toBeVisible();
+    expect(screen.getByText(/reset demo data/i)).toBeVisible();
     expect(screen.getByText(/synthetic examples only/i)).toBeVisible();
   });
 });

@@ -58,7 +58,7 @@ describe("screenshot proxy", () => {
         headers: { "content-type": "image/png" },
         body: expect.any(ArrayBuffer),
       }),
-      65_000,
+      55_000,
     );
   });
 });

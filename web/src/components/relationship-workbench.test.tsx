@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -47,5 +47,21 @@ describe("RelationshipWorkbench", () => {
       expect(JSON.parse(String(call[1]?.body))).toMatchObject({ store_case: true });
     }
     expect(fetch).toHaveBeenLastCalledWith("/api/graph?minimum_case_count=2", expect.objectContaining({ cache: "no-store" }));
+  });
+
+  it("maps each case to entities through graph edges rather than array position", () => {
+    const graph: EntityGraph = {
+      ...linkedGraph,
+      case_nodes: [...linkedGraph.case_nodes, { id: "case:c", case_id: "c", created_at: "2026-08-10T10:02:00Z", predicted_label: "fake_job", risk_level: "medium", risk_score: 52 }],
+      entity_nodes: [...linkedGraph.entity_nodes, { id: "entity:phone:other", entity_type: "phone", entity_id: "other", masked_value: "+91••••2211" }],
+      edges: [...linkedGraph.edges, { source: "case:b", target: "entity:phone:other" }, { source: "case:c", target: "entity:phone:other" }],
+    };
+    render(<RelationshipWorkbench initialGraph={graph} />);
+
+    const rows = within(screen.getByRole("table", { name: /relationship evidence/i })).getAllByRole("row").slice(1);
+    expect(rows[0]).toHaveTextContent("fraud-demo.example/•••");
+    expect(rows[0]).not.toHaveTextContent("+91••••2211");
+    expect(rows[1]).toHaveTextContent("fraud-demo.example/•••, +91••••2211");
+    expect(rows[2]).toHaveTextContent("+91••••2211");
   });
 });

@@ -1,8 +1,13 @@
 import type { EntityGraph } from "@/lib/contracts";
 
 export function RelationshipGraph({ graph }: { graph: EntityGraph }) {
-  const cases = graph.case_nodes.slice(0, 6);
   const entity = graph.entity_nodes[0];
+  const linkedCaseIds = new Set(
+    graph.edges
+      .filter((edge) => edge.source === entity?.id || edge.target === entity?.id)
+      .map((edge) => edge.source === entity?.id ? edge.target : edge.source),
+  );
+  const cases = graph.case_nodes.filter((item) => linkedCaseIds.has(item.id)).slice(0, 6);
   if (!entity || cases.length === 0) return <div className="emptyGraph">No repeated masked entity is present yet.</div>;
 
   const centerY = 145;

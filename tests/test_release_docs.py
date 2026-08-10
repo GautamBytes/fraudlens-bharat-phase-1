@@ -16,7 +16,8 @@ def test_readme_exposes_the_1_0_release_path_and_health_contract():
         "docker compose up --build --detach",
         "GET /health",
         "GET /ready",
-        "http://127.0.0.1:8501",
+        "http://127.0.0.1:3000",
+        "docs/professor_testing_guide.md",
         "docs/deployment_guide.md",
         "docs/release_checklist.md",
     ):

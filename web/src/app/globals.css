@@ -22,6 +22,7 @@ button, input, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; }
 :focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 .appFrame { min-height: 100vh; }
 .sideRail { position: fixed; inset: 0 auto 0 0; z-index: 20; display: flex; width: 260px; flex-direction: column; padding: 32px 24px 24px; color: #fff; background: var(--ink); border-right: 1px solid var(--line-dark); }
@@ -41,7 +42,7 @@ a { color: inherit; }
 .railBoundary strong, .railBoundary span { display: block; }
 .railBoundary strong { margin-bottom: 7px; font-size: 12px; }
 .railBoundary span { color: #aeb9c8; font-size: 11px; line-height: 1.5; }
-.railVersion { margin-top: 18px; color: #718096; font: 500 10px var(--font-mono); }
+.railVersion { margin-top: 18px; color: #8290a3; font: 500 10px var(--font-mono); }
 .mobileHeader { display: none; }
 
 .pageSurface { min-height: 100vh; margin-left: 260px; }
@@ -91,7 +92,7 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .sectionHeading h2 { margin: 7px 0 0; font-size: 34px; }
 .sectionHeading > span { color: var(--slate); font: 500 11px var(--font-mono); }
 .evidenceRail { display: grid; grid-template-columns: repeat(4, 1fr); padding: 0; margin: 0; list-style: none; border: 1px solid var(--line); background: #fff; }
-.railStep { display: flex; gap: 13px; min-height: 92px; align-items: center; padding: 18px; color: #8792a0; border-right: 1px solid var(--line); }
+.railStep { display: flex; gap: 13px; min-height: 92px; align-items: center; padding: 18px; color: var(--slate); border-right: 1px solid var(--line); }
 .railStep:last-child { border-right: 0; }
 .railStepActive { color: var(--ink); box-shadow: inset 0 3px 0 var(--saffron); }
 .railNumber { font: 600 11px var(--font-mono); }
@@ -229,8 +230,11 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .relationshipControls h2 { margin: 4px 0 8px; font: 700 clamp(1.45rem, 2.5vw, 2.2rem)/1.1 var(--font-display); }
 .relationshipControls p:last-child { margin: 0; color: var(--slate); }
 .controlButtons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.relationshipActions { display: grid; gap: 12px; justify-items: end; }
+.relationshipActions label { display: flex; gap: 10px; align-items: center; color: var(--slate); font-size: .78rem; }
+.relationshipActions select { min-height: 38px; padding: 0 30px 0 10px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); }
 .secondaryButton, .textButton { padding: 11px 16px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); cursor: pointer; font: 650 .88rem var(--font-body); }
-.textButton { color: var(--coral); border-color: transparent; }
+.textButton { color: #b42331; border-color: transparent; }
 .primaryButton:disabled, .secondaryButton:disabled, .textButton:disabled { cursor: wait; opacity: .55; }
 .graphCanvas { overflow: hidden; min-height: 350px; padding: 28px; border: 1px solid var(--line); background: radial-gradient(circle at 75% 50%, rgba(8,127,120,.08), transparent 30%), linear-gradient(rgba(24,32,39,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(24,32,39,.035) 1px, transparent 1px), var(--surface); background-size: auto, 24px 24px, 24px 24px, auto; }
 .relationshipGraph { display: block; width: 100%; min-width: 650px; height: 290px; }
@@ -243,6 +247,11 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .entityMeta { fill: #c3ebe6; }
 .emptyGraph { min-height: 290px; display: grid; place-items: center; color: var(--slate); font-weight: 600; text-align: center; }
 .relationshipTableSection { padding-top: 8px; }
+.clusterMetrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.clusterMetrics article { display: grid; gap: 5px; padding: 16px 18px; background: var(--teal-soft); border-left: 3px solid var(--teal); }
+.clusterMetrics span { color: var(--teal); font: 600 .7rem var(--font-mono); text-transform: uppercase; }
+.clusterMetrics strong { font-size: .9rem; }
+.clusterMetrics small { color: var(--slate); }
 
 /* Research evidence */
 .researchComparison { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -253,6 +262,7 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .researchHeroCard h2 { margin: 5px 0 14px; color: var(--ink); font: 700 clamp(1.5rem, 2.5vw, 2.35rem)/1.08 var(--font-display); }
 .researchHeroCard h3 { margin: 0 0 22px; color: currentColor; font-size: 1rem; }
 .researchHeroCard > p:last-child { max-width: 60ch; margin: 20px 0 0; color: var(--slate); }
+.modelSize { margin-top: 12px; color: currentColor; font: 600 .72rem var(--font-mono); }
 .researchMetrics { display: flex; gap: 10px; }
 .researchMetric { min-width: 125px; padding: 14px 16px; background: rgba(255,255,255,.7); }
 .researchMetric span, .researchMetric strong { display: block; }
@@ -268,7 +278,7 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .modelTable th, .modelTable td { padding: 15px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .modelTable thead th { color: var(--slate); font: 600 .7rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
 .modelTable tbody th { max-width: 250px; font-weight: 650; }
-.modelTable tbody td:nth-child(3), .modelTable tbody td:nth-child(4), .modelTable tbody td:nth-child(5) { font-family: var(--font-mono); }
+.modelTable tbody td:nth-child(3), .modelTable tbody td:nth-child(4), .modelTable tbody td:nth-child(5), .modelTable tbody td:nth-child(6) { font-family: var(--font-mono); }
 .rolePill { display: inline-block; padding: 4px 8px; color: var(--slate); background: var(--paper); white-space: nowrap; font-size: .7rem; }
 .role-experimental-candidate { color: #985800; background: #fff0d8; }
 .role-deployed { color: #07645f; background: #dff4f1; }
@@ -290,6 +300,13 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 .guideStep h3 { margin: 0 0 7px; font-size: .9rem; }
 .guideStep p { margin: 0; opacity: .67; font-size: .8rem; }
 .dockerPath pre { overflow-x: auto; margin: 24px 0; padding: 20px; color: #e9f4f1; background: #17272d; font: .88rem/1.8 var(--font-mono); }
+.researchSection pre { overflow-x: auto; min-height: 100%; margin: 0; padding: 18px; color: #e9f4f1; background: #17272d; font: .78rem/1.75 var(--font-mono); }
+.commandGrid, .verificationGrid { display: grid; gap: 12px; }
+.commandGrid { grid-template-columns: 1fr 1fr; }
+.verificationGrid { grid-template-columns: repeat(3, 1fr); }
+.commandGrid article, .verificationGrid article { min-width: 0; }
+.commandGrid h3, .verificationGrid h3 { margin-bottom: 10px; font-size: .9rem; }
+.guideNote { margin: 20px 0 0; padding: 16px; color: var(--slate); background: var(--paper); line-height: 1.65; }
 .dockerPath code, .guideChecklist code { font-family: var(--font-mono); }
 .guideChecklist ul { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; margin: 0; padding: 0; list-style: none; }
 .guideChecklist li { position: relative; padding: 14px 14px 14px 40px; color: var(--slate); background: var(--paper); }
@@ -301,11 +318,13 @@ h1, h2, h3 { margin-top: 0; font-family: var(--font-display), sans-serif; letter
 }
 @media (max-width: 760px) {
   .relationshipControls { align-items: stretch; flex-direction: column; }
+  .relationshipActions { justify-items: stretch; }
   .controlButtons { justify-content: stretch; }
   .controlButtons button { flex: 1; }
   .graphCanvas { overflow-x: auto; padding: 12px; }
   .researchComparison, .guideChecklist ul { grid-template-columns: 1fr; }
   .parameterGrid, .guideSteps { grid-template-columns: 1fr; }
+  .commandGrid, .verificationGrid { grid-template-columns: 1fr; }
   .evidenceCaveat { flex-direction: column; }
   .researchMetrics { flex-wrap: wrap; }
 }
