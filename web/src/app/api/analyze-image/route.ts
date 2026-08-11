@@ -1,9 +1,12 @@
 import { fraudlensRequest } from "@/lib/server/fraudlens";
+import { requireProfessorSession } from "@/lib/server/authorization";
 
 export const WEB_IMAGE_MAX_BYTES = 4_000_000;
 const IMAGE_TYPES = new Set(["image/png", "image/jpeg"]);
 
 export async function POST(request: Request): Promise<Response> {
+  const unauthorized = await requireProfessorSession(request);
+  if (unauthorized) return unauthorized;
   const mediaType = request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
   if (!mediaType || !IMAGE_TYPES.has(mediaType)) {
     return Response.json({ detail: "Use a PNG or JPEG screenshot" }, { status: 415 });

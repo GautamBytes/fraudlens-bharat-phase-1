@@ -1,8 +1,11 @@
 import { fraudlensRequest } from "@/lib/server/fraudlens";
+import { requireProfessorSession } from "@/lib/server/authorization";
 
 const MAX_JSON_BYTES = 24_000;
 
 export async function POST(request: Request): Promise<Response> {
+  const unauthorized = await requireProfessorSession(request);
+  if (unauthorized) return unauthorized;
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
     return Response.json({ detail: "Expected a JSON analysis request" }, { status: 415 });
   }

@@ -17,6 +17,12 @@ Chrome, Edge, Firefox, or Safari browser. Vercel serves the Next.js interface
 and proxies requests to the containerized FastAPI service. The server-only
 `FRAUDLENS_API_URL` and `FRAUDLENS_DEMO_API_KEY` are never sent to the browser.
 
+The project author provides one professor email/password account. Select
+**Professor sign in** before opening Analyze, Relationships, Research, or Run
+guide. Public sign-up is disabled. Better Auth stores users, sessions, and
+login rate limits in durable PostgreSQL; the landing page and `/api/health`
+remain public while every functional application API requires a valid session.
+
 1. Open the hosted URL and start on **Evaluate**. A free Render service can take
    roughly one minute to wake after inactivity.
 2. Open **Analyze**. Run a prepared synthetic message and verify that category,
@@ -56,12 +62,38 @@ python3 -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
 Put the generated value in `.env` as `FRAUDLENS_HMAC_SECRET`. For loopback-only
-evaluation, `FRAUDLENS_DEMO_API_KEY` may remain empty. Then run:
+evaluation, `FRAUDLENS_DEMO_API_KEY` may remain empty. Generate separate strong
+values for `FRAUDLENS_AUTH_DB_PASSWORD` and `BETTER_AUTH_SECRET`, then start the
+authentication database. Keep `BETTER_AUTH_URL=http://127.0.0.1:3000` for this
+loopback flow:
 
 ```bash
+docker compose up auth-db --detach
+```
+
+Initialize Better Auth and create the single reviewer account. Copy
+`web/.env.example` to `web/.env`; set `DATABASE_URL` with the same database
+password, copy the same `BETTER_AUTH_SECRET` from the root `.env`, retain the
+loopback `BETTER_AUTH_URL`, and set `FRAUDLENS_PROFESSOR_EMAIL` plus
+`FRAUDLENS_PROFESSOR_PASSWORD`. The provisioning command reads that ignored
+file, keeping the password out of shell history:
+
+```bash
+cd web
+cp .env.example .env
+npm ci
+npm run auth:migrate
+npm run auth:create-professor
+cd ..
 docker compose config --quiet
 docker compose up --build
 ```
+
+After provisioning, remove `FRAUDLENS_PROFESSOR_EMAIL`,
+`FRAUDLENS_PROFESSOR_PASSWORD`, and `FRAUDLENS_PROFESSOR_NAME` from
+`web/.env`; they are not runtime settings. Do not commit either `.env` file or
+the reviewer credentials. For subsequent starts, only `docker compose up
+--build` is required.
 
 Open `http://127.0.0.1:3000`. The API remains available on
 `http://127.0.0.1:8000`; verify it in another terminal:
@@ -102,8 +134,10 @@ Terminal 2:
 
 ```bash
 cd web
-cp .env.example .env.local
+cp .env.example .env
 npm ci
+npm run auth:migrate
+npm run auth:create-professor
 npm run dev
 ```
 

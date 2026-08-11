@@ -20,4 +20,8 @@ describe("Next.js deployment output", () => {
   it("keeps standalone output for the Docker image", async () => {
     expect((await loadConfig(undefined)).output).toBe("standalone");
   });
+
+  it("does not regenerate repository-internal agent instruction files", async () => {
+    expect((await loadConfig(undefined)).agentRules).toBe(false);
+  });
 });

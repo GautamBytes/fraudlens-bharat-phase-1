@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const E2E_AUTH_SECRET = "FraudLens-E2E-Auth-Key-A7p2mQ9vL4xR8kT6nW3cY5hJ";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -16,5 +18,9 @@ export default defineConfig({
     url: "http://127.0.0.1:3100",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ...process.env,
+      BETTER_AUTH_SECRET: E2E_AUTH_SECRET,
+    },
   },
 });

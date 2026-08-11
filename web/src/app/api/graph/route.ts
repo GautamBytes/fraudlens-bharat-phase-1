@@ -1,4 +1,5 @@
 import { fraudlensRequest } from "@/lib/server/fraudlens";
+import { requireProfessorSession } from "@/lib/server/authorization";
 
 function boundedInteger(value: string | null, fallback: number, minimum: number, maximum: number): number {
   if (value === null || !/^\d+$/.test(value)) return fallback;
@@ -7,6 +8,8 @@ function boundedInteger(value: string | null, fallback: number, minimum: number,
 }
 
 export async function GET(request: Request): Promise<Response> {
+  const unauthorized = await requireProfessorSession(request);
+  if (unauthorized) return unauthorized;
   const url = new URL(request.url);
   const minimumCaseCount = boundedInteger(url.searchParams.get("minimum_case_count"), 2, 2, 20);
   const caseLimit = boundedInteger(url.searchParams.get("case_limit"), 100, 1, 100);
