@@ -170,12 +170,7 @@ jobs:
       - name: Validate Compose and start restricted API
         run: |
           smoke_secret="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
-          auth_db_password="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
-          auth_secret="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
-          FRAUDLENS_HMAC_SECRET="$smoke_secret" \
-            FRAUDLENS_AUTH_DB_PASSWORD="$auth_db_password" \
-            BETTER_AUTH_SECRET="$auth_secret" \
-            docker compose config --quiet
+          FRAUDLENS_HMAC_SECRET="$smoke_secret" docker compose config --quiet
           docker network create fraudlens-ci-network
           docker run --detach --name fraudlens-ci \
             --network fraudlens-ci-network \
@@ -219,14 +214,11 @@ jobs:
           python3 -c "import json; payload=json.load(open('/tmp/analyze.json')); assert payload['metadata']['stored'] is False; assert payload['predicted_label']"
           curl --fail --silent http://127.0.0.1:13000 > /tmp/professor-web.html
           grep --fixed-strings 'FraudLens Bharat' /tmp/professor-web.html
-          web_analyze_status="$(curl --silent \
-            --output /tmp/web-analyze.json \
-            --write-out '%{http_code}' \
+          curl --fail --silent \
             --header 'Content-Type: application/json' \
             --data '{"text":"Synthetic courier hold release fee now","store_case":false}' \
-            http://127.0.0.1:13000/api/analyze)"
-          test "$web_analyze_status" = 503
-          python3 -c "import json; payload=json.load(open('/tmp/web-analyze.json')); assert payload == {'detail':'Authentication service is unavailable'}"
+            http://127.0.0.1:13000/api/analyze > /tmp/web-analyze.json
+          python3 -c "import json; payload=json.load(open('/tmp/web-analyze.json')); assert payload['metadata']['stored'] is False; assert payload['predicted_label']"
           test "$(docker exec fraudlens-ci id -u)" = 10001
           test "$(docker inspect --format '{{.Config.User}}' fraudlens-ci)" = 10001:10001
           test "$(docker exec fraudlens-web-ci id -u)" = 10001

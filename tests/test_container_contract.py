@@ -26,16 +26,15 @@ def test_docker_runtime_is_non_root_locked_and_has_ocr_languages():
     assert "--reload" not in dockerfile
 
 
-def test_compose_enforces_production_boundaries_for_all_services():
+def test_compose_enforces_production_boundaries_for_both_services():
     compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
 
     assert "FRAUDLENS_ENVIRONMENT: production" in compose
     assert "FRAUDLENS_HMAC_SECRET: ${FRAUDLENS_HMAC_SECRET:?" in compose
     assert "FRAUDLENS_STORE_CASES: \"false\"" in compose
     assert compose.count("read_only: true") == 2
-    assert compose.count("no-new-privileges:true") == 3
+    assert compose.count("no-new-privileges:true") == 2
     assert compose.count("cap_drop:") == 2
-    assert "fraudlens-auth-data:/var/lib/postgresql/data" in compose
     assert "127.0.0.1:8000:8000" in compose
     assert "127.0.0.1:3000:3000" in compose
     assert "fraudlens-data:/data" in compose
@@ -102,7 +101,3 @@ def test_ci_builds_and_smokes_the_hardened_container():
     assert "CI-PRIVATE-MARKER" in workflow
     assert "docker logs fraudlens-ci" in workflow
     assert "http://127.0.0.1:13000/api/analyze" in workflow
-    assert 'FRAUDLENS_AUTH_DB_PASSWORD="$auth_db_password"' in workflow
-    assert 'BETTER_AUTH_SECRET="$auth_secret"' in workflow
-    assert 'test "$web_analyze_status" = 503' in workflow
-    assert 'Authentication service is unavailable' in workflow

@@ -9,11 +9,6 @@ An operator can check API liveness at `/health` and dependency readiness at
 `/ready`; both responses identify release `1.0.0`. For API-only use, run
 `uvicorn fraudlens.api:app --host 127.0.0.1 --port 8000`.
 
-The landing page is public. Select **Professor sign in** and use the reviewer
-email/password supplied by the project author before opening Analyze,
-Relationships, Research, or Run guide. Public sign-up is disabled. Select
-**Sign out** when the assessment is complete, especially on a shared machine.
-
 ## Analyze a Message
 
 1. Open **Analyze** (`/analyze`) in the website and select the **Message text** tab.

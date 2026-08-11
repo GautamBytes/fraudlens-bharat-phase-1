@@ -60,11 +60,9 @@ The project has five objectives:
 5. retain data only with consent and show repeated entities without exposing
    their raw values in graph storage or output.
 
-The release covers a local educational prototype and a controlled hosted
-professor demonstration protected by one pre-provisioned Better Auth reviewer
-account. It excludes automatic NCRP filing, transaction blocking, unrestricted
-production deployment, transformer fine-tuning, GNN fraud detection, and any
-legal conclusion.
+The release covers a local educational prototype. It excludes automatic NCRP
+filing, transaction blocking, public internet deployment, transformer
+fine-tuning, GNN fraud detection, and any legal conclusion.
 
 ## Phase 1 Foundation
 
@@ -299,9 +297,8 @@ The next work is empirical rather than cosmetic:
 3. compare character TF-IDF and a Hinglish transformer on the same grouped
    external test;
 4. run a supervised usability study and document error escalation;
-5. expand the current single-reviewer authentication boundary with password
-   recovery, distributed abuse controls, and operational monitoring before any
-   multi-user deployment.
+5. add authentication and operational monitoring only if deployment expands
+   beyond loopback local use.
 
 ## Reproducibility
 

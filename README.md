@@ -223,16 +223,7 @@ period used for pasted text then applies.
 ## Use the Website
 
 Open the [hosted FraudLens Bharat website](https://fraudlens-bharat.vercel.app)
-for the professor path and sign in with the reviewer account supplied by the
-project author. Public sign-up is disabled. The landing page and health check
-remain public; Analyze, Relationships, Research, Run guide, and every
-functional same-origin API require a valid Better Auth session stored in
-durable PostgreSQL.
-
-For local use, set `FRAUDLENS_AUTH_DB_PASSWORD`, `BETTER_AUTH_SECRET`, and
-`BETTER_AUTH_URL`, initialize the schema with `npm run auth:migrate`, and create
-the first reviewer with `npm run auth:create-professor` as described in
-`docs/professor_testing_guide.md`. Then start the complete local stack with
+for the professor path, or start the complete local stack with
 `docker compose up --build --detach` and open
 `http://127.0.0.1:3000`. Use `/analyze` for message or screenshot analysis and
 `/relationships` to review relationship evidence. The message tab corresponds

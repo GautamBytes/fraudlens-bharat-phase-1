@@ -1,15 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { fraudlensRequest } from "@/lib/server/fraudlens";
-import { requireProfessorSession } from "@/lib/server/authorization";
 import { POST } from "./route";
 
 vi.mock("@/lib/server/fraudlens", () => ({ fraudlensRequest: vi.fn() }));
-vi.mock("@/lib/server/authorization", () => ({ requireProfessorSession: vi.fn() }));
 
 describe("screenshot proxy", () => {
   beforeEach(() => {
-    vi.mocked(requireProfessorSession).mockResolvedValue(null);
     vi.mocked(fraudlensRequest).mockResolvedValue(
       Response.json({ predicted_label: "kyc_scam" }),
     );
