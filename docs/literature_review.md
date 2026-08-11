@@ -44,6 +44,21 @@ Kapoor et al. also show that Hinglish code-switched text is difficult because sp
 
 FraudLens Bharat does not claim to outperform transformer systems on real-world I4C data. Phase 1 instead proves a reproducible local baseline with explainable signals.
 
+## Deployed Message Spam Protection
+
+Google Messages documents a deployed spam-protection workflow that uses
+on-device machine-learning models to detect known spam patterns and can send a
+message URL to Google for a malicious-link check [15]. The product can warn,
+filter, and support spam reporting. Its public help page does not disclose an
+accuracy, Macro-F1, category taxonomy, or a result on the FraudLens dataset.
+
+This is an important practical comparison. Google Messages protects the inbox;
+FraudLens helps a reviewer structure evidence after a suspicious message or
+screenshot is available. FraudLens exposes an eight-class label, extracted
+identifiers, risk reasons, a complaint draft, consent controls, and masked
+cross-case relationships. Those features establish a broader documented
+review workflow, not a claim that FraudLens detects spam more accurately.
+
 ## Phishing URL Detection
 
 Phishing URL detection research shows that URL-only models can reach strong results when trained on large URL datasets.
@@ -112,3 +127,5 @@ The contribution is not state-of-the-art model performance. The contribution is 
 11. M. T. Ribeiro, S. Singh, and C. Guestrin, "'Why Should I Trust You?': Explaining the Predictions of Any Classifier," KDD, 2016. https://arxiv.org/abs/1602.04938
 12. F. Pedregosa et al., "Scikit-learn: Machine Learning in Python," Journal of Machine Learning Research, 2011. https://jmlr.org/papers/v12/pedregosa11a.html
 13. National Institute of Standards and Technology, "Artificial Intelligence Risk Management Framework (AI RMF 1.0)," NIST AI 100-1, 2023. https://doi.org/10.6028/NIST.AI.100-1
+14. R. Nayak and R. Joshi, "L3Cube-HingCorpus and HingBERT: A Code Mixed Hindi-English Dataset and BERT Language Models," WILDRE-6, 2022. https://aclanthology.org/2022.wildre-1.2/
+15. Google, "How Google protects your privacy with spam detection," Google Messages Help. https://support.google.com/messages/answer/9327903?hl=en. Accessed 11 August 2026.

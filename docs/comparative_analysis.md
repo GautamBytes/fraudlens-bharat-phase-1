@@ -130,3 +130,10 @@ come from the same eight-row synthetic test and are therefore suitable for an
 internal ablation, not for declaring superiority over external transformer,
 URL, or graph datasets. Full methods and limitations are in
 `docs/phase2_research_report.md`.
+
+Character TF-IDF is the best research candidate: it produces the same test
+decisions as the word-character hybrid with 331,415 instead of 415,954
+estimated fitted bytes. That is a measured 20.3% payload reduction. The
+deployed runtime serves a different release goal by adding calibrated
+confidence and abstention; it must not inherit the research candidate's 75.0%
+accuracy claim.

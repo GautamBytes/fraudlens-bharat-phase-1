@@ -27,12 +27,15 @@ presentation evidence. The completed codebase has 358 automated tests and runs
 through the Next.js website and FastAPI, including a hardened local container
 path.
 
-The research result remains limited. The frozen dataset contains 64 synthetic
-fraud-only messages, no legitimate class, and one test message per scam class.
-Character TF-IDF and a word-character hybrid reach 75.0% accuracy and 66.67%
-Macro-F1 on the eight-row test. The deployed calibrated runtime reaches 50.0%
-accuracy, 50.0% Macro-F1, and 87.5% coverage on that same test. These are
-internal engineering results, not production-accuracy estimates.
+The best research candidate, character TF-IDF, reaches 75.0% accuracy and
+66.67% Macro-F1 on the frozen test. It doubles the word-only Macro-F1 and
+matches the hybrid's decisions with a 20.3% smaller estimated fitted payload.
+The deployed runtime instead prioritizes calibrated confidence and abstention:
+it reaches 50.0% accuracy, 50.0% Macro-F1, 87.5% coverage, and 12.5%
+abstention. These data-backed results make FraudLens a strong, inspectable
+student system while preserving an important boundary: the 64 messages are
+synthetic, there is no legitimate class, and the test has one message per scam
+class.
 
 ## Problem Statement
 
@@ -192,6 +195,30 @@ combines text and screenshot input, uncertainty, evidence extraction, reasons,
 complaint drafting, consent, retention, masked relationships, reproducible
 evaluation, and local CPU deployment.
 
+### Named-solution evidence summary
+
+Evidence labels prevent unlike facts from appearing as one leaderboard:
+
+- **Measured locally** means generated on the frozen FraudLens split.
+- **Verified capability** means implemented and covered by automated tests.
+- **Externally reported** means stated by a named primary source on its own data.
+- **Not yet measured** identifies a valid parameter without a FraudLens labelled
+  benchmark.
+
+| Named solution | Evidence and disclosed score | Scope | Defensible FraudLens advantage |
+|---|---|---|---|
+| National Cyber Crime Reporting Portal [2] | **Externally reported** official reporting capability; accuracy not applicable | Citizen complaint reporting | FraudLens structures evidence and prepares a draft before the user reports manually |
+| Google Messages [15] | **Externally reported** on-device spam models and URL checking; accuracy **Not publicly disclosed** | Inbox warning, filtering, and spam reporting | FraudLens exposes eight-class triage, evidence fields, reasons, and complaint preparation after intake |
+| HingRoBERTa [7] | **Externally reported** 74.41% accuracy and 71.49% F1 on I4C CyberGuard AI Hackathon data | Hinglish complaint classification with a Django REST/frontend tool | FraudLens adds screenshot OCR, explicit evidence, abstention, consented retention, and masked relationships; no external accuracy win is claimed |
+| Neural phishing-URL detector [9] | **Externally reported** about 97% validation accuracy on a large binary URL task | Specialized URL classification and uncertainty | FraudLens analyzes the complete message or screenshot and uses URL checks as one auditable signal |
+| Financial-fraud GNN research [10] | **Externally reported** review of more than 100 studies; no universal score | Learned detection over labelled relational graphs | FraudLens provides lightweight, privacy-safe repeated-entity visualization without claiming GNN detection |
+| FraudLens Bharat | **Measured locally:** best research candidate 75.0% accuracy/66.67% Macro-F1; deployed runtime 50.0% accuracy/50.0% Macro-F1/87.5% coverage | End-to-end evidence triage | One reproducible workflow joins text, OCR, evidence, URL reasons, uncertainty, drafting, consent, expiry, and masked relationships |
+
+The FraudLens and HingRoBERTa accuracy percentages occupy the same numerical
+range, but different datasets and an eight-row synthetic FraudLens test mean
+that this observation does not establish parity. The positive comparison rests
+on measured same-split gains and documented workflow capabilities.
+
 ## Evaluation Parameters And Rationale
 
 | Parameter | Why it belongs in the comparison |
@@ -234,6 +261,16 @@ The character model misses the digital-arrest test row as courier scam and the
 OTP-phishing row as KYC scam. Those two classes have zero test F1. The deployed
 calibrated model trades further classification quality for probability quality
 and one abstention. The deck and demo keep these models separate.
+
+### Data-backed Pareto position
+
+| Advantage | Evidence status | Result |
+|---|---|---|
+| Strongest lightweight classification | **Measured locally** | Character Macro-F1 0.6667 versus word 0.3333 and rules 0.2500; gain over word = 0.3333 |
+| Best research candidate by quality and size | **Measured locally** | Character and hybrid make the same decisions, but character uses 331,415 versus 415,954 estimated fitted bytes, 20.3% less |
+| Best probability quality | **Measured locally** | Calibrated hybrid Brier 0.5894 versus 0.7908 for the uncalibrated hybrid, 25.5% lower, with lower accuracy disclosed |
+| Complete review workflow | **Verified capability** | Text, screenshot OCR, entities, URL reasons, uncertainty, complaint draft, consent, expiry, and masked relationships pass automated behavior tests |
+| Subsystem accuracy and performance | **Not yet measured** | OCR CER/WER, entity F1, URL PR-AUC, graph edge F1, draft rubric, p50/p95 latency, and peak RAM remain evaluation targets |
 
 ## Software Verification
 
@@ -289,6 +326,20 @@ complaint-ready result and adds privacy controls that classifier-only demos
 usually omit. The research benchmark identifies character TF-IDF as the most
 promising lightweight representation on the present split.
 
+### PPT-safe claims
+
+- “On the same frozen test, character TF-IDF doubles Macro-F1 over word
+  TF-IDF, from 0.3333 to 0.6667.”
+- “The best research candidate matches the hybrid's test decisions with a
+  20.3% smaller estimated fitted payload: 331,415 versus 415,954 bytes.”
+- “Calibration produces the best Brier score, 0.5894, while the report exposes
+  the corresponding accuracy trade-off.”
+- “FraudLens combines evidence intake, review, uncertainty, privacy controls,
+  and complaint preparation in one reproducible college prototype.”
+
+Do not claim: FraudLens is more accurate than HingRoBERTa, Google Messages, a
+production URL detector, or a GNN fraud platform.
+
 The next work is empirical rather than cosmetic:
 
 1. collect an authorized, diverse dataset with legitimate controls;
@@ -321,5 +372,5 @@ PYTHONPATH=src python -m pytest -q
 
 The machine-readable evidence lives in `outputs/phase2/`, `outputs/research/`,
 and `outputs/presentation/`. The detailed methodology is in
-`docs/research_methodology.md`; IEEE-style sources [1]-[14] are in
+`docs/research_methodology.md`; IEEE-style sources [1]-[15] are in
 `docs/references.md`.
