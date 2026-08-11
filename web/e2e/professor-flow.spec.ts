@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { symmetricEncodeJWT } from "better-auth/crypto";
+
+const E2E_AUTH_SECRET = "FraudLens-E2E-Auth-Key-A7p2mQ9vL4xR8kT6nW3cY5hJ";
 
 const result = {
   case_id: "demo-e2e",
@@ -27,6 +30,53 @@ const linkedGraph = {
   components: [{ id: "component:1", node_ids: ["case:a", "case:b", "entity:url:shared"], case_count: 2, entity_count: 1, edge_count: 2, max_risk_score: 82 }],
   summary: { case_count: 2, entity_count: 1, edge_count: 2, component_count: 1, truncated: false },
 };
+
+test.beforeEach(async ({ context, page }) => {
+  const sessionCache = await symmetricEncodeJWT({
+    session: {
+      id: "e2e-session",
+      token: "e2e-token",
+      userId: "e2e-professor",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    },
+    user: {
+      id: "e2e-professor",
+      name: "Professor Reviewer",
+      email: "professor@example.edu",
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    updatedAt: Date.now(),
+  }, E2E_AUTH_SECRET, "better-auth-session", 60 * 60);
+  await context.addCookies([{
+    name: "better-auth.session_data",
+    value: sessionCache,
+    url: "http://127.0.0.1:3100",
+  }]);
+  await page.route("**/api/auth/get-session", (route) => route.fulfill({
+    json: {
+      session: { id: "e2e-session", expiresAt: "2026-08-12T10:00:00Z" },
+      user: { id: "e2e-professor", name: "Professor Reviewer", email: "professor@example.edu" },
+    },
+  }));
+});
+
+test("protected project routes redirect an unauthenticated professor to login", async ({ context, page }) => {
+  await context.clearCookies();
+
+  await page.goto("/analyze");
+
+  await expect(page).toHaveURL(/\/login\?returnTo=%2Fanalyze$/);
+  await expect(page.getByRole("heading", { name: "Professor access" })).toBeVisible();
+  await expect(page.getByLabel("Professor email")).toBeVisible();
+  await expect(page.getByLabel("Password")).toBeVisible();
+  await expect(page.getByRole("link", { name: /sign up/i })).toHaveCount(0);
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
 
 test("professor can move from overview to an explainable analysis", async ({ page }) => {
   await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", service: "fraudlens-bharat", version: "1.0.0" } }));
@@ -111,7 +161,7 @@ test("reduced motion disables the ambient signal animation", async ({ page }) =>
 
 test("major professor routes have no automatically detectable accessibility violations", async ({ page }) => {
   await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", service: "fraudlens-bharat", version: "1.0.0" } }));
-  for (const path of ["/", "/analyze", "/relationships", "/research", "/guide"]) {
+  for (const path of ["/", "/login", "/analyze", "/relationships", "/research", "/guide"]) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations, `${path}: ${results.violations.map((item) => item.id).join(", ")}`).toEqual([]);

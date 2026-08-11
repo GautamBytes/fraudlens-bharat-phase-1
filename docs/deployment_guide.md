@@ -6,8 +6,11 @@ The supplied Compose deployment is intended for a single trusted host, a
 capstone demonstration, or a private service behind an authenticated gateway.
 It uses SQLite and deliberately binds the API and modern Next.js website to
 loopback. The hosted capstone demo uses a separate Vercel website and Render
-API protected by a private demo key. This is not multi-user authentication or
-distributed rate limiting, and this deployment does not establish production accuracy.
+API protected by a private demo key. The website uses Better Auth with durable
+PostgreSQL, one pre-provisioned reviewer account, secure sessions, disabled
+public sign-up, and database-backed login rate limiting. This remains a
+controlled capstone deployment rather than a multi-user production service,
+and it does not establish production accuracy.
 Do not expose the local API port directly to the public internet.
 
 For remote access, place an authenticated gateway or reverse proxy in front,
@@ -22,11 +25,18 @@ evaluation remains a small synthetic bootstrap.
    control with restrictive file permissions.
 2. Generate a unique secret with
    `python3 -c "import secrets; print(secrets.token_urlsafe(48))"` and set it as
-   `FRAUDLENS_HMAC_SECRET`.
+   `FRAUDLENS_HMAC_SECRET`. Generate independent values for
+   `FRAUDLENS_AUTH_DB_PASSWORD` and `BETTER_AUTH_SECRET`.
 3. Keep `FRAUDLENS_ALLOWED_HOSTS=localhost,127.0.0.1,api` for the default local
    deployment. `api` is the internal Compose service host. Use only explicit
    host names; wildcards are rejected.
-4. Validate and launch:
+4. Start `auth-db`, configure `web/.env` from `web/.env.example`, then run
+   `npm run auth:migrate` and `npm run auth:create-professor` from `web/`.
+   Use the same database password and Better Auth secret in both environment
+   files, then remove the provisioning-only reviewer credentials from
+   `web/.env`. The complete command sequence is in
+   `professor_testing_guide.md`.
+5. Validate and launch:
 
 ```bash
 docker compose config --quiet
@@ -60,13 +70,23 @@ configuration schema and gives the bounded proxy routes the Hobby tier's
 60-second maximum duration. The screenshot proxy aborts upstream work before
 that platform deadline.
 
+Attach a durable PostgreSQL database such as Neon and configure `DATABASE_URL`,
+`BETTER_AUTH_SECRET` with at least 32 high-entropy characters, and
+`BETTER_AUTH_URL=https://fraudlens-bharat.vercel.app` in Vercel. Run
+`npm run auth:migrate` against that database, then provision the single
+reviewer with `npm run auth:create-professor`. The provisioning email and
+password are local command inputs only; do not store them as Vercel variables.
+Public sign-up remains disabled in the deployed auth configuration.
+
 The free Render filesystem is ephemeral. This is acceptable for the controlled
 professor relationship demo, but it is not a durable evidence store. See
 `professor_testing_guide.md` for the expected evaluation and reset sequence.
-The public website is not an end-user authentication system: it intentionally
-offers analysis, a masked relationship graph, and synthetic-demo reset. It does
-not proxy the backend case-list or case-detail read endpoints. Use only
-synthetic inputs and do not adapt this shared demo for real records.
+The public landing page is a project showcase. Functional pages and APIs require
+the pre-provisioned professor session. This is controlled reviewer access, not
+self-service identity management: there is no public registration, password
+reset email, organization model, or real-record workflow. The website does not
+proxy the backend case-list or case-detail read endpoints. Use only synthetic
+inputs and do not adapt this shared demo for real records.
 
 Case storage remains off by default. Explicit user consent is still required
 to retain analysis text, and source screenshot bytes are never retained.

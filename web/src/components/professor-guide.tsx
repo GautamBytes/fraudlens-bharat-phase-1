@@ -18,7 +18,7 @@ export function ProfessorGuide() {
       </nav>
       <section className="guidePath hostedPath" id="hosted">
         <p className="eyebrow">No installation</p><h2>Fastest: hosted evaluation</h2>
-        <p>Open the published Vercel URL. Its server securely calls the containerized Python engine; the private key never reaches the browser.</p>
+        <p>Open the published Vercel URL and sign in with the professor account provided by the project author. Public sign-up is disabled. The server securely calls the containerized Python engine; private credentials never reach the browser.</p>
         <div className="guideHostedAction"><a className="primaryButton" href="https://fraudlens-bharat.vercel.app" target="_blank" rel="noreferrer">Open hosted website</a></div>
         <div className="guideSteps">
           <Step number="01" title="Open the project"><p>Start on Evaluate. The screenshot flow automatically retries one initial timeout while a sleeping analysis engine wakes.</p></Step>
@@ -30,15 +30,15 @@ export function ProfessorGuide() {
 
       <section className="guidePath dockerPath" id="docker-run">
         <p className="eyebrow">Full reproducibility</p><h2>Complete: Docker evaluation</h2>
-        <p>This path includes the web UI, FastAPI, calibrated model, SQLite case store, and English/Hindi Tesseract OCR.</p>
-        <Command>{"cp .env.example .env\ndocker compose up --build"}</Command>
-        <p>Set a strong <code>FRAUDLENS_HMAC_SECRET</code>, then open <code>http://localhost:3000</code>. Stop with <code>docker compose down</code>; add <code>-v</code> only when intentionally deleting demo data.</p>
+        <p>This path includes the web UI, FastAPI, calibrated model, SQLite evidence storage, PostgreSQL-backed Better Auth, and English/Hindi Tesseract OCR.</p>
+        <Command>{"cp .env.example .env\ndocker compose up auth-db --detach\ncd web && cp .env.example .env && npm ci\nnpm run auth:migrate\nnpm run auth:create-professor\ncd .. && docker compose up --build"}</Command>
+        <p>Set strong <code>FRAUDLENS_HMAC_SECRET</code>, <code>FRAUDLENS_AUTH_DB_PASSWORD</code>, and <code>BETTER_AUTH_SECRET</code> values. Use the same database password and auth secret in <code>web/.env</code>, keep <code>BETTER_AUTH_URL</code> at the local website origin, and remove the provisioning-only professor credentials after account creation. Then open <code>http://localhost:3000</code>. Stop with <code>docker compose down</code>; add <code>-v</code> only when intentionally deleting demo and authentication data.</p>
       </section>
 
       <section className="researchSection" id="development">
         <div className="sectionIntro"><p className="eyebrow">Source-level inspection</p><h2>Split development run</h2></div>
-        <div className="commandGrid"><article><h3>1 · Python API</h3><Command>{"python3 -m venv .venv\nsource .venv/bin/activate\npip install --require-hashes -r requirements.lock\npip install -e . --no-deps\nuvicorn fraudlens.api:app --host 127.0.0.1 --port 8000"}</Command></article><article><h3>2 · Next.js website</h3><Command>{"cd web\ncp .env.example .env.local\nnpm ci\nnpm run dev"}</Command></article></div>
-        <p className="guideNote"><code>FRAUDLENS_API_URL</code> points the Next.js server to FastAPI. <code>FRAUDLENS_DEMO_API_KEY</code> is optional on loopback and must match at both boundaries when enabled. Never use a <code>NEXT_PUBLIC_</code> prefix for either value.</p>
+        <div className="commandGrid"><article><h3>1 · Python API</h3><Command>{"python3 -m venv .venv\nsource .venv/bin/activate\npip install --require-hashes -r requirements.lock\npip install -e . --no-deps\nuvicorn fraudlens.api:app --host 127.0.0.1 --port 8000"}</Command></article><article><h3>2 · Next.js website</h3><Command>{"cd web\ncp .env.example .env\nnpm ci\nnpm run auth:migrate\nnpm run auth:create-professor\nnpm run dev"}</Command></article></div>
+        <p className="guideNote"><code>FRAUDLENS_API_URL</code> points the Next.js server to FastAPI. <code>DATABASE_URL</code>, <code>BETTER_AUTH_SECRET</code>, and <code>BETTER_AUTH_URL</code> configure server-only authentication. <code>FRAUDLENS_DEMO_API_KEY</code> is optional on loopback and must match at both boundaries when enabled. Never use a <code>NEXT_PUBLIC_</code> prefix for these values.</p>
       </section>
 
       <section className="researchSection" id="verification">

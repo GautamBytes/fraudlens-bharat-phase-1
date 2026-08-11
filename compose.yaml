@@ -1,4 +1,23 @@
 services:
+  auth-db:
+    image: postgres:17.6-alpine3.22@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fraudlens_auth
+      POSTGRES_USER: fraudlens
+      POSTGRES_PASSWORD: ${FRAUDLENS_AUTH_DB_PASSWORD:?Set FRAUDLENS_AUTH_DB_PASSWORD to a strong random value}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - fraudlens-auth-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraudlens -d fraudlens_auth"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
   api:
     build:
       context: .
@@ -34,9 +53,14 @@ services:
     depends_on:
       api:
         condition: service_healthy
+      auth-db:
+        condition: service_healthy
     environment:
       FRAUDLENS_API_URL: http://api:8000
       FRAUDLENS_DEMO_API_KEY: ${FRAUDLENS_DEMO_API_KEY:-}
+      DATABASE_URL: postgresql://fraudlens:${FRAUDLENS_AUTH_DB_PASSWORD}@auth-db:5432/fraudlens_auth
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET to a strong random value}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://127.0.0.1:3000}
     ports:
       - "127.0.0.1:3000:3000"
     read_only: true
@@ -49,3 +73,4 @@ services:
 
 volumes:
   fraudlens-data:
+  fraudlens-auth-data:
