@@ -1,3 +1,5 @@
+import csv
+import json
 from pathlib import Path
 
 
@@ -18,16 +20,18 @@ def test_phase2_research_report_has_complete_academic_structure():
         "## 2. Research Questions And Hypotheses",
         "## 3. Literature Selection Method",
         "## 4. Existing Solution Families",
-        "## 5. Research Gap And Proposed Contribution",
-        "## 6. Dataset And Ethics",
-        "## 7. Experimental Methodology",
-        "## 8. Classification Results",
-        "## 9. Robustness And Ablation Results",
-        "## 10. Full-System Evaluation Framework",
-        "## 11. Statistical Interpretation",
-        "## 12. Explainability, Privacy, And Deployment",
-        "## 13. Threats To Validity",
-        "## 14. Conclusion",
+        "## 5. Named Solution Comparison",
+        "## 6. Research Gap And Proposed Contribution",
+        "## 7. Dataset And Ethics",
+        "## 8. Experimental Methodology",
+        "## 9. Classification Results",
+        "## 10. Robustness And Ablation Results",
+        "## 11. Full-System Evaluation Framework",
+        "## 12. Statistical Interpretation",
+        "## 13. Explainability, Privacy, And Deployment",
+        "## 14. Threats To Validity",
+        "## 15. PPT-safe claims",
+        "## 16. Conclusion",
         "## Reproduction Commands",
     ):
         assert heading in report
@@ -35,6 +39,7 @@ def test_phase2_research_report_has_complete_academic_structure():
 
 def test_report_separates_published_results_from_same_dataset_results():
     report = _read("docs/phase2_research_report.md")
+    references = _read("docs/references.md")
 
     for expected in (
         "74.41%",
@@ -46,12 +51,28 @@ def test_report_separates_published_results_from_same_dataset_results():
         "eight-row frozen test",
         "no legitimate",
         "does not establish production accuracy",
+        "## 5. Named Solution Comparison",
+        "Measured locally",
+        "Verified capability",
+        "Externally reported",
+        "Not yet measured",
+        "National Cyber Crime Reporting Portal",
+        "Google Messages",
+        "HingRoBERTa",
+        "Not publicly disclosed",
+        "same numerical range",
+        "does not establish parity",
     ):
         assert expected in report
+
+    reference = next(line for line in references.splitlines() if line.startswith("[15]"))
+    assert "support.google.com/messages/answer/9327903" in reference
 
 
 def test_report_contains_exact_reproducible_results_and_failure_analysis():
     report = _read("docs/phase2_research_report.md")
+    capstone = _read("docs/final_capstone_report.md")
+    comparison = _read("docs/comparative_analysis.md")
 
     for expected in (
         "character_tfidf_logistic_regression",
@@ -69,6 +90,52 @@ def test_report_contains_exact_reproducible_results_and_failure_analysis():
         "0.4084",
     ):
         assert expected in report
+
+    for document in (report, capstone):
+        for expected in (
+            "PPT-safe claims",
+            "Measured locally",
+            "Verified capability",
+            "Not yet measured",
+            "0.3333",
+            "331,415",
+            "415,954",
+            "0.5894",
+            "Do not claim: FraudLens is more accurate than HingRoBERTa",
+        ):
+            assert expected in document
+
+    for document in (report, capstone, comparison):
+        assert "best research candidate" in document
+        assert "deployed runtime" in document
+
+    with (ROOT / "outputs/research/classification_summary.csv").open(
+        encoding="utf-8", newline=""
+    ) as handle:
+        rows = {row["model"]: row for row in csv.DictReader(handle)}
+
+    character = rows["character_tfidf_logistic_regression"]
+    word = rows["word_tfidf_logistic_regression"]
+    hybrid = rows["word_character_tfidf_logistic_regression"]
+    calibrated = rows["calibrated_word_character_tfidf"]
+    runtime = json.loads(_read("models/metrics.json"))["test"]
+
+    macro_gain = float(character["macro_f1"]) - float(word["macro_f1"])
+    size_reduction = 1 - (
+        int(character["estimated_model_bytes"])
+        / int(hybrid["estimated_model_bytes"])
+    )
+    brier_reduction = 1 - (float(calibrated["brier"]) / float(hybrid["brier"]))
+
+    for document in (report, capstone):
+        assert f"{macro_gain:.4f}" in document
+        assert f'{int(character["estimated_model_bytes"]):,}' in document
+        assert f'{int(hybrid["estimated_model_bytes"]):,}' in document
+        assert f"{size_reduction:.1%}" in document
+        assert f'{float(calibrated["brier"]):.4f}' in document
+        assert f"{brier_reduction:.1%}" in document
+        assert f'{runtime["coverage"]:.1%}' in document
+        assert f'{runtime["abstention_rate"]:.1%}' in document
 
 
 def test_methodology_explains_each_metric_and_leakage_control():
