@@ -26,9 +26,6 @@ uvx pip-audit -r requirements-runtime.lock
 docker build --tag fraudlens-bharat:release .
 ```
 
-From `web/`, also run `npm ci`, `npm test`, `npm run lint`, `npm run
-typecheck`, `npm run build`, and `npm audit --audit-level=high`.
-
 Verify the build-time `python -m pip check` succeeds, the image runs as UID
 10001, runtime package managers and pytest are absent, and
 `tesseract --list-langs` contains both `eng` and `hin`. Require the
@@ -39,11 +36,6 @@ and log redaction.
 ## Manual acceptance
 
 - Check `/health`, `/ready`, OpenAPI version `1.0.0`, and the website.
-- Confirm the landing page and health check remain public, protected pages
-  redirect to Professor access, invalid credentials reveal no account details,
-  and a provisioned reviewer can sign in and sign out.
-- Confirm public sign-up is disabled and unauthenticated analysis, screenshot,
-  graph, and reset API requests return `401` without contacting FastAPI.
 - Analyze one synthetic text and one synthetic PNG/JPEG without storage; case
   history must remain empty.
 - Repeat with explicit consent; verify history, masked repeated-entity graph,
@@ -57,9 +49,6 @@ and log redaction.
 
 - Generate the production HMAC secret in the target secret manager and use
   explicit allowed hosts.
-- Configure the production PostgreSQL URL, a unique Better Auth secret, and the
-  canonical HTTPS Better Auth URL; migrate the schema and provision the single
-  reviewer account from a trusted local terminal.
 - Verify the SQLite backup, retention period, free space, TLS/authenticated
   gateway, log access policy, owner, and incident contact.
 - Record the previous immutable image digest and rehearse the application

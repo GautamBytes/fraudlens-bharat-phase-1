@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { SiteFooter } from "./site-footer";
-import { authClient } from "@/lib/auth-client";
 
 const NAVIGATION = [
   ["/", "Evaluate", "01"],
@@ -17,8 +16,6 @@ const NAVIGATION = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const session = authClient.useSession();
   const [open, setOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
 
@@ -66,24 +63,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </nav>
           <div className="headerTools">
-            {!session.isPending && session.data ? (
-              <div className="sessionControl">
-                <span className="sessionEmail">{session.data.user.email}</span>
-                <button
-                  className="authHeaderLink"
-                  type="button"
-                  onClick={() => void (async () => {
-                    await authClient.signOut();
-                    router.replace("/");
-                    router.refresh();
-                  })()}
-                >
-                  Sign out
-                </button>
-              </div>
-            ) : !session.isPending ? (
-              <Link className="authHeaderLink" href="/login">Professor sign in</Link>
-            ) : null}
             <button
               ref={menuButton}
               className="menuButton"
