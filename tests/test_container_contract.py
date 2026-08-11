@@ -102,3 +102,7 @@ def test_ci_builds_and_smokes_the_hardened_container():
     assert "CI-PRIVATE-MARKER" in workflow
     assert "docker logs fraudlens-ci" in workflow
     assert "http://127.0.0.1:13000/api/analyze" in workflow
+    assert 'FRAUDLENS_AUTH_DB_PASSWORD="$auth_db_password"' in workflow
+    assert 'BETTER_AUTH_SECRET="$auth_secret"' in workflow
+    assert 'test "$web_analyze_status" = 503' in workflow
+    assert 'Authentication service is unavailable' in workflow
