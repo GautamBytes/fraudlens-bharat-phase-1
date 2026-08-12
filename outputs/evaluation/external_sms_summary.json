@@ -1,0 +1,234 @@
+{
+  "claim_boundary": "Binary public-corpus validation is separate from the internal eight-class synthetic evaluation and does not establish production effectiveness.",
+  "dataset": {
+    "archive_sha256": "1587ea43e58e82b14ff1f5425c88e17f8496bfcdb67a583dbff9eefaf9963ce3",
+    "doi": "10.24432/C5CC84",
+    "duplicate_rows": 415,
+    "group_to_split_manifest_sha256": "71fc0ea9cd693bee42bdc8e4766a4c782f8f8e7f68b2703e2e7eaa11463be772",
+    "labels": [
+      "ham",
+      "spam"
+    ],
+    "license": "CC BY 4.0",
+    "name": "SMS Spam Collection",
+    "normalized_groups": 5159,
+    "raw_messages_committed": false,
+    "row_predictions_committed": false,
+    "rows": 5574,
+    "source_url": "https://archive.ics.uci.edu/dataset/228/sms+spam+collection",
+    "split_labels": {
+      "test": {
+        "ham": 748,
+        "spam": 110
+      },
+      "train": {
+        "ham": 3363,
+        "spam": 534
+      },
+      "validation": {
+        "ham": 716,
+        "spam": 103
+      }
+    },
+    "split_rows": {
+      "test": 858,
+      "train": 3897,
+      "validation": 819
+    },
+    "uci_dataset_id": 228
+  },
+  "models": {
+    "calibrated_character_tfidf": {
+      "calibration": "sigmoid_cv_3_train_only",
+      "decision_threshold": 0.5,
+      "estimated_model_bytes": 4229692,
+      "fit_split": "train",
+      "representation": "character_ngrams_3_5",
+      "test": {
+        "accuracy": 0.98601399,
+        "balanced_accuracy": 0.96096257,
+        "brier_score": 0.01068872,
+        "confidence_intervals_95": {
+          "accuracy": [
+            0.97571379,
+            0.99198159
+          ],
+          "ham_specificity": [
+            0.98633154,
+            0.99791852
+          ],
+          "spam_recall": [
+            0.86302015,
+            0.96268958
+          ]
+        },
+        "confusion_matrix": [
+          [
+            744,
+            4
+          ],
+          [
+            8,
+            102
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "ham",
+          "spam"
+        ],
+        "expected_calibration_error": 0.00705779,
+        "label_support": {
+          "ham": 748,
+          "spam": 110
+        },
+        "macro_f1": 0.96822222,
+        "matthews_correlation_coefficient": 0.93665778,
+        "spam_average_precision": 0.98579198,
+        "spam_f1": 0.94444444,
+        "spam_precision": 0.96226415,
+        "spam_recall": 0.92727273,
+        "support": 858
+      }
+    },
+    "character_tfidf_logistic_regression": {
+      "calibration": "none",
+      "decision_threshold": 0.5,
+      "estimated_model_bytes": 1775811,
+      "fit_split": "train",
+      "representation": "character_ngrams_3_5",
+      "test": {
+        "accuracy": 0.98717949,
+        "balanced_accuracy": 0.96938503,
+        "brier_score": 0.02671276,
+        "confidence_intervals_95": {
+          "accuracy": [
+            0.97718961,
+            0.99282639
+          ],
+          "ham_specificity": [
+            0.98444842,
+            0.9971415
+          ],
+          "spam_recall": [
+            0.88608214,
+            0.97476417
+          ]
+        },
+        "confusion_matrix": [
+          [
+            743,
+            5
+          ],
+          [
+            6,
+            104
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "ham",
+          "spam"
+        ],
+        "expected_calibration_error": 0.11358128,
+        "label_support": {
+          "ham": 748,
+          "spam": 110
+        },
+        "macro_f1": 0.97121183,
+        "matthews_correlation_coefficient": 0.94243675,
+        "spam_average_precision": 0.98738871,
+        "spam_f1": 0.94977169,
+        "spam_precision": 0.95412844,
+        "spam_recall": 0.94545455,
+        "support": 858
+      }
+    },
+    "word_tfidf_logistic_regression": {
+      "calibration": "none",
+      "decision_threshold": 0.5,
+      "estimated_model_bytes": 1274709,
+      "fit_split": "train",
+      "representation": "word_ngrams_1_2",
+      "test": {
+        "accuracy": 0.98601399,
+        "balanced_accuracy": 0.97259358,
+        "brier_score": 0.03673417,
+        "confidence_intervals_95": {
+          "accuracy": [
+            0.97571379,
+            0.99198159
+          ],
+          "ham_specificity": [
+            0.98081006,
+            0.9954596
+          ],
+          "spam_recall": [
+            0.89798406,
+            0.98043054
+          ]
+        },
+        "confusion_matrix": [
+          [
+            741,
+            7
+          ],
+          [
+            5,
+            105
+          ]
+        ],
+        "confusion_matrix_labels": [
+          "ham",
+          "spam"
+        ],
+        "expected_calibration_error": 0.14322972,
+        "label_support": {
+          "ham": 748,
+          "spam": 110
+        },
+        "macro_f1": 0.96895691,
+        "matthews_correlation_coefficient": 0.93796478,
+        "spam_average_precision": 0.97952642,
+        "spam_f1": 0.94594595,
+        "spam_precision": 0.9375,
+        "spam_recall": 0.95454545,
+        "support": 858
+      }
+    }
+  },
+  "primary_comparison": {
+    "confidence_interval_95": [
+      -0.01054804,
+      0.01470485
+    ],
+    "macro_f1_difference": 0.00225492,
+    "probability_candidate_b_better": 0.579,
+    "samples": 2000
+  },
+  "protocol": {
+    "bootstrap_samples": 2000,
+    "primary_comparison": "character TF-IDF minus word TF-IDF test Macro-F1, paired stratified bootstrap",
+    "random_seed": 42,
+    "split": "normalized-text-grouped stratified 70/15/15",
+    "test_use": "single final aggregate evaluation",
+    "training_data": "train only"
+  },
+  "runtime_ham_stress": {
+    "abstention_rate": 0.70989305,
+    "coverage": 0.29010695,
+    "high_risk_rate": 0.0,
+    "interpretation": "Stress test on held-out ham only; this is not legitimate-class accuracy.",
+    "medium_or_high_escalation_rate": 0.0,
+    "non_abstained_category_distribution": {
+      "courier_scam": 6,
+      "digital_arrest": 141,
+      "fake_job": 31,
+      "investment_scam": 12,
+      "kyc_scam": 8,
+      "loan_scam": 8,
+      "otp_phishing": 8,
+      "upi_refund_scam": 3
+    },
+    "support": 748
+  },
+  "schema_version": 1
+}

@@ -174,3 +174,18 @@ Recommended evaluation targets:
 The main report should state: "The current calibrated result is an internal synthetic bootstrap benchmark, has no legitimate examples, and is not a claim of production accuracy."
 
 That sentence protects the project while still showing measurable progress.
+
+## Completed Hybrid Evaluation
+
+The final package now includes the public UCI SMS Spam Collection binary track,
+separate from the internal eight-class benchmark. Its 5,574 rows are normalized,
+grouped before splitting to prevent duplicate leakage, and evaluated once on an
+858-row test partition. The archive hash, split counts, uncertainty intervals,
+aggregate model metrics and runtime ham stress are committed in
+`outputs/evaluation/`; raw messages and row predictions are not.
+
+Five controlled synthetic subsystem tracks are also complete: entity extraction
+(40 cases), URL-risk reasoning (40 URLs), privacy-safe graph linking (20 cases),
+real Tesseract OCR (24 screenshots), and complaint-template contracts (24 cases).
+Binary, eight-class and subsystem numbers must remain separately labelled in
+reports and presentations.

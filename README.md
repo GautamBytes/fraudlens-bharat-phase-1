@@ -44,6 +44,26 @@ sequence, see `docs/deployment_guide.md` before changing exposure, and use
 
 These synthetic bootstrap results are not a production accuracy claim.
 
+### Hybrid evaluation evidence
+
+The final research package now keeps four evidence tracks separate:
+
+- internal eight-class synthetic evaluation;
+- external binary validation on all 5,574 UCI SMS Spam Collection records,
+  with normalized duplicate groups kept within one split;
+- deployed-runtime abstention and escalation behavior on 748 held-out ham
+  messages; and
+- controlled entity, URL, graph, OCR and complaint-template benchmarks.
+
+The calibrated character candidate reached 98.60% accuracy, 0.9682 Macro-F1,
+0.9273 spam recall and 0.0071 ECE on the 858-message external binary test. The
+paired character-vs-word Macro-F1 interval crosses zero, so it is not presented
+as a statistically decisive win. The OCR benchmark used 24 real Tesseract runs
+and recorded 0% failures with 91.67% downstream label agreement. See
+`outputs/evaluation/` and `docs/phase2_research_report.md`. Only aggregate
+evidence is tracked; raw UCI messages, row predictions and externally trained
+artifacts are not committed. These results are not production accuracy.
+
 ## Final Capstone Package
 
 The final Phase 1 + Phase 2 meeting package is source-backed and uses the
@@ -252,6 +272,20 @@ This writes deterministic `evaluation.json` and a readable `summary.txt`.
 The report intentionally omits wall-clock timings, which are not stable enough
 for byte-for-byte reproducible evidence. It records that the 64-row synthetic
 bootstrap is missing `legitimate` and does not meet the 200-rows-per-label target.
+
+To reproduce the external binary benchmark, download the official UCI archive
+outside the repository and run:
+
+```bash
+python -m fraudlens.external_evaluation \
+  --archive /path/to/sms-spam-collection.zip \
+  --output outputs/evaluation \
+  --bootstrap-samples 2000
+```
+
+The command refuses an archive whose SHA-256 or 5,574-row contract differs from
+the pinned source. Run `python -m fraudlens.subsystem_evaluation --output
+outputs/evaluation` in the pinned Docker image for canonical Tesseract evidence.
 
 ## Demo Cases
 

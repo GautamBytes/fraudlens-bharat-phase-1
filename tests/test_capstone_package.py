@@ -140,8 +140,8 @@ def test_final_deck_uses_current_source_backed_claims_and_boundaries():
     text = " ".join(_deck_slide_text())
     claims = _machine_claims()
 
+    assert "phase 1 + phase 2" in text.casefold()
     for current_claim in (
-        "Phase 1 + Phase 2",
         *claims.values(),
         "74.41% accuracy",
         "71.49% F1",
@@ -192,10 +192,14 @@ def test_final_deck_embeds_the_current_architecture_evidence():
             "ppt/slides/_rels/slide5.xml.rels"
         ).decode("utf-8")
         target = re.search(
-            rf'<Relationship Id="{relationship_id}"[^>]+Target="([^"]+)"',
+            rf'<Relationship (?=[^>]*Id="{relationship_id}")(?=[^>]*Target="([^"]+)")',
             relationships,
         ).group(1)
-        media_name = posixpath.normpath(posixpath.join("ppt/slides", target))
+        media_name = (
+            target.lstrip("/")
+            if target.startswith("/")
+            else posixpath.normpath(posixpath.join("ppt/slides", target))
+        )
 
         assert archive.read(media_name) == expected
 
@@ -219,10 +223,14 @@ def test_final_deck_embeds_the_current_website_demo_evidence():
             relationship_ids, expected_paths, strict=True
         ):
             target = re.search(
-                rf'<Relationship Id="{relationship_id}"[^>]+Target="([^"]+)"',
+                rf'<Relationship (?=[^>]*Id="{relationship_id}")(?=[^>]*Target="([^"]+)")',
                 relationships,
             ).group(1)
-            media_name = posixpath.normpath(posixpath.join("ppt/slides", target))
+            media_name = (
+                target.lstrip("/")
+                if target.startswith("/")
+                else posixpath.normpath(posixpath.join("ppt/slides", target))
+            )
             assert archive.read(media_name) == expected_path.read_bytes()
 
 

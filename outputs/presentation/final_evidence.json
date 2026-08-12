@@ -26,7 +26,7 @@
     "runtime_display_name": "Calibrated TF-IDF",
     "runtime_summary": "8 synthetic test rows | Accuracy 0.500 | Macro-F1 0.500 | Coverage 0.875"
   },
-  "claim_boundary": "Internal synthetic evidence only; the research candidate is not the deployed model and no production-accuracy claim is made.",
+  "claim_boundary": "Internal eight-class, external binary, deployed-runtime stress, and synthetic subsystem evidence are separate tracks; no production-accuracy claim is made.",
   "dataset": {
     "legitimate_label_present": false,
     "phase2_target_met": false,
@@ -43,6 +43,49 @@
     "coverage": 0.875,
     "macro_f1": 0.5,
     "name": "calibrated_tfidf"
+  },
+  "external_binary": {
+    "calibrated_character": {
+      "accuracy": 0.98601399,
+      "ece": 0.00705779,
+      "macro_f1": 0.96822222,
+      "spam_recall": 0.92727273
+    },
+    "dataset": {
+      "doi": "10.24432/C5CC84",
+      "name": "SMS Spam Collection",
+      "rows": 5574,
+      "test_rows": 858
+    },
+    "primary_comparison": {
+      "confidence_interval_95": [
+        -0.01054804,
+        0.01470485
+      ],
+      "macro_f1_difference": 0.00225492,
+      "probability_candidate_b_better": 0.579,
+      "samples": 2000
+    },
+    "raw_messages_committed": false,
+    "runtime_ham_stress": {
+      "abstention_rate": 0.70989305,
+      "coverage": 0.29010695,
+      "high_risk_rate": 0.0,
+      "interpretation": "Stress test on held-out ham only; this is not legitimate-class accuracy.",
+      "medium_or_high_escalation_rate": 0.0,
+      "non_abstained_category_distribution": {
+        "courier_scam": 6,
+        "digital_arrest": 141,
+        "fake_job": 31,
+        "investment_scam": 12,
+        "kyc_scam": 8,
+        "loan_scam": 8,
+        "otp_phishing": 8,
+        "upi_refund_scam": 3
+      },
+      "support": 748
+    },
+    "test_rows": 858
   },
   "research_candidates": [
     {
@@ -450,11 +493,132 @@
     "upi_refund_scam",
     "unknown"
   ],
-  "schema_version": 2,
+  "schema_version": 3,
   "sources": {
     "models/metrics.json": "f8b3530b3c14c0df73bb7d59cd6527e5711bc9f1830242e80025604e0af7290f",
+    "outputs/evaluation/external_sms_models.csv": "48db1e6fc1576d7741e07c5801ca4bd6c0db2fe8f59a82690bf8ffec6a29d153",
+    "outputs/evaluation/external_sms_summary.json": "1ac056896a36a0ca13cce77d043cf69546f7c09aa088058ccbe082564a054a49",
+    "outputs/evaluation/subsystem_metrics.csv": "17ef7013924ce992c5bd3378c76b911ab52f84c66aa531927ae4229c4273dc9a",
+    "outputs/evaluation/subsystem_summary.json": "e0ea0f32efd4c73c46a63d6ed604536de7c2babeb90d243087fb1b5d72e4ed0a",
     "outputs/phase2/evaluation.json": "6c588d52920b5a0d3b22babce1a87cf1356c7278f93cd0fdc4206285165d0adb",
     "outputs/research/ablation_summary.csv": "b11cfe53153c3daa37d3e79905967085b54e8e748a11f8c0cafcd62e989a8496",
     "outputs/research/classification_summary.csv": "ed37d9e5b30d18d267ea781fa83873c4e9a1fa8eb877e5fc94c1531ebf4a09fb"
+  },
+  "subsystem_benchmarks": {
+    "complaint_draft": {
+      "category_consistency": 1.0,
+      "editability_template_pass_rate": 1.0,
+      "expected_evidence_inclusion": 1.0,
+      "field_completeness": 1.0,
+      "human_rated": false,
+      "interpretation": "Deterministic template checks; not a human judgement of complaint quality.",
+      "secret_leak_count": 0,
+      "support": 24,
+      "unsupported_identifier_rate": 0.0
+    },
+    "entity_extraction": {
+      "exact_case_accuracy": 0.875,
+      "micro_f1": 0.94117647,
+      "micro_precision": 0.88888889,
+      "micro_recall": 1.0,
+      "per_type": {
+        "email": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "money": {
+          "f1": 0.66666667,
+          "precision": 0.5,
+          "recall": 1.0,
+          "support": 5
+        },
+        "otp_like_code": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "phone": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "threat_phrase": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "upi_id": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "urgency_phrase": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "url": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        }
+      },
+      "support": 40
+    },
+    "entity_graph": {
+      "component_exact_match": 1.0,
+      "edge_f1": 1.0,
+      "edge_precision": 1.0,
+      "edge_recall": 1.0,
+      "expected_edge_support": 10,
+      "privacy_leak_count": 0,
+      "support": 20
+    },
+    "ocr": {
+      "by_stratum": {
+        "clean": {
+          "character_error_rate": 0.08797654,
+          "failure_rate": 0.0,
+          "support": 8
+        },
+        "low_contrast": {
+          "character_error_rate": 0.07917889,
+          "failure_rate": 0.0,
+          "support": 8
+        },
+        "mild_blur": {
+          "character_error_rate": 0.07038123,
+          "failure_rate": 0.0,
+          "support": 8
+        }
+      },
+      "character_error_rate": 0.07917889,
+      "downstream_entity_f1": 0.71428571,
+      "downstream_label_agreement": 0.91666667,
+      "engine": "tesseract",
+      "failure_rate": 0.0,
+      "languages": "eng+hin",
+      "support": 24,
+      "word_error_rate": 0.5
+    },
+    "url_risk": {
+      "balanced_accuracy": 1.0,
+      "exact_reason_accuracy": 1.0,
+      "f1": 1.0,
+      "false_positive_rate": 0.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "risky_support": 20,
+      "safe_support": 20,
+      "support": 40
+    }
   }
 }

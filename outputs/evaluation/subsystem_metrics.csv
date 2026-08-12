@@ -1,0 +1,6 @@
+subsystem,primary_metric,value,support
+entity_extraction,micro_f1,0.94117647,40
+url_risk,f1,1.0,40
+entity_graph,edge_f1,1.0,20
+ocr,downstream_label_agreement,0.91666667,24
+complaint_draft,field_completeness,1.0,24

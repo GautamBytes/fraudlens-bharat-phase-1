@@ -208,3 +208,33 @@ def test_hingbert_reference_uses_the_official_acl_authors():
 
     assert reference.startswith("[14] R. Nayak and R. Joshi")
     assert "R. R. Shah" not in reference
+
+
+def test_reports_include_separate_external_and_subsystem_evidence_tracks():
+    report = _read("docs/phase2_research_report.md")
+    capstone = _read("docs/final_capstone_report.md")
+    methodology = _read("docs/research_methodology.md")
+    evaluation = _read("docs/evaluation_plan.md")
+    model_card = _read("docs/model_card.md")
+    references = _read("docs/references.md")
+
+    for document in (report, capstone):
+        for expected in (
+            "5,574",
+            "858",
+            "98.60%",
+            "0.9682",
+            "0.9273",
+            "0.0071",
+            "91.67%",
+            "94.12%",
+            "not statistically decisive",
+            "not production accuracy",
+        ):
+            assert expected in document
+    for document in (methodology, evaluation, model_card):
+        assert "SMS Spam Collection" in document
+        assert "group" in document.casefold()
+        assert "binary" in document.casefold()
+        assert "eight-class" in document.casefold()
+    assert "10.24432/C5CC84" in references

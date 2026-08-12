@@ -12,6 +12,8 @@ EXPECTED_IMAGES = {
     "model_comparison.png",
     "robustness_ablation.png",
     "runtime_confusion_matrix.png",
+    "external_validation.png",
+    "subsystem_benchmarks.png",
 }
 ARCHITECTURE_CONTRACT = (
     "Text input=Next.js / FastAPI|Web + API=Result + provenance"
@@ -31,7 +33,7 @@ def test_presentation_evidence_uses_current_runtime_and_research_metrics(tmp_pat
     payload = json.loads((tmp_path / "final_evidence.json").read_text(encoding="utf-8"))
 
     assert {path.name for path in written} == {"final_evidence.json", *EXPECTED_IMAGES}
-    assert payload["schema_version"] == 2
+    assert payload["schema_version"] == 3
     assert payload["dataset"] == {
         "rows": 64,
         "train_rows": 48,
@@ -92,9 +94,18 @@ def test_presentation_evidence_uses_current_runtime_and_research_metrics(tmp_pat
         ),
     }
     assert payload["claim_boundary"] == (
-        "Internal synthetic evidence only; the research candidate is not the deployed model "
-        "and no production-accuracy claim is made."
+        "Internal eight-class, external binary, deployed-runtime stress, and synthetic subsystem "
+        "evidence are separate tracks; no production-accuracy claim is made."
     )
+    assert payload["external_binary"]["dataset"]["rows"] == 5574
+    assert payload["external_binary"]["test_rows"] == 858
+    assert payload["external_binary"]["calibrated_character"]["accuracy"] == 0.98601399
+    assert payload["external_binary"]["calibrated_character"]["macro_f1"] == 0.96822222
+    assert payload["external_binary"]["calibrated_character"]["ece"] == 0.00705779
+    assert payload["external_binary"]["raw_messages_committed"] is False
+    assert payload["subsystem_benchmarks"]["ocr"]["support"] == 24
+    assert payload["subsystem_benchmarks"]["ocr"]["failure_rate"] == 0
+    assert payload["subsystem_benchmarks"]["entity_extraction"]["micro_f1"] == 0.94117647
     for image_name in EXPECTED_IMAGES:
         with Image.open(tmp_path / image_name) as image:
             assert image.format == "PNG"
@@ -133,3 +144,17 @@ def test_architecture_labels_name_the_supported_web_and_api_interfaces():
 
     assert 'box(0.7, 6.6, 2.0, 1.0, "Text input", "Next.js / FastAPI", _BLUE)' in source
     assert 'box(9.0, 6.0, 2.25, 1.15, "Web + API", "Result + provenance", _BLUE)' in source
+
+
+def test_presentation_manifest_binds_external_and_subsystem_aggregate_sources(tmp_path):
+    module = _module()
+    module.generate_presentation_evidence(ROOT, tmp_path)
+    payload = json.loads((tmp_path / "final_evidence.json").read_text(encoding="utf-8"))
+
+    for path in (
+        "outputs/evaluation/external_sms_summary.json",
+        "outputs/evaluation/external_sms_models.csv",
+        "outputs/evaluation/subsystem_summary.json",
+        "outputs/evaluation/subsystem_metrics.csv",
+    ):
+        assert path in payload["sources"]
