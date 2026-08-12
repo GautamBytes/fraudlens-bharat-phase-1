@@ -1,7 +1,7 @@
 {
   "automated_tests": 369,
-  "captured_at_commit": "pending-hybrid-evaluation-pr",
-  "capture_basis": "Hybrid evaluation branch; 369 collected tests verified before PR creation",
+  "captured_at_commit": "a4b360af19951f4a1db8b6ac95be7ea2800252fc",
+  "capture_basis": "Hybrid evaluation evidence revision; 369 collected tests verified before PR creation",
   "captured_on": "2026-08-13",
   "scope": "Final Phase 1 and Phase 2 capstone presentation package",
   "schema_version": 1
