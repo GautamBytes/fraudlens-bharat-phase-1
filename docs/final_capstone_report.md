@@ -23,7 +23,7 @@ Phase 1 established the text-analysis pipeline, FastAPI, a retired Phase 1
 demonstration interface, SQLite storage, tests, and documentation. Phase 2
 added calibrated inference with abstention, screenshot OCR, privacy-safe entity
 relationships, reproducible model research, release hardening, and final
-presentation evidence. The completed codebase has 358 automated tests and runs
+presentation evidence. The completed codebase has 369 automated tests and runs
 through the Next.js website and FastAPI, including a hardened local container
 path.
 
@@ -270,11 +270,12 @@ and one abstention. The deck and demo keep these models separate.
 | Best research candidate by quality and size | **Measured locally** | Character and hybrid make the same decisions, but character uses 331,415 versus 415,954 estimated fitted bytes, 20.3% less |
 | Best probability quality | **Measured locally** | Calibrated hybrid Brier 0.5894 versus 0.7908 for the uncalibrated hybrid, 25.5% lower, with lower accuracy disclosed |
 | Complete review workflow | **Verified capability** | Text, screenshot OCR, entities, URL reasons, uncertainty, complaint draft, consent, expiry, and masked relationships pass automated behavior tests |
-| Subsystem accuracy and performance | **Not yet measured** | OCR CER/WER, entity F1, URL PR-AUC, graph edge F1, draft rubric, p50/p95 latency, and peak RAM remain evaluation targets |
+| Controlled subsystem quality | **Measured locally** | Entity micro-F1 0.9412 (n=40), URL F1 1.0000 (n=40), graph edge-F1 1.0000 (n=20), OCR CER 0.0792 and downstream label agreement 0.9167 (n=24), draft completeness 1.0000 (n=24) |
+| Field accuracy and performance | **Not yet measured** | Naturally sourced OCR/entity/URL/graph labels, blinded human draft ratings, p50/p95 latency, peak RAM, and a usability study remain evaluation targets |
 
 ## Software Verification
 
-The final local suite contains 358 automated tests across preprocessing,
+The final local suite contains 369 automated tests across preprocessing,
 training, inference trust boundaries, evaluation, research reproducibility,
 entities, URL signals, risk, API, OCR, image policies, storage, retention,
 privacy, graph analysis, website integration, deployment, and presentation
@@ -372,5 +373,28 @@ PYTHONPATH=src python -m pytest -q
 
 The machine-readable evidence lives in `outputs/phase2/`, `outputs/research/`,
 and `outputs/presentation/`. The detailed methodology is in
-`docs/research_methodology.md`; IEEE-style sources [1]-[15] are in
+`docs/research_methodology.md`; IEEE-style sources [1]-[16] are in
 `docs/references.md`.
+
+## Hybrid Evaluation Addendum
+
+The final evidence package separates four questions rather than presenting one
+misleading overall score: (1) the internal eight-class synthetic bootstrap,
+(2) external binary spam/ham generalisation, (3) deployed-runtime behaviour on
+held-out ham, and (4) subsystem quality.
+
+The external benchmark uses the UCI SMS Spam Collection: 5,574 public messages,
+grouped by normalized text before a deterministic 70/15/15 split. The 858-row
+held-out test produced 98.60% accuracy, 0.9682 Macro-F1, 0.9273 spam recall and
+0.0071 ECE for calibrated character TF-IDF. Character and word TF-IDF differed
+by only +0.0023 Macro-F1 with a 95% paired-bootstrap interval of -0.0105 to
++0.0147, so the result is not statistically decisive. It is a binary task, not
+the deployed eight-class score and not production accuracy.
+
+Subsystem evidence is also explicit: 94.12% entity micro-F1 on 40 synthetic
+cases; 100% URL-risk F1 on 40 controlled URLs; 100% graph edge-F1 on 20 cases
+with zero raw-value leaks; and 24 real Tesseract screenshot runs with 0% OCR
+failure, 7.92% CER and 91.67% downstream label agreement. Complaint drafts had
+100% required-field completeness on 24 deterministic checks, which is not a
+human quality rating. Aggregate JSON/CSV is committed; raw UCI messages,
+row-level predictions and external fitted models are not.

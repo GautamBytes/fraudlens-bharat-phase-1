@@ -150,10 +150,21 @@ jobs:
             final_system_architecture.png \
             model_comparison.png \
             robustness_ablation.png \
-            runtime_confusion_matrix.png
+            runtime_confusion_matrix.png \
+            external_validation.png \
+            subsystem_benchmarks.png
           do
             test -s "$presentation_tmp/$artifact"
           done
+      - name: Verify hybrid evaluation privacy and committed aggregates
+        if: matrix.python-version == '3.11.15'
+        run: |
+          test -s outputs/evaluation/external_sms_summary.json
+          test -s outputs/evaluation/external_sms_models.csv
+          test -s outputs/evaluation/subsystem_summary.json
+          test -s outputs/evaluation/subsystem_metrics.csv
+          test ! -e data/external/SMSSpamCollection
+          python -c "import json; p=json.load(open('outputs/evaluation/external_sms_summary.json')); assert p['dataset']['raw_messages_committed'] is False; assert p['dataset']['row_predictions_committed'] is False"
 
   container-smoke:
     needs: [test, web]

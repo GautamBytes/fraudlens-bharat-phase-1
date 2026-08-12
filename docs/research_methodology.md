@@ -120,3 +120,23 @@ establish real-world superiority.
 - “Better classifier” requires a same-test improvement with uncertainty.
 - “Better system” can instead mean a documented trade-off across classification,
   evidence extraction, OCR, explainability, privacy, and deployability.
+
+## Hybrid external-validation protocol
+
+The SMS Spam Collection [16] supplies a public binary spam/ham task that is
+reported separately from the internal eight-class fraud-category task. The
+official archive is accepted only when SHA-256 equals
+`1587ea43e58e82b14ff1f5425c88e17f8496bfcdb67a583dbff9eefaf9963ce3` and the
+row count is 5,574. Text is normalized with the production normalizer, grouped
+by exact normalized value, and then split deterministically with seed 42 so a
+duplicate group cannot cross train, validation and test. The committed artifact
+contains only aggregate counts and a hash of the group-to-split manifest.
+
+Word TF-IDF, character TF-IDF, and sigmoid-calibrated character TF-IDF use the
+same split. Binary accuracy, balanced accuracy, spam precision/recall/F1,
+Macro-F1, MCC, average precision, Brier score, ECE, confusion matrix, fitted
+size estimates and Wilson 95% intervals describe complementary behavior.
+The pre-registered character-minus-word Macro-F1 comparison uses a paired,
+class-stratified 2,000-sample bootstrap. The deployed eight-class runtime is
+tested separately on held-out ham only and interpreted as abstention and risk
+escalation behavior—not legitimate accuracy.

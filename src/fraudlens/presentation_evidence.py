@@ -31,8 +31,8 @@ _MODEL_DISPLAY_NAMES = {
     "calibrated_tfidf": "Calibrated TF-IDF",
 }
 _CLAIM_BOUNDARY = (
-    "Internal synthetic evidence only; the research candidate is not the deployed model "
-    "and no production-accuracy claim is made."
+    "Internal eight-class, external binary, deployed-runtime stress, and synthetic subsystem "
+    "evidence are separate tracks; no production-accuracy claim is made."
 )
 _ARCHITECTURE_CONTRACT = (
     "Text input=Next.js / FastAPI|Web + API=Result + provenance"
@@ -67,10 +67,16 @@ def _build_payload(repo_root: Path):
     evaluation_path = repo_root / "outputs" / "phase2" / "evaluation.json"
     comparison_path = repo_root / "outputs" / "research" / "classification_summary.csv"
     robustness_path = repo_root / "outputs" / "research" / "ablation_summary.csv"
+    external_path = repo_root / "outputs" / "evaluation" / "external_sms_summary.json"
+    external_csv_path = repo_root / "outputs" / "evaluation" / "external_sms_models.csv"
+    subsystem_path = repo_root / "outputs" / "evaluation" / "subsystem_summary.json"
+    subsystem_csv_path = repo_root / "outputs" / "evaluation" / "subsystem_metrics.csv"
     metrics = _read_json(metrics_path)
     evaluation = _read_json(evaluation_path)
     comparison_rows = _read_csv(comparison_path)
     robustness_rows = _read_csv(robustness_path)
+    external = _read_json(external_path)
+    subsystems = _read_json(subsystem_path)["subsystems"]
     dataset = evaluation["dataset"]
     test_metrics = metrics["test"]
     final_runtime_evaluation = evaluation["classifiers"]["calibrated_tfidf"]["test"]
@@ -134,7 +140,7 @@ def _build_payload(repo_root: Path):
         ),
     }
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "dataset": {
             "rows": dataset["rows"],
             "train_rows": dataset["split_rows"]["train"],
@@ -149,11 +155,39 @@ def _build_payload(repo_root: Path):
         "runtime_labels": final_runtime_evaluation["confusion_matrix_labels"],
         "research_candidates": research_candidates,
         "robustness": robustness,
+        "external_binary": {
+            "dataset": {
+                "name": external["dataset"]["name"],
+                "rows": external["dataset"]["rows"],
+                "test_rows": external["dataset"]["split_rows"]["test"],
+                "doi": external["dataset"]["doi"],
+            },
+            "test_rows": external["dataset"]["split_rows"]["test"],
+            "calibrated_character": {
+                "accuracy": external["models"]["calibrated_character_tfidf"]["test"]["accuracy"],
+                "macro_f1": external["models"]["calibrated_character_tfidf"]["test"]["macro_f1"],
+                "spam_recall": external["models"]["calibrated_character_tfidf"]["test"]["spam_recall"],
+                "ece": external["models"]["calibrated_character_tfidf"]["test"]["expected_calibration_error"],
+            },
+            "primary_comparison": external["primary_comparison"],
+            "runtime_ham_stress": external["runtime_ham_stress"],
+            "raw_messages_committed": external["dataset"]["raw_messages_committed"],
+        },
+        "subsystem_benchmarks": subsystems,
         "chart_contract": chart_contract,
         "claim_boundary": _CLAIM_BOUNDARY,
         "sources": {
             str(path.relative_to(repo_root)): _sha256(path)
-            for path in (metrics_path, evaluation_path, comparison_path, robustness_path)
+            for path in (
+                metrics_path,
+                evaluation_path,
+                comparison_path,
+                robustness_path,
+                external_path,
+                external_csv_path,
+                subsystem_path,
+                subsystem_csv_path,
+            )
         },
     }
 
@@ -321,6 +355,76 @@ def _confusion_figure(payload, output_path: Path) -> Path:
     return _save_figure(fig, output_path)
 
 
+def _external_figure(payload, output_path: Path) -> Path:
+    external = payload["external_binary"]
+    metrics = external["calibrated_character"]
+    labels = ["Accuracy", "Macro-F1", "Spam recall", "Calibration\n(1 - ECE)"]
+    values = [metrics["accuracy"], metrics["macro_f1"], metrics["spam_recall"], 1 - metrics["ece"]]
+    colors = [_BLUE, _TEAL, _ORANGE, _RED]
+    fig, axis = plt.subplots(figsize=(12, 9))
+    bars = axis.bar(labels, values, color=colors, width=0.62)
+    axis.set_ylim(0, 1.08)
+    axis.set_ylabel("Score (higher is better; calibration shown as 1 - ECE)")
+    axis.set_title("External binary validation on the UCI SMS Spam Collection", loc="left", fontsize=20, fontweight="bold", color=_NAVY)
+    axis.grid(axis="y", alpha=0.2)
+    for bar, value in zip(bars, values):
+        axis.text(bar.get_x() + bar.get_width() / 2, value + 0.018, f"{value:.3f}", ha="center", fontweight="bold", color=_NAVY)
+    comparison = external["primary_comparison"]
+    fig.text(
+        0.10,
+        0.055,
+        (
+            f"5,574 public messages; duplicate-safe grouped split; 858 held-out test messages.\n"
+            f"Character - word Macro-F1 = {comparison['macro_f1_difference']:+.4f}, "
+            f"95% bootstrap CI [{comparison['confidence_interval_95'][0]:+.4f}, {comparison['confidence_interval_95'][1]:+.4f}].\n"
+            "Binary public-corpus evidence is not the deployed eight-class runtime and is not a production claim."
+        ),
+        fontsize=9.5,
+        color="#334E68",
+        va="bottom",
+    )
+    fig.subplots_adjust(left=0.10, right=0.97, top=0.88, bottom=0.22)
+    return _save_figure(fig, output_path)
+
+
+def _subsystem_figure(payload, output_path: Path) -> Path:
+    subsystems = payload["subsystem_benchmarks"]
+    labels = ["Entity\nF1", "URL risk\nF1", "Graph edge\nF1", "OCR label\nagreement", "Draft field\ncompleteness"]
+    values = [
+        subsystems["entity_extraction"]["micro_f1"],
+        subsystems["url_risk"]["f1"],
+        subsystems["entity_graph"]["edge_f1"],
+        subsystems["ocr"]["downstream_label_agreement"],
+        subsystems["complaint_draft"]["field_completeness"],
+    ]
+    supports = [
+        subsystems["entity_extraction"]["support"],
+        subsystems["url_risk"]["support"],
+        subsystems["entity_graph"]["support"],
+        subsystems["ocr"]["support"],
+        subsystems["complaint_draft"]["support"],
+    ]
+    fig, axis = plt.subplots(figsize=(12, 9))
+    bars = axis.bar(labels, values, color=[_BLUE, _TEAL, _ORANGE, _RED, _NAVY], width=0.64)
+    axis.set_ylim(0, 1.08)
+    axis.set_ylabel("Controlled synthetic benchmark score")
+    axis.set_title("Measured subsystem quality, reported separately", loc="left", fontsize=20, fontweight="bold", color=_NAVY)
+    axis.grid(axis="y", alpha=0.2)
+    for bar, value, support in zip(bars, values, supports):
+        axis.text(bar.get_x() + bar.get_width() / 2, value + 0.018, f"{value:.3f}\nn={support}", ha="center", fontsize=10, fontweight="bold", color=_NAVY)
+    fig.text(
+        0.10,
+        0.060,
+        "OCR: 24 deterministic PNG screenshots; 0% failures; 7.92% CER.\n"
+        "Downstream label agreement: 91.67%. Complaint checks are deterministic templates, not human ratings.",
+        fontsize=9.5,
+        color="#334E68",
+        va="bottom",
+    )
+    fig.subplots_adjust(left=0.10, right=0.97, top=0.88, bottom=0.20)
+    return _save_figure(fig, output_path)
+
+
 def generate_presentation_evidence(repo_root: Path, output_dir: Path):
     repo_root = Path(repo_root)
     output_dir = Path(output_dir)
@@ -333,6 +437,8 @@ def generate_presentation_evidence(repo_root: Path, output_dir: Path):
     written.append(_comparison_figure(payload, output_dir / "model_comparison.png"))
     written.append(_robustness_figure(payload, output_dir / "robustness_ablation.png"))
     written.append(_confusion_figure(payload, output_dir / "runtime_confusion_matrix.png"))
+    written.append(_external_figure(payload, output_dir / "external_validation.png"))
+    written.append(_subsystem_figure(payload, output_dir / "subsystem_benchmarks.png"))
     return tuple(written)
 
 

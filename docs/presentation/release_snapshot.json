@@ -1,8 +1,8 @@
 {
-  "automated_tests": 358,
-  "captured_at_commit": "b4a7fd23c0d0853a5692787e90ff1ac3814e970e",
-  "capture_basis": "Final pitch-readiness branch; 358 collected tests verified at this revision",
-  "captured_on": "2026-08-11",
+  "automated_tests": 369,
+  "captured_at_commit": "a4b360af19951f4a1db8b6ac95be7ea2800252fc",
+  "capture_basis": "Hybrid evaluation evidence revision; 369 collected tests verified before PR creation",
+  "captured_on": "2026-08-13",
   "scope": "Final Phase 1 and Phase 2 capstone presentation package",
   "schema_version": 1
 }

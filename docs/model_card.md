@@ -97,3 +97,13 @@ The complaint draft is an assistive summary. The user must manually review and r
 ## Maintenance
 
 When new data is added, retrain the baseline, inspect the confusion matrix, update `models/metrics.json`, and add regression tests for repeated errors.
+
+## External Validation Boundary
+
+The SMS Spam Collection [16] is used only for a separate binary spam/ham
+research benchmark. A deterministic normalized-text group split prevents exact
+duplicates from crossing partitions. The calibrated character TF-IDF research
+candidate achieved 98.60% accuracy and 0.9682 Macro-F1 on 858 held-out messages,
+but it is not the deployed eight-class model. The deployed runtime is evaluated
+on the corpus only as a held-out ham selectivity stress test. Neither result is
+production accuracy, and no externally trained model artifact is shipped.

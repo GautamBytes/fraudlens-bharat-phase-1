@@ -1,0 +1,127 @@
+{
+  "claim_boundary": "These controlled synthetic subsystem checks complement, but do not replace, field or user studies.",
+  "fixture_policy": {
+    "interpretation": "Fixtures are generated from reviewed templates; only aggregates are emitted.",
+    "raw_fixture_text_committed": false,
+    "row_level_predictions_committed": false,
+    "synthetic_only": true
+  },
+  "schema_version": 1,
+  "subsystems": {
+    "complaint_draft": {
+      "category_consistency": 1.0,
+      "editability_template_pass_rate": 1.0,
+      "expected_evidence_inclusion": 1.0,
+      "field_completeness": 1.0,
+      "human_rated": false,
+      "interpretation": "Deterministic template checks; not a human judgement of complaint quality.",
+      "secret_leak_count": 0,
+      "support": 24,
+      "unsupported_identifier_rate": 0.0
+    },
+    "entity_extraction": {
+      "exact_case_accuracy": 0.875,
+      "micro_f1": 0.94117647,
+      "micro_precision": 0.88888889,
+      "micro_recall": 1.0,
+      "per_type": {
+        "email": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "money": {
+          "f1": 0.66666667,
+          "precision": 0.5,
+          "recall": 1.0,
+          "support": 5
+        },
+        "otp_like_code": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "phone": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "threat_phrase": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "upi_id": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "urgency_phrase": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        },
+        "url": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 5
+        }
+      },
+      "support": 40
+    },
+    "entity_graph": {
+      "component_exact_match": 1.0,
+      "edge_f1": 1.0,
+      "edge_precision": 1.0,
+      "edge_recall": 1.0,
+      "expected_edge_support": 10,
+      "privacy_leak_count": 0,
+      "support": 20
+    },
+    "ocr": {
+      "by_stratum": {
+        "clean": {
+          "character_error_rate": 0.08797654,
+          "failure_rate": 0.0,
+          "support": 8
+        },
+        "low_contrast": {
+          "character_error_rate": 0.07917889,
+          "failure_rate": 0.0,
+          "support": 8
+        },
+        "mild_blur": {
+          "character_error_rate": 0.07038123,
+          "failure_rate": 0.0,
+          "support": 8
+        }
+      },
+      "character_error_rate": 0.07917889,
+      "downstream_entity_f1": 0.71428571,
+      "downstream_label_agreement": 0.91666667,
+      "engine": "tesseract",
+      "failure_rate": 0.0,
+      "languages": "eng+hin",
+      "support": 24,
+      "word_error_rate": 0.5
+    },
+    "url_risk": {
+      "balanced_accuracy": 1.0,
+      "exact_reason_accuracy": 1.0,
+      "f1": 1.0,
+      "false_positive_rate": 0.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "risky_support": 20,
+      "safe_support": 20,
+      "support": 40
+    }
+  }
+}

@@ -501,5 +501,35 @@ Compact evidence is committed under `outputs/research/`. The full
 `classification_benchmark.json` and `robustness_benchmark.json` diagnostics are
 generated locally but ignored by Git. CI creates two independent runs,
 byte-compares every JSON and CSV artifact between them, and compares the compact
-committed evidence with the generated result. References [1]-[15] are listed in
+committed evidence with the generated result. References [1]-[16] are listed in
 `docs/references.md`.
+
+## 17. Hybrid External And Subsystem Evaluation
+
+The final evaluation adds three evidence tracks without blending unlike tasks.
+First, the existing eight-class study remains the internal synthetic bootstrap.
+Second, a binary public-corpus benchmark uses all 5,574 records in the UCI SMS
+Spam Collection [16]. Normalized duplicate messages are assigned as groups to a
+deterministic 70/15/15 split, leaving 858 held-out test messages. No raw public
+messages, fitted vocabulary, model binary, or row-level prediction is committed.
+
+On that binary task, calibrated character TF-IDF achieved 98.60% accuracy,
+0.9682 Macro-F1, 0.9273 spam recall and 0.0071 expected calibration error. The
+un-calibrated character model reached 0.9712 Macro-F1 and the word model reached
+0.9690. Their paired 2,000-sample bootstrap difference was +0.0023 with a 95%
+interval from -0.0105 to +0.0147, so the apparent difference is not statistically decisive.
+These are external binary results, not the deployed
+eight-class score and not production accuracy.
+
+Third, the deployed runtime was stress-tested only on the 748 held-out ham
+messages. It abstained on 70.99%, covered 29.01%, and produced no medium/high
+risk escalation. This is a false-escalation/selectivity probe, not legitimate
+classification accuracy, because `legitimate` was never a trained runtime label.
+
+Finally, controlled synthetic subsystem benchmarks measured entity extraction
+on 40 cases (94.12% micro-F1), URL risk on 40 cases (100% F1), graph linking on
+20 cases (100% edge-F1 with zero raw-value leaks), OCR on 24 rendered screenshots
+(0% failures, 7.92% character error rate, 91.67% downstream label agreement),
+and complaint templates on 24 cases (100% required-field completeness and zero
+secret leaks). The URL, graph and complaint scores reflect deterministic
+contract fixtures; they are not field or human usability studies.

@@ -23,5 +23,8 @@ outputs/research/classification_benchmark.json
 outputs/research/robustness_benchmark.json
 data/raw/*
 data/processed/*
+data/external/*
+*sms-spam-collection*.zip
+SMSSpamCollection
 !data/raw/.gitkeep
 !data/processed/.gitkeep

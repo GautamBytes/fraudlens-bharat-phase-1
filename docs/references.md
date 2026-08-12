@@ -31,3 +31,5 @@ Use IEEE format in the final PDF. These sources support the Phase 1 report, lite
 [14] R. Nayak and R. Joshi, "L3Cube-HingCorpus and HingBERT: A Code Mixed Hindi-English Dataset and BERT Language Models," in Proceedings of WILDRE-6, 2022. Available: https://aclanthology.org/2022.wildre-1.2/
 
 [15] Google, "How Google protects your privacy with spam detection," Google Messages Help. Available: https://support.google.com/messages/answer/9327903?hl=en. [Accessed: Aug. 11, 2026].
+
+[16] T. Almeida and J. Hidalgo, "SMS Spam Collection," UCI Machine Learning Repository, 2011. doi: 10.24432/C5CC84. Available: https://archive.ics.uci.edu/dataset/228/sms+spam+collection
