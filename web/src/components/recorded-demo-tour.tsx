@@ -72,7 +72,7 @@ export function RecordedDemoTour() {
   return (
     <section className="homeSection recordedTour" aria-labelledby="recorded-tour-title">
       <header className="recordedTourHeading">
-        <div><p className="eyebrow">Recorded product path</p><h2 id="recorded-tour-title">See the system before you run it.</h2></div>
+        <div><p className="eyebrow">Recorded product path</p><h2 id="recorded-tour-title">See the evidence before you run it.</h2></div>
         <p>These screenshots replay controlled synthetic fixtures through the current interface. They demonstrate workflow and evidence structure, not production accuracy.</p>
       </header>
       <div className="recordedStories">

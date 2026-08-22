@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { AnalysisResult } from "@/lib/contracts";
+import { InterfaceIcon } from "./interface-primitives";
 
 function titleCaseLabel(label: string): string {
   if (label === "kyc_scam") return "KYC scam";
@@ -16,7 +17,7 @@ function percent(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
-export function AnalysisResultView({ result }: { result: AnalysisResult }) {
+export function AnalysisResultView({ result, onReset }: { result: AnalysisResult; onReset?: () => void }) {
   const [copied, setCopied] = useState(false);
   const abstained = result.metadata.prediction_abstained === true;
 
@@ -32,9 +33,10 @@ export function AnalysisResultView({ result }: { result: AnalysisResult }) {
           <p className="eyebrow">Analysis complete</p>
           <h2>Review decision</h2>
         </div>
-        <span className={`riskBadge risk-${result.risk_level}`}>
-          {result.risk_level} risk
-        </span>
+        <div className="resultHeadingActions">
+          <span className={`riskBadge risk-${result.risk_level}`}>{result.risk_level} risk</span>
+          {onReset && <button className="textButton" type="button" onClick={onReset}>Analyze another message</button>}
+        </div>
       </div>
 
       <div className="decisionIdentity">
@@ -120,7 +122,7 @@ export function AnalysisResultView({ result }: { result: AnalysisResult }) {
           <h3>Complaint draft</h3>
           <p>{result.complaint_draft}</p>
           <button className="secondaryButton" type="button" onClick={copyDraft}>
-            {copied ? "Copied" : "Copy complaint draft"}
+            <InterfaceIcon name={copied ? "check" : "copy"} />{copied ? "Copied" : "Copy complaint draft"}
           </button>
           <div className="humanBoundary">
             <strong>Human review remains required.</strong>

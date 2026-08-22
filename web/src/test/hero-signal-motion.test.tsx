@@ -18,13 +18,16 @@ describe("hero signal motion", () => {
     expect(container.querySelectorAll(".signalDepthArc")).toHaveLength(0);
   });
 
-  it("defines the enlarged staggered flat ellipse", () => {
-    expect(stylesheet.includes("width: 84%; height: 72%")).toBe(true);
-    expect(stylesheet.includes("offset-path: ellipse(42% 36% at 50% 38%)")).toBe(true);
-    expect(stylesheet.includes("animation: signal-orbit 11s linear infinite")).toBe(true);
-    expect(stylesheet.includes("animation-delay: -3.667s")).toBe(true);
-    expect(stylesheet.includes("animation-delay: -7.333s")).toBe(true);
-    expect(stylesheet.includes("animation: none !important")).toBe(true);
+  it("defines the enlarged staggered evidence orbit", () => {
+    expect(stylesheet).toContain("grid-template-columns:minmax(0,1.15fr) minmax(440px,.85fr)");
+    expect(stylesheet).toContain("font-size:clamp(3.5rem,4.7vw,5.1rem)");
+    expect(stylesheet).toContain("width:94%;height:78%");
+    expect(stylesheet).toContain("offset-path:ellipse(47% 39% at 50% 42%)");
+    expect(stylesheet).toContain("animation:signal-orbit 18s linear infinite");
+    expect(stylesheet).toContain("animation-delay:-6s");
+    expect(stylesheet).toContain("animation-delay:-12s");
+    expect(stylesheet).toContain("@media(prefers-reduced-motion:reduce)");
+    expect(stylesheet).toContain(".signalNode{display:none}");
     expect(stylesheet.includes("signal-depth-orbit")).toBe(false);
     expect(stylesheet.includes("perspective(900px)")).toBe(false);
   });

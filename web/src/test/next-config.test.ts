@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 async function loadConfig(vercel: string | undefined) {
@@ -19,5 +22,11 @@ describe("Next.js deployment output", () => {
 
   it("keeps standalone output for the Docker image", async () => {
     expect((await loadConfig(undefined)).output).toBe("standalone");
+  });
+
+  it("keeps production builds independent from remote font downloads", () => {
+    const layout = readFileSync(resolve(process.cwd(), "src/app/layout.tsx"), "utf8");
+
+    expect(layout).not.toContain("next/font/google");
   });
 });

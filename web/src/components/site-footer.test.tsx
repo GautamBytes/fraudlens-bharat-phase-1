@@ -9,6 +9,12 @@ describe("SiteFooter", () => {
 
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Educational prototype · Synthetic evidence only");
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Do not enter real personal, banking or victim information.");
+    expect(screen.getByRole("navigation", { name: "Project" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Analyze" })).toHaveAttribute("href", "/analyze");
+    expect(screen.getByRole("link", { name: "Source repository" })).toHaveAttribute(
+      "href",
+      "https://github.com/GautamBytes/fraudlens-bharat-phase-1",
+    );
 
     const contacts = [
       ["LinkedIn", "https://www.linkedin.com/in/gautam-manchandani/"],

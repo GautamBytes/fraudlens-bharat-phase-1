@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { SiteFooter } from "./site-footer";
+import { InterfaceIcon } from "./interface-primitives";
 
 const NAVIGATION = [
-  ["/", "Evaluate", "01"],
-  ["/analyze", "Analyze", "02"],
-  ["/relationships", "Relationships", "03"],
-  ["/research", "Research", "04"],
-  ["/guide", "Run guide", "05"],
+  ["/", "Overview"],
+  ["/relationships", "Relationships"],
+  ["/research", "Research"],
+  ["/guide", "Run guide"],
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -32,6 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="appFrame">
+      <a className="skipLink" href="#main-content">Skip to content</a>
       <header className="siteHeader">
         <div className="siteHeaderInner">
           <Link href="/" className="siteBrand" onClick={() => setOpen(false)}>
@@ -57,12 +58,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
+            <Link className="siteNavLink mobileAnalyzeLink" href="/analyze" onClick={() => setOpen(false)}>
+              Analyze
+            </Link>
             <div className="mobileBoundary">
               <strong>Educational prototype</strong>
               <span>Synthetic evidence only. Human review remains mandatory.</span>
             </div>
           </nav>
           <div className="headerTools">
+            <Link className="headerCta" href="/analyze" onClick={() => setOpen(false)}>
+              <span>Analyze evidence</span>
+              <InterfaceIcon name="arrow" />
+            </Link>
             <button
               ref={menuButton}
               className="menuButton"
@@ -72,12 +80,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-label={open ? "Close menu" : "Menu"}
               onClick={() => setOpen(!open)}
             >
-              <span aria-hidden="true">{open ? "×" : "☰"}</span>
+              <InterfaceIcon name={open ? "close" : "menu"} />
             </button>
           </div>
         </div>
       </header>
-      <div className="pageSurface">
+      <div className="pageSurface" id="main-content">
         {children}
       </div>
       <SiteFooter />

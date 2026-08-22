@@ -1,14 +1,29 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useState } from "react";
+
+import { InterfaceIcon } from "./interface-primitives";
 
 function Step({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return <article className="guideStep"><span>{number}</span><div><h3>{title}</h3>{children}</div></article>;
 }
 
 function Command({ children }: { children: string }) {
-  return <pre tabIndex={0}><code>{children}</code></pre>;
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    await navigator.clipboard.writeText(children);
+    setCopied(true);
+  }
+  return (
+    <div className="commandBlock">
+      <button type="button" onClick={copy} aria-label={copied ? "Command copied" : "Copy command"}><InterfaceIcon name={copied ? "check" : "copy"} />{copied ? "Copied" : "Copy"}</button>
+      <pre tabIndex={0}><code>{children}</code></pre>
+    </div>
+  );
 }
 
-export function ProfessorGuide() {
+export function ProjectGuide() {
   return (
     <div className="guideStack">
       <nav className="guidePathIndex" aria-label="Evaluation paths">
@@ -18,10 +33,10 @@ export function ProfessorGuide() {
       </nav>
       <section className="guidePath hostedPath" id="hosted">
         <p className="eyebrow">No installation</p><h2>Fastest: hosted evaluation</h2>
-        <p>Open the published Vercel URL. Its server securely calls the containerized Python engine; the private key never reaches the browser.</p>
-        <div className="guideHostedAction"><a className="primaryButton" href="https://fraudlens-bharat.vercel.app" target="_blank" rel="noreferrer">Open hosted website</a></div>
+        <p>Open the published website. Its server securely calls the containerized Python engine; the private key never reaches the browser.</p>
+        <div className="guideHostedAction"><a className="primaryButton" href="https://fraudlens-bharat.vercel.app" target="_blank" rel="noreferrer">Open hosted website <InterfaceIcon name="external" /></a></div>
         <div className="guideSteps">
-          <Step number="01" title="Open the project"><p>Start on Evaluate. The screenshot flow automatically retries one initial timeout while a sleeping analysis engine wakes.</p></Step>
+          <Step number="01" title="Open the project"><p>Start on Overview. The screenshot flow retries one initial timeout while a sleeping analysis engine wakes.</p></Step>
           <Step number="02" title="Run prepared evidence"><p>Analyze synthetic text or a screenshot, then inspect confidence, signals and the draft.</p></Step>
           <Step number="03" title="Inspect a campaign"><p>Build the synthetic relationship and confirm the repeated value is masked.</p></Step>
           <Step number="04" title="Audit the claims"><p>Compare research and runtime models, then read the evidence boundary.</p></Step>
@@ -30,7 +45,7 @@ export function ProfessorGuide() {
 
       <section className="guidePath dockerPath" id="docker-run">
         <p className="eyebrow">Full reproducibility</p><h2>Complete: Docker evaluation</h2>
-        <p>This path includes the web UI, FastAPI, calibrated model, SQLite case store, and English/Hindi Tesseract OCR.</p>
+        <p>This path includes the website, FastAPI, calibrated model, SQLite case store, and English/Hindi Tesseract OCR.</p>
         <Command>{"cp .env.example .env\ndocker compose up --build"}</Command>
         <p>Set a strong <code>FRAUDLENS_HMAC_SECRET</code>, then open <code>http://localhost:3000</code>. Stop with <code>docker compose down</code>; add <code>-v</code> only when intentionally deleting demo data.</p>
       </section>

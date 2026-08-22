@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_professor_web_deployment_contract_is_documented():
     guide = (ROOT / "docs/professor_testing_guide.md").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    in_app_guide = (ROOT / "web/src/components/professor-guide.tsx").read_text(
+    in_app_guide = (ROOT / "web/src/components/project-guide.tsx").read_text(
         encoding="utf-8"
     )
     for phrase in (

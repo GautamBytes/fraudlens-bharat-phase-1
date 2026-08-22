@@ -59,9 +59,17 @@ export function ResearchEvidence() {
         <span>{RESEARCH_SNAPSHOT.dataset.rows}-row synthetic fraud-only bootstrap; {RESEARCH_SNAPSHOT.dataset.test_rows} test rows, one per class; no legitimate label. This is internal comparative evidence, not a production accuracy claim.</span>
       </div>
 
+      <details className="methodologyDetails">
+        <summary>Methodology and validity checks</summary>
+        <div>
+          <p>All approaches use the same frozen, stratified internal split so their relative comparison is reproducible. The deployed runtime is reported separately because calibration and abstention change how often it accepts a decision.</p>
+          <ul><li>One held-out synthetic example per fraud class.</li><li>No legitimate-message class, field trial, or population prevalence estimate.</li><li>Robustness checks perturb punctuation, spacing, and spelling.</li><li>Artifact sizes describe implementation cost, not predictive quality.</li></ul>
+        </div>
+      </details>
+
       <section className="researchSection" id="approaches">
         <div className="sectionIntro"><p className="eyebrow">All evaluated approaches</p><h2>Same split, different trade-offs</h2></div>
-        <div className="modelTableWrap">
+        <div className="modelTableWrap" tabIndex={0} aria-label="Model comparison table; scroll horizontally on small screens">
           <table className="modelTable">
             <caption className="visuallyHidden">Same-split classification benchmark and model trade-offs</caption>
             <thead><tr><th>Approach</th><th>Role</th><th>Accuracy</th><th>Macro-F1</th><th>Coverage</th><th>Size</th><th>Primary weakness</th></tr></thead>

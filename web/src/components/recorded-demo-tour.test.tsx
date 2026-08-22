@@ -7,7 +7,7 @@ describe("RecordedDemoTour", () => {
   it("shows three honest recorded demonstrations with direct routes", () => {
     render(<RecordedDemoTour />);
 
-    expect(screen.getByRole("heading", { name: "See the system before you run it." })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "See the evidence before you run it." })).toBeVisible();
     expect(screen.getAllByText("Recorded synthetic demonstration")).toHaveLength(3);
 
     const screenshots = [
