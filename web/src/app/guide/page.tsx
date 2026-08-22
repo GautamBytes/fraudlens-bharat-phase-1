@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DocsFrame } from "@/components/docs-frame";
 import { PageIntro } from "@/components/page-intro";
-import { ProfessorGuide } from "@/components/professor-guide";
+import { ProjectGuide } from "@/components/project-guide";
 
 export const metadata: Metadata = { title: "Run guide" };
 
@@ -25,11 +25,11 @@ export default function GuidePage() {
   return (
     <main className="pageContent docsPage guidePage">
       <PageIntro
-        eyebrow="Professor evaluation guide"
+        eyebrow="Project run guide"
         title="Test it in minutes. Reproduce every layer."
         description="Use the hosted path for a quick review or Docker for the complete local model, OCR, storage, API, and website stack."
       />
-      <DocsFrame index={INDEX} outline={OUTLINE}><ProfessorGuide /></DocsFrame>
+      <DocsFrame index={INDEX} outline={OUTLINE}><ProjectGuide /></DocsFrame>
     </main>
   );
 }

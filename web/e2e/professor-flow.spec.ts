@@ -28,17 +28,17 @@ const linkedGraph = {
   summary: { case_count: 2, entity_count: 1, edge_count: 2, component_count: 1, truncated: false },
 };
 
-test("professor can move from overview to an explainable analysis", async ({ page }) => {
+test("a reviewer can move from overview to an explainable analysis", async ({ page }) => {
   await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", service: "fraudlens-bharat", version: "1.0.0" } }));
   await page.route("**/api/analyze", (route) => route.fulfill({ json: result }));
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /review suspicious messages/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /turn suspicious messages into reviewable evidence/i })).toBeVisible();
   await expect(page.getByRole("region", { name: "Synthetic analysis trace" })).toBeVisible();
   await expect(page.getByRole("contentinfo")).toContainText("Educational prototype · Synthetic evidence only");
   await expect(page.getByText(/phase 1|phase 2/i)).toHaveCount(0);
 
-  await page.getByRole("link", { name: /start guided evaluation/i }).click();
+  await page.getByRole("link", { name: /analyze synthetic evidence/i }).click();
   await page.getByRole("button", { name: /analyze message/i }).click();
   await expect(page.getByRole("heading", { name: "KYC scam" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /complaint draft/i })).toBeVisible();
@@ -66,7 +66,7 @@ test("screenshot intake rejects a payload above the hosted boundary", async ({ p
   await expect(page.locator(".errorNotice[role=alert]")).toContainText("under 4 MB");
 });
 
-test("professor can seed and reset the masked relationship demo", async ({ page }) => {
+test("a reviewer can seed and reset the masked relationship demo", async ({ page }) => {
   await page.route("**/api/cases", (route) => route.fulfill({ json: { deleted_count: 2 } }));
   await page.route("**/api/analyze", (route) => route.fulfill({ json: result }));
   await page.route("**/api/graph**", (route) => route.fulfill({ json: linkedGraph }));
@@ -102,6 +102,14 @@ test("mobile navigation and keyboard focus remain usable", async ({ page }) => {
   await expect(page.locator(":focus")).toBeVisible();
 });
 
+test("every major route fits a narrow mobile viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  for (const path of ["/", "/analyze", "/relationships", "/research", "/guide"]) {
+    await page.goto(path);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), path).toBe(true);
+  }
+});
+
 test("reduced motion disables the ambient signal animation", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
@@ -109,7 +117,7 @@ test("reduced motion disables the ambient signal animation", async ({ page }) =>
   await expect(page.locator(".signalField")).toHaveCSS("animation-name", "none");
 });
 
-test("major professor routes have no automatically detectable accessibility violations", async ({ page }) => {
+test("major project routes have no automatically detectable accessibility violations", async ({ page }) => {
   await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", service: "fraudlens-bharat", version: "1.0.0" } }));
   for (const path of ["/", "/analyze", "/relationships", "/research", "/guide"]) {
     await page.goto(path);

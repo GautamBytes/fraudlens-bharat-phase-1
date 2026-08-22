@@ -21,6 +21,7 @@ export function RelationshipWorkbench({ initialGraph }: { initialGraph: EntityGr
   const [minimumCaseCount, setMinimumCaseCount] = useState(2);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
 
   async function refresh() {
     const response = await fetch(`/api/graph?minimum_case_count=${minimumCaseCount}`, { cache: "no-store" });
@@ -42,12 +43,20 @@ export function RelationshipWorkbench({ initialGraph }: { initialGraph: EntityGr
 
   async function clear() {
     setPending(true); setError(null);
-    try { await responseJson(await fetch("/api/cases", { method: "DELETE" })); setGraph(null); }
+    try { await responseJson(await fetch("/api/cases", { method: "DELETE" })); setGraph(null); setSelectedCaseId(null); }
     catch (caught) { setError(caught instanceof Error ? caught.message : "Could not clear the demo cases."); }
     finally { setPending(false); }
   }
 
   const summary = graph?.summary;
+  const selectedCase = graph?.case_nodes.find((item) => item.id === selectedCaseId);
+  const selectedEntityValues = selectedCase && graph
+    ? graph.edges
+      .filter((edge) => edge.source === selectedCase.id || edge.target === selectedCase.id)
+      .map((edge) => edge.source === selectedCase.id ? edge.target : edge.source)
+      .map((id) => graph.entity_nodes.find((entity) => entity.id === id)?.masked_value)
+      .filter((value): value is string => Boolean(value))
+    : [];
   return (
     <div className="relationshipStack">
       <section className="relationshipControls">
@@ -89,12 +98,19 @@ export function RelationshipWorkbench({ initialGraph }: { initialGraph: EntityGr
       )}
       <section className="graphCanvas" aria-label="Relationship signal map">
         <div className="graphCaption"><span>Observed co-occurrence</span><small>Masked before persistence</small></div>
-        <RelationshipGraph graph={graph ?? { case_nodes: [], entity_nodes: [], edges: [], components: [], summary: { case_count: 0, entity_count: 0, edge_count: 0, component_count: 0, truncated: false } }} />
+        <RelationshipGraph graph={graph ?? { case_nodes: [], entity_nodes: [], edges: [], components: [], summary: { case_count: 0, entity_count: 0, edge_count: 0, component_count: 0, truncated: false } }} selectedCaseId={selectedCaseId} onSelectCase={setSelectedCaseId} />
+        {selectedCase && (
+          <aside className="selectedEvidence" aria-live="polite">
+            <div><span>Selected evidence</span><strong>{selectedCase.predicted_label.replaceAll("_", " ")}</strong></div>
+            <p>Risk score {selectedCase.risk_score}/100 · case {selectedCase.case_id.slice(0, 8)}</p>
+            <small>{selectedEntityValues.length ? `Connected through ${selectedEntityValues.join(", ")}` : "No repeated masked entity"}</small>
+          </aside>
+        )}
       </section>
       {graph && graph.entity_nodes.length > 0 && (
         <section className="relationshipTableSection">
           <div className="sectionIntro"><p className="eyebrow">Auditable evidence</p><h2>Verify every relationship edge</h2><p>Observational co-occurrence only. The graph does not classify fraud.</p></div>
-          <div className="modelTableWrap">
+          <div className="modelTableWrap" tabIndex={0} aria-label="Relationship evidence table; scroll horizontally on small screens">
             <table className="modelTable" aria-label="Relationship evidence">
               <caption className="visuallyHidden">Cases and their edge-linked masked entities</caption>
               <thead><tr><th>Case</th><th>Classification</th><th>Risk</th><th>Shared masked entities</th></tr></thead>

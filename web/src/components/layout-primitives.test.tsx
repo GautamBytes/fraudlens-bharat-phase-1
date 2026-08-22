@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { DocsFrame } from "./docs-frame";
@@ -21,7 +22,8 @@ describe("Signal Studio layout primitives", () => {
     expect(screen.getByRole("button", { name: "Start review" })).toBeVisible();
   });
 
-  it("connects documentation indexes to real anchored content", () => {
+  it("connects documentation indexes to real anchored content", async () => {
+    const user = userEvent.setup();
     const links = [{ href: "#models", label: "Models" }];
     render(
       <DocsFrame index={links} outline={links}>
@@ -33,6 +35,8 @@ describe("Signal Studio layout primitives", () => {
       screen.getAllByRole("link", { name: "Models" })[0],
     );
     expect(screen.getByRole("complementary", { name: "On this page" })).toBeVisible();
+    await user.click(screen.getAllByRole("link", { name: "Models" })[0]);
+    expect(screen.getAllByRole("link", { name: "Models" })[0]).toHaveAttribute("aria-current", "location");
   });
 
   it("keeps the signal field decorative", () => {

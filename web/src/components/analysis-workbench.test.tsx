@@ -20,6 +20,7 @@ describe("AnalysisWorkbench", () => {
     expect(
       screen.getByRole("checkbox", { name: /store this synthetic analysis/i }),
     ).not.toBeChecked();
+    expect(screen.getByText("Storage off")).toBeVisible();
     expect(screen.getByRole("heading", { name: "What happens next" })).toBeVisible();
     await user.click(screen.getByRole("button", { name: /analyze message/i }));
 
@@ -27,11 +28,34 @@ describe("AnalysisWorkbench", () => {
     expect(screen.getByTestId("analysis-workspace")).toHaveAttribute("data-state", "complete");
     expect(screen.getByRole("heading", { name: /review decision/i })).toBeVisible();
     expect(screen.getByRole("heading", { name: /complaint draft/i })).toBeVisible();
+    expect(screen.getByRole("button", { name: /analyze another message/i })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "What happens next" })).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
       "/api/analyze",
       expect.objectContaining({ method: "POST" }),
     );
+  });
+
+  it("announces progress while evidence is being analyzed", async () => {
+    vi.mocked(fetch).mockReturnValueOnce(new Promise(() => undefined));
+    const user = userEvent.setup();
+    render(<AnalysisWorkbench />);
+
+    await user.click(screen.getByRole("button", { name: /analyze message/i }));
+
+    expect(screen.getByRole("status")).toHaveTextContent(/analyzing evidence/i);
+    expect(screen.getByTestId("analysis-workspace")).toHaveAttribute("data-state", "pending");
+  });
+
+  it("returns to evidence intake from a completed result", async () => {
+    const user = userEvent.setup();
+    render(<AnalysisWorkbench />);
+
+    await user.click(screen.getByRole("button", { name: /analyze message/i }));
+    await user.click(await screen.findByRole("button", { name: /analyze another message/i }));
+
+    expect(screen.getByRole("heading", { name: "What happens next" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: /review decision/i })).not.toBeInTheDocument();
   });
 
   it("rejects a screenshot above the web limit without making a request", async () => {

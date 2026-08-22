@@ -27,6 +27,7 @@ describe("RelationshipWorkbench", () => {
   });
 
   it("renders masked relationship evidence as a graph and accessible table", async () => {
+    const user = userEvent.setup();
     render(<RelationshipWorkbench initialGraph={linkedGraph} />);
 
     expect(screen.getByText("2 linked cases")).toBeVisible();
@@ -36,6 +37,10 @@ describe("RelationshipWorkbench", () => {
     expect(screen.getAllByText("fraud-demo.example/•••")).toHaveLength(3);
     expect(screen.getByRole("table", { name: /relationship evidence/i })).toBeVisible();
     expect(screen.queryByText(/https:\/\//i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /inspect kyc scam case a/i }));
+    expect(screen.getByText("Selected evidence")).toBeVisible();
+    expect(screen.getByText(/risk score 82/i)).toBeVisible();
   });
 
   it("builds a synthetic two-case link with storage explicitly enabled", async () => {

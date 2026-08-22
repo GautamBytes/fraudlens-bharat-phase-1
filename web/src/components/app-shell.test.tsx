@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -9,13 +9,17 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("AppShell", () => {
-  it("renders the Signal Studio header and an accessible mobile menu", async () => {
+  it("renders the investigation shell and an accessible mobile menu", async () => {
     const user = userEvent.setup();
-    render(<AppShell><p>Professor workspace</p></AppShell>);
+    render(<AppShell><p>Investigation workspace</p></AppShell>);
 
     expect(screen.getByRole("banner")).toHaveClass("siteHeader");
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeVisible();
-    expect(screen.getByText("Professor workspace")).toBeVisible();
+    expect(screen.getByText("Investigation workspace")).toBeVisible();
+    expect(screen.getByRole("link", { name: /skip to content/i })).toHaveAttribute("href", "#main-content");
+    expect(screen.getByRole("link", { name: /analyze evidence/i })).toHaveAttribute("href", "/analyze");
+    expect(within(screen.getByRole("navigation", { name: "Primary navigation" })).getByRole("link", { name: "Analyze" })).toHaveAttribute("href", "/analyze");
+    expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByText(/engine ready|checking engine/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Safety notice" })).not.toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeVisible();

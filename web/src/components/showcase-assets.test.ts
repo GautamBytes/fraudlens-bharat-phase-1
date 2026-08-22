@@ -25,9 +25,9 @@ describe("recorded showcase assets", () => {
     expect(script).toContain("fraud-demo[.]example/•••");
   });
 
-  it("stacks page toolbars at the 768 pixel boundary", () => {
+  it("stacks page toolbars at the tablet boundary", () => {
     const styles = readFileSync(resolve(process.cwd(), "src", "app", "globals.css"), "utf8");
 
-    expect(styles).toContain("@media (max-width: 768px)");
+    expect(styles).toContain("@media(max-width:860px)");
   });
 });

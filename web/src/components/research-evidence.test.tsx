@@ -14,6 +14,7 @@ describe("ResearchEvidence", () => {
     expect(screen.getByText(/64-row synthetic fraud-only bootstrap; 8 test rows/i)).toBeVisible();
     expect(screen.getByText(/committed artifact bundle · 211 KB/i)).toBeVisible();
     expect(screen.getByText(/not a production accuracy claim/i)).toBeVisible();
+    expect(screen.getByText(/methodology and validity checks/i)).toBeVisible();
     const signal = screen.getByRole("region", { name: "Research metric signal" });
     expect(signal).toHaveTextContent("Accuracy");
     expect(signal).toHaveTextContent("Macro-F1");

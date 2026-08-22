@@ -6,6 +6,7 @@ import type { AnalysisResult } from "@/lib/contracts";
 import { DEFAULT_DEMO_MESSAGE, DEMO_MESSAGES } from "@/lib/demo-data";
 import { AnalysisResultView } from "./analysis-result";
 import { EvidenceRail } from "./evidence-rail";
+import { InterfaceIcon, StatusPill } from "./interface-primitives";
 
 const WEB_IMAGE_MAX_BYTES = 4_000_000;
 type InputMode = "text" | "screenshot";
@@ -118,6 +119,10 @@ export function AnalysisWorkbench() {
         data-state={result ? "complete" : pending ? "pending" : "ready"}
         data-testid="analysis-workspace"
       >
+        <div className="workspaceStatusBar">
+          <div><span className="statusDot" aria-hidden="true" /><strong>Investigation workspace</strong><small>Calibrated runtime · visible evidence</small></div>
+          <StatusPill tone={storeCase ? "warning" : "safe"}>{storeCase ? "Storage enabled" : "Storage off"}</StatusPill>
+        </div>
         <section className="inputPanel">
         <div className="panelHeading">
           <div>
@@ -130,7 +135,7 @@ export function AnalysisWorkbench() {
               checked={storeCase}
               onChange={(event) => setStoreCase(event.target.checked)}
             />
-            <span>Store this synthetic analysis</span>
+            <span><strong>Store this synthetic analysis</strong><small>Required only for relationship mapping</small></span>
           </label>
         </div>
 
@@ -178,7 +183,7 @@ export function AnalysisWorkbench() {
             <div className="inputFooter">
               <span>{message.length.toLocaleString()} / 20,000 characters</span>
               <button className="primaryButton" disabled={pending} type="submit">
-                {pending ? "Analyzing evidence…" : "Analyze message"}
+                {pending ? "Analyzing evidence…" : <>Analyze message <InterfaceIcon name="arrow" /></>}
               </button>
             </div>
           </form>
@@ -212,6 +217,14 @@ export function AnalysisWorkbench() {
         {error && <div className="errorNotice" role="alert">{error}</div>}
         </section>
 
+        {pending && (
+          <div className="analysisPending" role="status" aria-live="polite">
+            <div className="pendingMark" aria-hidden="true"><InterfaceIcon name="spark" /></div>
+            <div><strong>Analyzing evidence</strong><span>Extracting signals, calibrating confidence, and preparing a reviewable result.</span></div>
+            <div className="pendingBars" aria-hidden="true"><i /><i /><i /></div>
+          </div>
+        )}
+
         {!result && (
           <aside className="analysisGuide" aria-labelledby="analysis-guide-title">
             <p className="eyebrow">Guided review</p>
@@ -225,7 +238,7 @@ export function AnalysisWorkbench() {
           </aside>
         )}
 
-        {result && <AnalysisResultView result={result} />}
+        {result && <AnalysisResultView result={result} onReset={() => setResult(null)} />}
       </div>
     </div>
   );
